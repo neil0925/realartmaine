@@ -35,7 +35,8 @@ body.dark-mode .caption { color: #eee; }
 /* Navigation bar */
 nav {
   display: flex;
-  justify-content: center;
+  justify-content: center; /* center Home + Gallery */
+  align-items: center;
   gap: 2rem;
   background: black;
   color: white;
@@ -44,7 +45,25 @@ nav {
   position: sticky;
   top: 0;
   z-index: 10;
+  position: relative;
 }
+
+/* Settings Dropdown positioned independently */
+.settings-dropdown {
+  position: absolute;
+  right: 20px;  /* move gear to the right */
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+/* Gear box */
+.gear-box {
+  display: inline-block;
+  padding: 2px;   /* snug padding */
+  background: black;
+  border-radius: 5px;
+  border: 1px solid #
+
 
 nav a {
   color: #fff;
