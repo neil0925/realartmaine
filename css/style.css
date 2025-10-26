@@ -149,7 +149,7 @@ footer hr {
 .modal img {
   display: block;
   max-width: 100%;
-  max-height: 80vh; /* fit viewport height */
+  max-height: 80vh; /* ensures image fits viewport */
   width: auto;
   height: auto;
   margin-bottom: 8px;
