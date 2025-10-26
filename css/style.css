@@ -69,24 +69,65 @@ nav a::after {
 nav a:hover::after { width: 100%; }
 
 /* Settings Dropdown */
-.settings-dropdown { position: relative; display: inline-block; margin-left: 20px; }
+.settings-dropdown {
+  position: relative;
+  display: inline-block;
+  margin-left: 20px;
+}
+
+/* Gear icon */
 .gear-icon {
-  width: 30px; height: 30px; cursor: pointer;
-  border: 1px solid #fff; border-radius: 5px; padding: 5px;
-  background: black; transition: transform 0.3s ease;
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+  border: 1px solid #fff;
+  border-radius: 5px;
+  padding: 5px;
+  background: black;
+  transition: transform 0.3s ease;
 }
-.gear-icon:hover { transform: rotate(20deg); }
+
+/* Only the gear rotates on hover */
+.gear-icon:hover { 
+  transform: rotate(20deg); 
+}
+
+/* Dropdown container */
 .dropdown-content {
-  display: none; position: absolute; top: 40px; right: 0;
-  background-color: #222; min-width: 150px; border-radius: 5px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.3); z-index: 20;
+  display: none; /* hidden by default */
+  position: absolute;
+  top: 40px;
+  right: 0;
+  background-color: #222;
+  min-width: 150px;
+  border-radius: 5px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+  z-index: 20;
 }
-.settings-dropdown:hover .dropdown-content { display: block; }
+
+/* Show dropdown when toggled via JS */
+.dropdown-content.show {
+  display: block;
+}
+
+/* Dropdown buttons */
 .dropdown-content button {
-  width: 100%; padding: 10px; background: none; border: none;
-  color: #fff; cursor: pointer; display: flex; align-items: center; gap: 10px;
+  width: 100%;
+  padding: 10px;
+  background: none;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
-.dropdown-content button:hover { background: #333; border-radius: 5px; }
+
+.dropdown-content button:hover { 
+  background: #333;
+  border-radius: 5px;
+}
+
 
 /* Main container */
 main {
