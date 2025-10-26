@@ -1,18 +1,12 @@
 /* Global reset */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
-html {
-  scrollbar-gutter: stable both-edges;
-}
+html { scrollbar-gutter: stable both-edges; }
 
 body {
   font-family: Arial, Helvetica, sans-serif;
-  background-color: #fff;
-  color: #000;
+  background-color: #111; /* default dark mode */
+  color: #eee;
   line-height: 1.6;
   min-height: 100vh;
   display: flex;
@@ -24,7 +18,6 @@ body.dark-mode {
   background-color: #111;
   color: #eee;
 }
-
 body.dark-mode nav { background: #000; }
 body.dark-mode footer { background: #222; color: #ccc; }
 body.dark-mode .search-bar input { background: #333; color: #fff; border: 1px solid #555; }
@@ -35,36 +28,17 @@ body.dark-mode .caption { color: #eee; }
 /* Navigation bar */
 nav {
   display: flex;
-  justify-content: center; /* center Home + Gallery */
+  justify-content: center;
   align-items: center;
   gap: 2rem;
   background: black;
   color: white;
   width: 100%;
   padding: 1rem 0;
-  position: sticky;
-  top: 0;
-  z-index: 10;
   position: relative;
 }
 
-/* Settings Dropdown positioned independently */
-.settings-dropdown {
-  position: absolute;
-  right: 20px;  /* move gear to the right */
-  top: 50%;
-  transform: translateY(-50%);
-}
-
-/* Gear box */
-.gear-box {
-  display: inline-block;
-  padding: 2px;   /* snug padding */
-  background: black;
-  border-radius: 5px;
-  border: 1px solid #
-
-
+/* Links */
 nav a {
   color: #fff;
   text-decoration: none;
@@ -72,9 +46,7 @@ nav a {
   letter-spacing: 0.5px;
   transition: all 0.2s ease;
 }
-
 nav a:hover { transform: scale(1.1); }
-
 nav a::after {
   content: '';
   display: block;
@@ -84,23 +56,23 @@ nav a::after {
   transition: width 0.2s;
   margin: 0 auto;
 }
-
 nav a:hover::after { width: 100%; }
 
-/* Settings Dropdown */
+/* Settings Dropdown positioned independently */
 .settings-dropdown {
-  position: relative;
-  display: inline-block;
-  margin-left: 20px;
+  position: absolute;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
 }
 
 /* Gear box */
 .gear-box {
-  border: 1px solid #fff;
-  border-radius: 5px;
-  padding: 5px;
-  background: black;
   display: inline-block;
+  padding: 2px;
+  background: black;
+  border-radius: 5px;
+  border: 1px solid #fff;
 }
 
 /* Gear icon only rotates */
@@ -108,65 +80,31 @@ nav a:hover::after { width: 100%; }
   width: 30px;
   height: 30px;
   cursor: pointer;
+  display: block;
   transition: transform 0.3s ease;
 }
-
-.gear-icon:hover {
-  transform: rotate(20deg);
-}
+.gear-icon:hover { transform: rotate(20deg); }
 
 /* Dropdown container */
 .dropdown-content {
-  display: none; /* hidden by default */
+  display: none;
   position: absolute;
-  top: 45px;
+  top: 40px;
   right: 0;
   background-color: #222;
-  min-width: 150px;
   border-radius: 5px;
   box-shadow: 0 4px 8px rgba(0,0,0,0.3);
   z-index: 20;
+  padding: 2px;
 }
+.dropdown-content.show { display: block; }
 
-/* Show dropdown when toggled via JS */
-.dropdown-content.show {
-  display: block;
-}
-
-/* Dropdown buttons */
-.dropdown-content button {
-  width: 100%;
-  padding: 10px;
-  background: none;
-  border: none;
-  color: #fff;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-/* Small toggle icon */
-#modeIcon {
-  transform: scale(0.2);
-  transform-origin: center;
-  display: inline-block;
-  vertical-align: middle;
-}
-
-.dropdown-content button:hover { 
-  background: #333;
-  border-radius: 5px;
-}
+/* Only small icon */
+#modeToggle { padding: 0; border: none; background: none; display: block; }
+#modeIcon { transform: scale(0.2); transform-origin: center; display: block; }
 
 /* Main container */
-main {
-  padding: 30px;
-  max-width: 1100px;
-  margin: auto;
-  flex: 1;
-}
-
+main { padding: 30px; max-width: 1100px; margin: auto; flex: 1; }
 main h1 { text-align: center; margin-bottom: 20px; }
 
 /* Footer */
@@ -178,13 +116,17 @@ footer {
   color: #555;
   border-top: 1px solid #ccc;
 }
-
 footer hr { border: none; border-top: 1px solid #aaa; margin: 10px 0; }
 
 /* Search bar */
 .search-bar { text-align: center; margin: 20px; }
 .search-bar input {
-  padding: 10px; width: 80%; max-width: 420px; border: 1px solid #333; border-radius: 5px; font-size: 1em;
+  padding: 10px;
+  width: 80%;
+  max-width: 420px;
+  border: 1px solid #333;
+  border-radius: 5px;
+  font-size: 1em;
 }
 
 /* Masonry gallery */
@@ -200,16 +142,19 @@ footer hr { border: none; border-top: 1px solid #aaa; margin: 10px 0; }
 .gallery::-webkit-scrollbar { display: none; }
 
 .card, .ad-card { display: block; width: 100%; }
-.card img {
-  width: 100%; display: block; border-radius: 5px;
-  cursor: pointer; transition: transform 0.2s;
-}
+.card img { width: 100%; display: block; border-radius: 5px; cursor: pointer; transition: transform 0.2s; }
 .card img:hover { transform: scale(1.03); }
 
 .ad-card {
-  background: #f8f8f8; border: 2px dashed #ccc;
-  display: flex; justify-content: center; align-items: center;
-  color: #666; font-style: italic; border-radius: 5px; min-height: 150px;
+  background: #222;
+  border: 2px dashed #555;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #aaa;
+  font-style: italic;
+  border-radius: 5px;
+  min-height: 150px;
 }
 
 /* Lightbox modal */
@@ -219,12 +164,12 @@ footer hr { border: none; border-top: 1px solid #aaa; margin: 10px 0; }
   background: rgba(0,0,0,0.6); z-index: 1000; padding: 20px;
 }
 .modal {
-  background: #fff; border-radius: 6px; padding: 12px;
+  background: #111; border-radius: 6px; padding: 12px;
   max-width: 90%; max-height: 90%;
   box-shadow: 0 10px 30px rgba(0,0,0,0.5); overflow: hidden;
 }
-.modal img { display: block; max-width: 100%; max-height: 80vh; width: auto; height: auto; margin-bottom: 8px; border-radius: 4px; }
-.caption { font-size: 0.95rem; color: #111; opacity: 0.9; }
+.modal img { display: block; max-width: 100%; max-height: 80vh; margin-bottom: 8px; border-radius: 4px; }
+.caption { font-size: 0.95rem; color: #eee; opacity: 0.9; }
 
 @media (max-width: 600px) {
   nav a { font-size: 1em; }
