@@ -3,12 +3,6 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-}
-
-html {
-  scrollbar-gutter: stable both-edges;
-}
-
 body {
   margin: 0;
   font-family: Arial, Helvetica, sans-serif;
@@ -25,9 +19,9 @@ nav {
   display: flex;
   justify-content: center;
   gap: 2rem;
-  background: black;
+  background: black;        /* black bar */
   color: white;
-  width: 100%;
+  width: 100%;              /* full width */
   padding: 1rem 0;
   position: sticky;
   top: 0;
