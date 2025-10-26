@@ -32,7 +32,6 @@ nav a {
   font-size: 1.1em;
   letter-spacing: 0.5px;
   transition: all 0.2s ease;
-  position: relative;
 }
 
 /* Hover "pop" effect */
@@ -60,6 +59,11 @@ main {
   max-width: 1100px;
   margin: auto;
   flex: 1;
+}
+
+main h1 {
+  text-align: center;
+  margin-bottom: 20px;
 }
 
 /* Footer */
