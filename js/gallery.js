@@ -1,8 +1,4 @@
-// js/gallery.js
-// Simple gallery loader + parser that reads a hardcoded list of images.
-// NOTE: GitHub Pages does not expose directory listing, so we will keep
-// a small `imagesList` array you update when you add images via GitHub UI.
-
+// Simple gallery loader + parser
 const imagesList = [
 "/images/5G-TroubledGuppy-piece.jpg",
 "/images/aura-OHK-troubledguppy-piece.jpg",
@@ -17,24 +13,18 @@ const searchInput = document.getElementById('searchInput');
 
 // parse filename into metadata
 function parseFilename(filename) {
-  // Remove path and extension:
   const base = filename.split('/').pop().replace(/\.[^.]+$/, '');
-  // Split last part (styles) off by finding the last hyphen
-  // We assume: tag[-crew]-photographer-styles...
   const parts = base.split('-');
-  // styles are after the last hyphen, everything before are components
   const stylesPart = parts.pop();
-  const components = parts; // 2 or 3 components
+  const components = parts;
   const styles = stylesPart.split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
 
-  // determine tag / crew / photographer
   let tag = '', crew = null, photographer = '';
   if (components.length === 2) {
     [tag, photographer] = components;
   } else if (components.length === 3) {
     [tag, crew, photographer] = components;
   } else {
-    // fallback: first = tag, last = photographer, middle join as crew
     tag = components[0] || '';
     photographer = components[components.length-1] || '';
     if (components.length > 2) {
@@ -42,9 +32,7 @@ function parseFilename(filename) {
     }
   }
 
-  // allow multiple tags inside tag string split by commas
   const tags = tag.split(',').map(t => t.trim().toLowerCase()).filter(Boolean);
-
   return { src: filename, rawBase: base, tags, crew: crew ? crew.toLowerCase() : null, photographer: photographer.toLowerCase(), styles };
 }
 
@@ -63,7 +51,6 @@ function makeCard(imageMeta, index) {
 }
 
 function openModal(meta) {
-  // prevent body scroll
   document.body.style.overflow = 'hidden';
 
   const backdrop = document.createElement('div');
@@ -71,7 +58,7 @@ function openModal(meta) {
   backdrop.addEventListener('click', (e) => {
     if (e.target === backdrop) {
       document.body.removeChild(backdrop);
-      document.body.style.overflow = ''; // restore scroll
+      document.body.style.overflow = '';
     }
   });
 
@@ -96,7 +83,6 @@ function openModal(meta) {
 function renderGallery(list) {
   gallery.innerHTML = '';
   list.forEach((src, i) => {
-    // insert ad every 10 images (index 9, 19, 29... => i % 10 === 9)
     if (i > 0 && i % 10 === 0) {
       const ad = document.createElement('div');
       ad.className = 'ad-card';
@@ -116,13 +102,7 @@ function filterGallery(q) {
   }
   const filtered = imagesList.filter(src => {
     const meta = parseFilename(src);
-    // search across tags, crew, photographer, styles
-    const hay = [
-      ...meta.tags,
-      meta.crew || '',
-      meta.photographer,
-      ...meta.styles
-    ].join(' ');
+    const hay = [...meta.tags, meta.crew || '', meta.photographer, ...meta.styles].join(' ');
     return hay.includes(q);
   });
   renderGallery(filtered);
@@ -131,12 +111,11 @@ function filterGallery(q) {
 // initial render
 renderGallery(imagesList);
 
-// hook up search
 if (searchInput) {
   searchInput.addEventListener('input', (e) => filterGallery(e.target.value));
 }
 
-// ---- Masonry layout: calculate grid row span ----
+// ---- Masonry layout ----
 function resizeMasonryItem(item){
     const grid = document.querySelector('.gallery');
     const rowHeight = parseInt(window.getComputedStyle(grid).getPropertyValue('grid-auto-rows'));
@@ -152,17 +131,9 @@ function resizeAllMasonryItems(){
     items.forEach(item => resizeMasonryItem(item));
 }
 
-// Resize after images load
-window.addEventListener('load', () => {
-    resizeAllMasonryItems();
-});
+window.addEventListener('load', () => resizeAllMasonryItems());
+window.addEventListener('resize', () => resizeAllMasonryItems());
 
-// Resize on window resize
-window.addEventListener('resize', () => {
-    resizeAllMasonryItems();
-});
-
-// Recalculate after rendering gallery
 const originalRenderGallery = renderGallery;
 renderGallery = function(list){
     originalRenderGallery(list);
