@@ -136,3 +136,35 @@ if (searchInput) {
   searchInput.addEventListener('input', (e) => filterGallery(e.target.value));
 }
 
+// ---- Masonry layout: calculate grid row span ----
+function resizeMasonryItem(item){
+    const grid = document.querySelector('.gallery');
+    const rowHeight = parseInt(window.getComputedStyle(grid).getPropertyValue('grid-auto-rows'));
+    const rowGap = parseInt(window.getComputedStyle(grid).getPropertyValue('gap'));
+    const img = item.querySelector('img');
+    if(!img) return;
+    const rowSpan = Math.ceil((img.getBoundingClientRect().height + rowGap) / (rowHeight + rowGap));
+    item.style.gridRowEnd = `span ${rowSpan}`;
+}
+
+function resizeAllMasonryItems(){
+    const items = document.querySelectorAll('.card, .ad-card');
+    items.forEach(item => resizeMasonryItem(item));
+}
+
+// Resize after images load
+window.addEventListener('load', () => {
+    resizeAllMasonryItems();
+});
+
+// Resize on window resize
+window.addEventListener('resize', () => {
+    resizeAllMasonryItems();
+});
+
+// Recalculate after rendering gallery
+const originalRenderGallery = renderGallery;
+renderGallery = function(list){
+    originalRenderGallery(list);
+    resizeAllMasonryItems();
+}
