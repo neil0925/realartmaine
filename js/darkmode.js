@@ -1,4 +1,4 @@
-// Default dark mode for new visitors
+// Default to dark mode for new visitors
 document.body.classList.add('dark-mode');
 
 const gear = document.querySelector('.gear-icon');
@@ -21,7 +21,5 @@ document.addEventListener('click', () => {
 modeToggle.addEventListener('click', (e) => {
   e.stopPropagation();
   const isDark = document.body.classList.toggle('dark-mode');
-
-  // Switch icon
   modeIcon.src = isDark ? 'images/DarkMode.png' : 'images/LightMode.png';
 });
