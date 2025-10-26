@@ -52,3 +52,4 @@ main { padding:30px; max-width:1100px; margin:auto; }
   nav a { margin:0 10px; font-size:1em; }
   .gallery { grid-template-columns:repeat(auto-fit, minmax(140px, 1fr)); gap:8px; }
 }
+footer { padding:30px; max-width:1100px; margin:auto; }
