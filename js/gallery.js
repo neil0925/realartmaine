@@ -4,8 +4,7 @@
 // a small `imagesList` array you update when you add images via GitHub UI.
 
 const imagesList = [
-  // Example: "/images/5G-TroubledGubby-piece,straight letter.jpg",
-  // Add your image paths here after uploading to /images/
+"images/5G-TroubledGuppy-piece.jpg",
 ];
 
 const gallery = document.getElementById('galleryContainer');
