@@ -8,7 +8,7 @@ const imagesList = [
 "/images/aura-OHK-troubledguppy-piece.jpg",
 "/images/blame-troubledguppy-piece.jpg",
 "/images/brik-PTG-troubledguppy-piece",
-"/images/burek, house-2GF, CTS, TNL-troubledgubby-piece",
+"/images/burek, house-2GF,CTS,TNL-troubledgubby-piece",
 "/images/burek-2GF-troubledguppy-piece",
 ];
 
