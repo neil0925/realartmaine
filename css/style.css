@@ -75,28 +75,32 @@ nav a:hover::after { width: 100%; }
   margin-left: 20px;
 }
 
-/* Gear icon */
-.gear-icon {
-  width: 30px;
-  height: 30px;
-  cursor: pointer;
+/* Gear box */
+.gear-box {
   border: 1px solid #fff;
   border-radius: 5px;
   padding: 5px;
   background: black;
+  display: inline-block;
+}
+
+/* Gear icon only rotates */
+.gear-icon {
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
   transition: transform 0.3s ease;
 }
 
-/* Only the gear rotates on hover */
-.gear-icon:hover { 
-  transform: rotate(20deg); 
+.gear-icon:hover {
+  transform: rotate(20deg);
 }
 
 /* Dropdown container */
 .dropdown-content {
   display: none; /* hidden by default */
   position: absolute;
-  top: 40px;
+  top: 45px;
   right: 0;
   background-color: #222;
   min-width: 150px;
@@ -123,11 +127,18 @@ nav a:hover::after { width: 100%; }
   gap: 10px;
 }
 
+/* Small toggle icon */
+#modeIcon {
+  transform: scale(0.2);
+  transform-origin: center;
+  display: inline-block;
+  vertical-align: middle;
+}
+
 .dropdown-content button:hover { 
   background: #333;
   border-radius: 5px;
 }
-
 
 /* Main container */
 main {
