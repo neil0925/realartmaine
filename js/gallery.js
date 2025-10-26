@@ -6,6 +6,10 @@
 const imagesList = [
 "/images/5G-TroubledGuppy-piece.jpg",
 "/images/aura-OHK-troubledguppy-piece.jpg",
+"/images/blame-troubledguppy-piece.jpg",
+"/images/burek, house-2GF, CTS, TNL-troubledgubby-piece",
+"/images/brik-PTG-troubledguppy-piece",
+"/images/burek-2GF-troubledguppy-piece",
 ];
 
 const gallery = document.getElementById('galleryContainer');
