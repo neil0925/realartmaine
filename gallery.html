@@ -5,50 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Real Art Maine | Gallery</title>
   <link rel="stylesheet" href="css/style.css">
-  <style>
-    /* Gallery page-specific styles */
-    .search-bar { text-align:center; margin:20px; }
-    .search-bar input {
-      padding:10px; width:80%; max-width:420px; border:1px solid #333;
-      border-radius:5px; font-size:1em;
-    }
-
-    .gallery {
-      display:grid; grid-template-columns:repeat(auto-fit, minmax(230px, 1fr));
-      gap:10px; padding:20px;
-    }
-
-    .gallery img {
-      width:100%; height:auto; border-radius:5px; cursor:pointer;
-      transition:transform .18s;
-    }
-
-    .gallery img:hover { transform:scale(1.03); }
-
-    .ad-card {
-      background:#f8f8f8; border:2px dashed #ccc; display:flex;
-      justify-content:center; align-items:center; color:#666;
-      font-style:italic; border-radius:5px; min-height:150px;
-    }
-
-    /* Lightbox modal */
-    .modal-backdrop {
-      position:fixed; inset:0; display:flex; justify-content:center;
-      align-items:center; background:rgba(0,0,0,0.6); z-index:1000; padding:20px;
-    }
-
-    .modal {
-      background:#fff; border-radius:6px; padding:12px; max-width:90%;
-      max-height:90%; box-shadow:0 10px 30px rgba(0,0,0,0.5); overflow:auto;
-    }
-
-    .modal img { display:block; max-width:100%; height:auto; margin-bottom:8px; border-radius:4px; }
-    .caption { font-size:0.95rem; color:#111; opacity:0.9; }
-
-    @media (max-width:600px) {
-      .gallery { grid-template-columns:repeat(auto-fit, minmax(140px, 1fr)); gap:8px; }
-    }
-  </style>
 </head>
 <body>
 
@@ -59,12 +15,10 @@
   </nav>
 
   <main>
-    <!-- Search bar -->
     <div class="search-bar">
       <input type="text" id="searchInput" placeholder="Search tags, crews, photographers, or styles...">
     </div>
 
-    <!-- Gallery container -->
     <div class="gallery" id="galleryContainer">
       <!-- Images + ads inserted by JS -->
     </div>
@@ -73,4 +27,3 @@
   <script src="js/gallery.js"></script>
 </body>
 </html>
-
