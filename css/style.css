@@ -83,13 +83,13 @@ nav a:hover::after { width: 100%; }
   transform: translateY(-50%);
 }
 
-/* Gear box */
+/* Gear box stays still */
 .gear-box {
+  display: inline-block;
+  padding: 2px;             /* snug padding */
+  background: black;
   border: 1px solid #fff;
   border-radius: 5px;
-  padding: 2px;
-  background: black;
-  display: inline-block;
 }
 
 /* Gear icon only rotates */
@@ -105,18 +105,19 @@ nav a:hover::after { width: 100%; }
   transform: rotate(20deg);
 }
 
-/* Dropdown container */
+/* Dropdown container fits button */
 .dropdown-content {
   display: none; /* hidden by default */
   position: absolute;
   top: 40px;
   right: 0;
   background-color: #222;
-  min-width: 40px; /* shrink to fit button */
   border-radius: 5px;
   box-shadow: 0 4px 8px rgba(0,0,0,0.3);
   z-index: 20;
-  padding: 5px;
+  padding: 0;       /* remove extra padding */
+  overflow: hidden; /* avoid extra spacing */
+  min-width: 40px;  /* shrink to fit button */
 }
 
 /* Show dropdown when toggled via JS */
@@ -126,22 +127,22 @@ nav a:hover::after { width: 100%; }
 
 /* Dropdown button */
 .dropdown-content button {
-  width: auto;
+  width: 100%;
   padding: 5px;
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   background: none;
   border: none;
-  color: #fff;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 0;
 }
 
 /* Small toggle icon */
 #modeIcon {
   width: auto;
   height: auto;
-  transform: scale(0.2);
+  transform: scale(0.2);   /* 20% of original */
   transform-origin: center;
   display: inline-block;
   vertical-align: middle;
@@ -151,6 +152,20 @@ nav a:hover::after { width: 100%; }
   background: #333;
   border-radius: 5px;
 }
+
+
+.dropdown-content button {
+  width: 100%;
+  padding: 5px;
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
 
 /* Main container */
 main {
