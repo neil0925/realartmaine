@@ -1,0 +1,54 @@
+/* css/style.css - shared styles and nav */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: Arial, Helvetica, sans-serif; background:#fff; color:#000; line-height:1.6; }
+
+/* Navigation */
+nav {
+  display:flex; justify-content:center; align-items:center;
+  background:#000; padding:15px 0; border-bottom:2px solid #222;
+}
+nav a {
+  color:#fff; text-decoration:none; margin:0 20px; font-size:1.1em;
+  letter-spacing:0.5px; transition:all .18s ease; position:relative;
+}
+nav a:hover { transform:scale(1.08); }
+nav a::after {
+  content:''; display:block; height:2px; width:0; background:#fff; transition:width .18s;
+}
+nav a:hover::after { width:100%; }
+
+/* Main container */
+main { padding:30px; max-width:1100px; margin:auto; }
+
+/* Gallery-specific defaults (can be overridden) */
+.search-bar { text-align:center; margin:20px; }
+.search-bar input {
+  padding:10px; width:80%; max-width:420px; border:1px solid #333; border-radius:5px; font-size:1em;
+}
+.gallery {
+  display:grid; grid-template-columns:repeat(auto-fit, minmax(230px, 1fr)); gap:10px; padding:20px;
+}
+.gallery img {
+  width:100%; height:auto; border-radius:5px; cursor:pointer; transition:transform .18s;
+}
+.gallery img:hover { transform:scale(1.03); }
+.ad-card {
+  background:#f8f8f8; border:2px dashed #ccc; display:flex; justify-content:center; align-items:center;
+  color:#666; font-style:italic; border-radius:5px; min-height:150px;
+}
+
+/* Lightbox modal */
+.modal-backdrop {
+  position:fixed; inset:0; display:flex; justify-content:center; align-items:center;
+  background:rgba(0,0,0,0.6); z-index:1000; padding:20px;
+}
+.modal {
+  background:#fff; border-radius:6px; padding:12px; max-width:90%; max-height:90%;
+  box-shadow:0 10px 30px rgba(0,0,0,0.5); overflow:auto;
+}
+.modal img { display:block; max-width:100%; height:auto; margin-bottom:8px; border-radius:4px; }
+.caption { font-size:0.95rem; color:#111; opacity:0.9; }
+@media (max-width:600px) {
+  nav a { margin:0 10px; font-size:1em; }
+  .gallery { grid-template-columns:repeat(auto-fit, minmax(140px, 1fr)); gap:8px; }
+}
