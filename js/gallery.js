@@ -58,11 +58,16 @@ function makeCard(imageMeta, index) {
 }
 
 function openModal(meta) {
-  // create modal elements
+  // prevent body scroll
+  document.body.style.overflow = 'hidden';
+
   const backdrop = document.createElement('div');
   backdrop.className = 'modal-backdrop';
   backdrop.addEventListener('click', (e) => {
-    if (e.target === backdrop) document.body.removeChild(backdrop);
+    if (e.target === backdrop) {
+      document.body.removeChild(backdrop);
+      document.body.style.overflow = ''; // restore scroll
+    }
   });
 
   const modal = document.createElement('div');
