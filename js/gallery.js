@@ -5,6 +5,7 @@
 
 const imagesList = [
 "/images/5G-TroubledGuppy-piece.jpg",
+"/images/aura-OHK-troubledguppy-piece.jpg",
 ];
 
 const gallery = document.getElementById('galleryContainer');
