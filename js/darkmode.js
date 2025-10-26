@@ -1,19 +1,19 @@
-// Initialize mode based on localStorage
+// Check if user has a saved preference
 const savedMode = localStorage.getItem('darkMode');
-if (savedMode === 'true') {
+
+// Default to dark mode if no preference
+const isDark = savedMode === null ? true : savedMode === 'true';
+if (isDark) {
   document.body.classList.add('dark-mode');
+  document.getElementById('modeIcon').src = 'images/DarkMode.png';
+} else {
+  document.getElementById('modeIcon').src = 'images/LightMode.png';
 }
 
-// Elements
 const gear = document.querySelector('.gear-icon');
 const dropdown = document.querySelector('.dropdown-content');
 const modeToggle = document.getElementById('modeToggle');
 const modeIcon = document.getElementById('modeIcon');
-
-// Set initial icon based on current mode
-modeIcon.src = document.body.classList.contains('dark-mode') 
-  ? 'images/DarkMode.png' 
-  : 'images/LightMode.png';
 
 // Gear click toggles dropdown
 gear.addEventListener('click', (e) => {
@@ -31,9 +31,9 @@ modeToggle.addEventListener('click', (e) => {
   e.stopPropagation();
   const isDark = document.body.classList.toggle('dark-mode');
   
-  // Save preference
-  localStorage.setItem('darkMode', isDark);
-
   // Switch icon
   modeIcon.src = isDark ? 'images/DarkMode.png' : 'images/LightMode.png';
+  
+  // Save preference
+  localStorage.setItem('darkMode', isDark);
 });
