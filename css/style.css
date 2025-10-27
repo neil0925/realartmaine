@@ -78,7 +78,7 @@ nav a:hover::after { width: 100%; }
 /* Settings Dropdown */
 .settings-dropdown {
   position: absolute;
-  right: 20px;  /* move gear to the right */
+  right: 20px;
   top: 50%;
   transform: translateY(-50%);
 }
@@ -86,7 +86,7 @@ nav a:hover::after { width: 100%; }
 /* Gear box stays still */
 .gear-box {
   display: inline-block;
-  padding: 2px;             /* snug padding */
+  padding: 2px;
   background: black;
   border: 1px solid #fff;
   border-radius: 5px;
@@ -105,66 +105,56 @@ nav a:hover::after { width: 100%; }
   transform: rotate(20deg);
 }
 
-/* Dropdown container fits button */
+/* Dropdown container */
 .dropdown-content {
-  display: none; /* hidden by default */
+  display: none;
   position: absolute;
   top: 40px;
   right: 0;
+  width: 160px;       /* fixed width */
+  height: 200px;      /* fixed height */
   background-color: #222;
   border-radius: 5px;
   box-shadow: 0 4px 8px rgba(0,0,0,0.3);
   z-index: 20;
-  padding: 0;       /* remove extra padding */
-  overflow: hidden; /* avoid extra spacing */
-  min-width: 40px;  /* shrink to fit button */
-}
-
-/* Show dropdown when toggled via JS */
-.dropdown-content.show {
-  display: block;
-}
-
-/* Dropdown button */
-.dropdown-content button {
-  width: 100%;
   padding: 5px;
-  margin: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Show dropdown when toggled */
+.dropdown-content.show {
+  display: flex;
+}
+
+/* Dropdown button at the top */
+.dropdown-content button {
+  width: 90%;
+  padding: 5px;
+  margin-top: 5px;
   display: flex;
   justify-content: center;
   align-items: center;
   background: none;
   border: none;
   cursor: pointer;
+  border-radius: 5px;
 }
 
-/* Small toggle icon */
+.dropdown-content button:hover {
+  background: #333;
+}
+
+/* Toggle mode icon */
 #modeIcon {
-  width: auto;
-  height: auto;
-  transform: scale(0.2);   /* 20% of original */
-  transform-origin: center;
+  width: 150px;
+  height: 130px;
   display: inline-block;
   vertical-align: middle;
 }
 
-.dropdown-content button:hover { 
-  background: #333;
-  border-radius: 5px;
-}
-
-
-.dropdown-content button {
-  width: 100%;
-  padding: 5px;
-  margin: 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background: none;
-  border: none;
-  cursor: pointer;
-}
 
 
 /* Main container */
