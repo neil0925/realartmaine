@@ -17,7 +17,7 @@ const imagesList = [
 "/images/catch-OHK-BNE-PTG-troubledguppy-piece-throie.jpg",
 "/images/catch-OHK-BNE-PTG-troubledguppy-piece.jpg",
 "/images/catch-OHK-BNE-PTG-troubledguppy-throie.jpg",
-"/images/cache-pyle-tabz-symbol-PTG-BNE-2GF-CTS-TNL-flicked-by-troubledguppy.jpg"
+"/images/cache-pyle-tabz-symbol-PTG-BNE-2GF-CTS-TNL-flicked-by-troubledguppy.jpg",
 ];
 
 const gallery = document.getElementById('galleryContainer');
