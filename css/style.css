@@ -111,8 +111,8 @@ nav a:hover::after { width: 100%; }
   position: absolute;
   top: 40px;
   right: 0;
-  width: 160px;       /* fixed width */
-  height: 200px;      /* fixed height */
+  width: 240px;       /* fixed width */
+  height: 300px;      /* fixed height */
   background-color: #222;
   border-radius: 5px;
   box-shadow: 0 4px 8px rgba(0,0,0,0.3);
@@ -149,8 +149,8 @@ nav a:hover::after { width: 100%; }
 
 /* Toggle mode icon */
 #modeIcon {
-  width: 150px;
-  height: 130px;
+  width: 200px;
+  height: 120px;
   display: inline-block;
   vertical-align: middle;
 }
