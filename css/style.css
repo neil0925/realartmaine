@@ -119,7 +119,6 @@ nav a:hover::after { width: 100%; }
   z-index: 20;
   padding: 5px;
   overflow: hidden;
-  display: flex;
   flex-direction: column;
   align-items: center;
 }
