@@ -8,8 +8,13 @@ const dropdown = document.querySelector('.dropdown-content');
 const modeToggle = document.getElementById('modeToggle');
 const modeIcon = document.getElementById('modeIcon');
 
-// --- Load saved mode from localStorage ---
-const savedMode = localStorage.getItem('darkMode');
+// --- Load saved mode from localStorage or default to dark ---
+let savedMode = localStorage.getItem('darkMode');
+if (savedMode === null) {
+  savedMode = 'true'; // Default to dark mode
+  localStorage.setItem('darkMode', savedMode);
+}
+
 if (savedMode === 'true') {
   document.body.classList.add('dark-mode');
   modeIcon.src = 'images/DarkMode.png';
