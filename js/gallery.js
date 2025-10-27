@@ -6,18 +6,6 @@ const imagesList = [
 "/images/brik-PTG-troubledguppy-piece.jpg",
 "/images/burek, house-2GF,CTS,TNL-troubledgubby-piece.jpg",
 "/images/burek-2GF-troubledguppy-piece.jpg",
-"/images/cache-pyle-BNE-OHK-PTG-troubledguppy-piece.jpg",
-"/images/feer-give-MFH-troubledguppy-piece-hand-style.jpg",
-"/images/feer-troubledguppy-throie.jpg",
-"/images/enzyme-dpw-troubledguppy-throie.jpg",
-"/images/enya-5G-troubledguppy-straight-letter.jpg",
-"/images/enya-5G-troubledguppy-piece-anti-style.jpg",
-"/images/enya-5G-troubledguppy-piece.jpg",
-"/images/catch-OHK-BNE-PTG-troubledguppy-throie-straight-letter.jpg",
-"/images/catch-OHK-BNE-PTG-troubledguppy-piece-throie.jpg",
-"/images/catch-OHK-BNE-PTG-troubledguppy-piece.jpg",
-"/images/catch-OHK-BNE-PTG-troubledguppy-throie.jpg",
-"/images/cache-pyle-tabz-symbol-PTG-BNE-2GF-CTS-TNL-flicked-by-troubledguppy.jpg",
 ];
 
 const gallery = document.getElementById('galleryContainer');
