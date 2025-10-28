@@ -11,7 +11,8 @@ const imagesList = [
   "images/enzyme-dpw-troubledguppy-throie.jpg",
   "images/Enya, 5G-troubledguppy-piece.jpg",
   "images/catch-OHK,BNE,PTG-troubledguppy-piece.jpg",
-  "images/catch-OHK,BNE,PTG-troubledguppy-throie.jpg"
+  "images/catch-OHK,BNE,PTG-troubledguppy-throie.jpg",
+  "images/tabz, sloan-2gf,ptg,bne-RealArtMaine-hand style.jpg",
 ];
 
 const gallery = document.getElementById("galleryContainer");
