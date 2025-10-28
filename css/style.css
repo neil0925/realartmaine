@@ -232,3 +232,33 @@ body.dark-mode .card img { filter: brightness(0.9); }
   nav a { font-size: 1em; }
   .gallery { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
 }
+/* Image loading + fade-in */
+.loading-placeholder {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  opacity: 0.7;
+  border-radius: 5px;
+  display: block;
+}
+
+.gallery-image.hidden {
+  display: none;
+  pointer-events: none;
+}
+
+.gallery-image.fade-in {
+  display: block;
+  animation: fadeIn 0.6s ease forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
