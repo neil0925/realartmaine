@@ -262,6 +262,7 @@ footer hr {
 }
 
 /* Gallery images */
+/* Gallery images */
 .gallery-image {
     width: 100%;
     display: block;
@@ -270,6 +271,13 @@ footer hr {
     transition: transform 0.2s ease, filter 0.3s ease;
 }
 
+/* Fade-in animation (does NOT block hover) */
+.gallery-image.fade-in {
+    display: block;
+    animation: fadeIn 0.6s ease forwards;
+}
+
+/* Hover pop-out effect applies immediately after image is loaded */
 .gallery-image.fade-in:hover {
     transform: scale(1.03);
 }
