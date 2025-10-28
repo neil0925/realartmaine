@@ -203,7 +203,15 @@ footer hr { border: none; border-top: 1px solid #aaa; margin: 10px 0; }
   width: 100%; display: block; border-radius: 5px;
   cursor: pointer; transition: transform 0.2s, filter 0.3s;
 }
-.card img:hover { transform: scale(1.03); }
+
+.card img:hover,
+.gallery-image.fade-in:hover {
+  transform: scale(1.03);
+  transition: transform 0.2s ease;
+  cursor: pointer;
+}
+
+
 
 /* Invert images slightly in dark mode if desired */
 body.dark-mode .card img { filter: brightness(0.9); }
