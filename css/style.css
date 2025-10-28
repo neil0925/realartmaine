@@ -253,9 +253,9 @@ footer hr {
 }
 
 .gallery-image.fade-in:hover {
-    transform: scale(1.03);
-    transition: transform 0.2s ease;
-    cursor: pointer;
+  transform: scale(1.03);
+  transition: transform 0.2s ease;
+  cursor: pointer;
 }
 
 body.dark-mode .card img {
