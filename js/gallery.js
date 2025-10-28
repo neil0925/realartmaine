@@ -113,6 +113,7 @@ function loadImageWithPlaceholder(meta) {
     const card = document.createElement("div");
     card.className = "card";
 
+    // placeholder image
     const placeholder = document.createElement("img");
     placeholder.src = "images/loading.gif";
     placeholder.alt = "Loading...";
@@ -120,18 +121,21 @@ function loadImageWithPlaceholder(meta) {
     card.appendChild(placeholder);
     gallery.appendChild(card);
 
+    // real image
     const img = new Image();
     img.src = meta.src;
     img.alt = meta.rawBase;
     img.className = "gallery-image hidden";
     img.draggable = false;
 
+    // modal on click
     img.addEventListener("click", () => openModal(meta));
 
     img.addEventListener("load", () => {
       placeholder.remove();
       img.classList.remove("hidden");
       img.classList.add("fade-in");
+      img.style.pointerEvents = "auto"; // hover + click enabled
       card.appendChild(img);
       resolve();
     });
@@ -178,8 +182,7 @@ function resizeAllMasonryItems() {
   items.forEach((item) => resizeMasonryItem(item));
 }
 
-window.addEventListener("load", () => resizeAllMasonryItems());
-window.addEventListener("resize", () => resizeAllMasonryItems());
-
 // --- Start Loading ---
 document.addEventListener("DOMContentLoaded", () => loadImagesSequentially(imagesList));
+window.addEventListener("load", () => resizeAllMasonryItems());
+window.addEventListener("resize", () => resizeAllMasonryItems());
