@@ -1,4 +1,4 @@
-/* ========== GLOBAL RESET ========== */
+/* ========== RESET & BASE ========== */
 * {
   margin: 0;
   padding: 0;
@@ -53,15 +53,6 @@ body.dark-mode .modal {
 }
 
 body.dark-mode .caption {
-  color: #eee;
-}
-
-body.dark-mode main {
-  background-color: #111;
-}
-
-body.dark-mode main h1,
-body.dark-mode main p {
   color: #eee;
 }
 
@@ -231,41 +222,34 @@ footer hr {
   font-size: 1em;
 }
 
-/* ========== GALLERY ========== */
-/* Flex layout ensures consistent spacing */
+/* ========== GALLERY (MASONRY STYLE) ========== */
 .gallery {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  grid-auto-rows: 10px;
   gap: 10px;
   padding: 20px;
+  overflow-y: auto;
+}
+
+.gallery::-webkit-scrollbar {
+  display: none;
 }
 
 .card {
   position: relative;
-  overflow: visible;
-  border-radius: 5px;
-  flex: 0 1 calc(25% - 10px);
-  max-width: 250px;
   transition: transform 0.2s ease;
+  border-radius: 5px;
 }
 
-@media (max-width: 900px) {
-  .card {
-    flex: 0 1 calc(33.333% - 10px);
-  }
+/* Fix clipping when scaled */
+.gallery {
+  overflow: visible;
 }
 
-@media (max-width: 600px) {
-  .card {
-    flex: 0 1 calc(50% - 10px);
-  }
-}
-
-/* ========== IMAGE BEHAVIOR ========== */
+/* --- IMAGES --- */
 .gallery-image {
   width: 100%;
-  height: auto;
   display: block;
   border-radius: 5px;
   cursor: pointer;
@@ -274,14 +258,14 @@ footer hr {
   z-index: 1;
 }
 
-/* Pop out on hover */
+/* Pop out on hover (above neighbors) */
 .card:hover .gallery-image {
   transform: scale(1.1);
   z-index: 10;
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
 }
 
-/* Fade-in effect after load */
+/* Fade-in animation */
 .gallery-image.fade-in {
   animation: fadeIn 0.5s ease forwards;
 }
@@ -295,6 +279,7 @@ footer hr {
 /* Loading placeholder */
 .loading-placeholder {
   width: 100%;
+  height: auto;
   object-fit: contain;
   opacity: 0.7;
   border-radius: 5px;
