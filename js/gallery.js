@@ -114,7 +114,7 @@ function loadImageWithPlaceholder(meta) {
     const card = document.createElement("div");
     card.className = "card";
 
-    // placeholder image
+    // placeholder
     const placeholder = document.createElement("img");
     placeholder.src = "images/loading.gif";
     placeholder.alt = "Loading...";
@@ -134,10 +134,18 @@ function loadImageWithPlaceholder(meta) {
 
     img.addEventListener("load", () => {
       placeholder.remove();
+
+      // wrap image for hover scaling without breaking grid
+      const innerWrapper = document.createElement("div");
+      innerWrapper.className = "image-inner";
+      innerWrapper.appendChild(img);
+
       img.classList.remove("hidden");
       img.classList.add("fade-in");
-      img.style.pointerEvents = "auto"; // hover + click enabled
-      card.appendChild(img);
+      img.style.pointerEvents = "auto";
+
+      card.appendChild(innerWrapper);
+      resizeMasonryItem(card);
       resolve();
     });
 
