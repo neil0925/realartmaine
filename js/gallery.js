@@ -18,180 +18,135 @@ const imagesList = [
 const gallery = document.getElementById("galleryContainer");
 const searchInput = document.getElementById("searchInput");
 
-// --- Parse filenames into metadata ---
+// --- Parse filenames ---
 function parseFilename(filename) {
   const base = filename.split("/").pop().replace(/\.[^.]+$/, "");
   const parts = base.split("-");
   const stylesPart = parts.pop();
   const components = parts;
-  const styles = stylesPart
-    .split(",")
-    .map((s) => s.trim().toLowerCase())
-    .filter(Boolean);
+  const styles = stylesPart.split(",").map(s => s.trim().toLowerCase()).filter(Boolean);
 
-  let tag = "",
-    crew = null,
-    photographer = "";
-  if (components.length === 2) {
-    [tag, photographer] = components;
-  } else if (components.length === 3) {
-    [tag, crew, photographer] = components;
-  } else {
-    tag = components[0] || "";
-    photographer = components[components.length - 1] || "";
-    if (components.length > 2) {
-      crew = components.slice(1, components.length - 1).join("-");
-    }
-  }
+  let tag="", crew=null, photographer="";
+  if(components.length===2){ [tag, photographer]=components; }
+  else if(components.length===3){ [tag, crew, photographer]=components; }
+  else{ tag=components[0]||""; photographer=components[components.length-1]||""; if(components.length>2) crew=components.slice(1,-1).join("-"); }
 
-  const tags = tag
-    .split(",")
-    .map((t) => t.trim().toLowerCase())
-    .filter(Boolean);
-
-  return {
-    src: filename,
-    rawBase: base,
-    tags,
-    crew: crew ? crew.toLowerCase() : null,
-    photographer: photographer.toLowerCase(),
-    styles,
-  };
+  const tags = tag.split(",").map(t=>t.trim().toLowerCase()).filter(Boolean);
+  return { src: filename, rawBase: base, tags, crew: crew?crew.toLowerCase():null, photographer: photographer.toLowerCase(), styles };
 }
 
-// --- Modal Viewer ---
-function openModal(meta) {
-  document.body.style.overflow = "hidden";
-
+// --- Modal ---
+function openModal(meta){
+  document.body.style.overflow="hidden";
   const backdrop = document.createElement("div");
-  backdrop.className = "modal-backdrop";
-  backdrop.addEventListener("click", (e) => {
-    if (e.target === backdrop) {
+  backdrop.className="modal-backdrop";
+  backdrop.addEventListener("click", e=>{
+    if(e.target===backdrop){
       document.body.removeChild(backdrop);
-      document.body.style.overflow = "";
+      document.body.style.overflow="";
     }
   });
-
   const modal = document.createElement("div");
-  modal.className = "modal";
-
-  const img = document.createElement("img");
-  img.src = meta.src;
-  img.alt = meta.rawBase;
-
-  const caption = document.createElement("div");
-  caption.className = "caption";
-  const crewPart = meta.crew ? ` (${meta.crew})` : "";
-  caption.textContent = `"${meta.tags.join(", ")}" flicked by ${meta.photographer}${crewPart}`;
-
+  modal.className="modal";
+  const img=document.createElement("img");
+  img.src=meta.src;
+  img.alt=meta.rawBase;
+  const caption=document.createElement("div");
+  caption.className="caption";
+  const crewPart=meta.crew?` (${meta.crew})`:"";
+  caption.textContent=`"${meta.tags.join(", ")}" flicked by ${meta.photographer}${crewPart}`;
   modal.appendChild(img);
   modal.appendChild(caption);
   backdrop.appendChild(modal);
   document.body.appendChild(backdrop);
 }
 
-// --- Load Images Sequentially (with placeholder + fade-in) ---
-async function loadImagesSequentially(list) {
-  gallery.innerHTML = "";
-
-  for (let i = 0; i < list.length; i++) {
-    // every 10th image → ad card
-    if (i > 0 && i % 10 === 0) {
-      const ad = document.createElement("div");
-      ad.className = "ad-card";
-      ad.textContent = "Ad / Featured";
+// --- Load images sequentially ---
+async function loadImagesSequentially(list){
+  gallery.innerHTML="";
+  for(let i=0;i<list.length;i++){
+    if(i>0 && i%10===0){
+      const ad=document.createElement("div");
+      ad.className="ad-card";
+      ad.textContent="Ad / Featured";
       gallery.appendChild(ad);
     }
-
-    const meta = parseFilename(list[i]);
+    const meta=parseFilename(list[i]);
     await loadImageWithPlaceholder(meta);
-    resizeAllMasonryItems(); // keep grid consistent
   }
+  resizeAllMasonryItems();
 }
 
-function loadImageWithPlaceholder(meta) {
-  return new Promise((resolve) => {
-    const card = document.createElement("div");
-    card.className = "card";
-
-    // placeholder
-    const placeholder = document.createElement("img");
-    placeholder.src = "images/loading.gif";
-    placeholder.alt = "Loading...";
-    placeholder.className = "loading-placeholder";
+function loadImageWithPlaceholder(meta){
+  return new Promise(resolve=>{
+    const card=document.createElement("div");
+    card.className="card";
+    const placeholder=document.createElement("img");
+    placeholder.src="images/loading.gif";
+    placeholder.alt="Loading...";
+    placeholder.className="loading-placeholder";
     card.appendChild(placeholder);
     gallery.appendChild(card);
 
-    // real image
-    const img = new Image();
-    img.src = meta.src;
-    img.alt = meta.rawBase;
-    img.className = "gallery-image hidden";
-    img.draggable = false;
+    const img=new Image();
+    img.src=meta.src;
+    img.alt=meta.rawBase;
+    img.className="gallery-image hidden";
+    img.draggable=false;
 
-    // modal on click
-    img.addEventListener("click", () => openModal(meta));
-
-    img.addEventListener("load", () => {
+    img.addEventListener("click", ()=>openModal(meta));
+    img.addEventListener("load", ()=>{
       placeholder.remove();
-
-      // wrap image for hover scaling without breaking grid
-      const innerWrapper = document.createElement("div");
-      innerWrapper.className = "image-inner";
-      innerWrapper.appendChild(img);
-
       img.classList.remove("hidden");
       img.classList.add("fade-in");
-      img.style.pointerEvents = "auto";
+      card.appendChild(img);
 
-      card.appendChild(innerWrapper);
-      resizeMasonryItem(card);
+      // Masonry row calculation
+      const grid=document.querySelector(".gallery");
+      const rowHeight=parseInt(window.getComputedStyle(grid).getPropertyValue("grid-auto-rows"));
+      const rowGap=parseInt(window.getComputedStyle(grid).getPropertyValue("gap"));
+      const rowSpan=Math.ceil((img.getBoundingClientRect().height + rowGap)/(rowHeight+rowGap));
+      card.style.gridRowEnd=`span ${rowSpan}`;
       resolve();
     });
 
-    img.addEventListener("error", () => {
-      placeholder.src = "images/error.png";
+    img.addEventListener("error", ()=>{
+      placeholder.src="images/error.png";
       resolve();
     });
   });
 }
 
-// --- Search Filter ---
-function filterGallery(q) {
-  q = (q || "").trim().toLowerCase();
-  if (!q) {
-    loadImagesSequentially(imagesList);
-    return;
-  }
-  const filtered = imagesList.filter((src) => {
-    const meta = parseFilename(src);
-    const hay = [...meta.tags, meta.crew || "", meta.photographer, ...meta.styles].join(" ");
+// --- Search ---
+function filterGallery(q){
+  q=(q||"").trim().toLowerCase();
+  if(!q){ loadImagesSequentially(imagesList); return; }
+  const filtered=imagesList.filter(src=>{
+    const meta=parseFilename(src);
+    const hay=[...meta.tags, meta.crew||"", meta.photographer, ...meta.styles].join(" ");
     return hay.includes(q);
   });
   loadImagesSequentially(filtered);
 }
 
-if (searchInput) {
-  searchInput.addEventListener("input", (e) => filterGallery(e.target.value));
+if(searchInput){
+  searchInput.addEventListener("input", e=>filterGallery(e.target.value));
 }
 
-// --- Masonry Layout Helpers ---
-function resizeMasonryItem(item) {
-  const grid = document.querySelector(".gallery");
-  const rowHeight = parseInt(window.getComputedStyle(grid).getPropertyValue("grid-auto-rows"));
-  const rowGap = parseInt(window.getComputedStyle(grid).getPropertyValue("gap"));
-  const img = item.querySelector("img");
-  if (!img) return;
-  const rowSpan = Math.ceil((img.getBoundingClientRect().height + rowGap) / (rowHeight + rowGap));
-  item.style.gridRowEnd = `span ${rowSpan}`;
+// --- Resize masonry ---
+function resizeAllMasonryItems(){
+  document.querySelectorAll(".card, .ad-card").forEach(item=>{
+    const grid=document.querySelector(".gallery");
+    const rowHeight=parseInt(window.getComputedStyle(grid).getPropertyValue("grid-auto-rows"));
+    const rowGap=parseInt(window.getComputedStyle(grid).getPropertyValue("gap"));
+    const img=item.querySelector("img");
+    if(img){
+      const rowSpan=Math.ceil((img.getBoundingClientRect().height + rowGap)/(rowHeight+rowGap));
+      item.style.gridRowEnd=`span ${rowSpan}`;
+    }
+  });
 }
 
-function resizeAllMasonryItems() {
-  const items = document.querySelectorAll(".card, .ad-card");
-  items.forEach((item) => resizeMasonryItem(item));
-}
-
-// --- Start Loading ---
-document.addEventListener("DOMContentLoaded", () => loadImagesSequentially(imagesList));
-window.addEventListener("load", () => resizeAllMasonryItems());
-window.addEventListener("resize", () => resizeAllMasonryItems());
+window.addEventListener("resize", resizeAllMasonryItems);
+document.addEventListener("DOMContentLoaded", ()=>loadImagesSequentially(imagesList));
+window.addEventListener("load", resizeAllMasonryItems);
