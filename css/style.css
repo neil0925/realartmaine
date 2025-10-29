@@ -1,4 +1,4 @@
-/* ========== RESET & BASE ========== */
+/* ========== GLOBAL RESET ========== */
 * {
   margin: 0;
   padding: 0;
@@ -56,7 +56,7 @@ body.dark-mode .caption {
   color: #eee;
 }
 
-body.dark-mode .gallery {
+body.dark-mode main {
   background-color: #111;
 }
 
@@ -182,87 +182,50 @@ main {
   flex: 1;
 }
 
-main h1 {
-  text-align: center;
-  margin-bottom: 20px;
-}
-
-main p {
-  margin-bottom: 15px;
-}
-
-/* ========== FOOTER ========== */
-footer {
-  background: #f9f9f9;
-  padding: 15px 30px;
-  text-align: center;
-  font-size: 0.9em;
-  color: #555;
-  border-top: 1px solid #ccc;
-}
-
-footer hr {
-  border: none;
-  border-top: 1px solid #aaa;
-  margin: 10px 0;
-}
-
-/* ========== SEARCH BAR ========== */
-.search-bar {
-  text-align: center;
-  margin: 20px;
-}
-
-.search-bar input {
-  padding: 10px;
-  width: 80%;
-  max-width: 420px;
-  border: 1px solid #333;
-  border-radius: 5px;
-  font-size: 1em;
-}
-
-/* ========== GALLERY (MASONRY STYLE) ========== */
+/* ========== GALLERY ========== */
 .gallery {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  grid-auto-rows: 10px;
+  grid-auto-rows: 10px; /* Masonry magic */
   gap: 10px;
   padding: 20px;
-  overflow-y: auto;
 }
 
-.gallery::-webkit-scrollbar {
-  display: none;
-}
-
+/* --- Fix uneven spacing --- */
 .card {
   position: relative;
-  transition: transform 0.2s ease;
+  overflow: visible;
+  transition: transform 0.25s ease, z-index 0.25s ease;
   border-radius: 5px;
 }
 
-/* Fix clipping when scaled */
-.gallery {
-  overflow: visible;
-}
-
-/* --- IMAGES --- */
+/* Image styling */
 .gallery-image {
   width: 100%;
+  height: auto;
   display: block;
   border-radius: 5px;
   cursor: pointer;
-  transition: transform 0.25s ease, filter 0.3s ease;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  will-change: transform;
   position: relative;
   z-index: 1;
 }
 
-/* Pop out on hover (above neighbors) */
-.card:hover .gallery-image {
-  transform: scale(1.1);
+/* Pop-out hover */
+.gallery-image.fade-in:hover {
+  transform: scale(1.08);
   z-index: 10;
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+}
+
+/* Placeholder */
+.loading-placeholder {
+  width: 100%;
+  object-fit: contain;
+  opacity: 0.7;
+  border-radius: 5px;
+  display: block;
 }
 
 /* Fade-in animation */
@@ -270,28 +233,18 @@ footer hr {
   animation: fadeIn 0.5s ease forwards;
 }
 
-/* Hide until loaded */
+/* Hidden while loading */
 .gallery-image.hidden {
   display: none;
   pointer-events: none;
 }
 
-/* Loading placeholder */
-.loading-placeholder {
-  width: 100%;
-  height: auto;
-  object-fit: contain;
-  opacity: 0.7;
-  border-radius: 5px;
-  display: block;
-}
-
-/* ========== DARK MODE IMAGE ADJUSTMENT ========== */
+/* Dark mode brightness */
 body.dark-mode .card img {
   filter: brightness(0.9);
 }
 
-/* ========== AD CARD ========== */
+/* Ad cards */
 .ad-card {
   background: #f8f8f8;
   border: 2px dashed #ccc;
@@ -342,7 +295,7 @@ body.dark-mode .card img {
   opacity: 0.9;
 }
 
-/* ========== ANIMATIONS ========== */
+/* Fade-in animation keyframes */
 @keyframes fadeIn {
   from {
     opacity: 0;
