@@ -7,7 +7,7 @@
 */
 
 const imagesList = [
-  "images/5G-TroubledGuppy-piece.jpg",
+  "images/5G-5G-TroubledGuppy-piece.jpg",
   "images/aura-OHK-troubledguppy-piece.jpg",
   "images/blame-troubledguppy-piece.jpg",
   "images/brik-PTG-troubledguppy-piece.jpg",
