@@ -1,9 +1,9 @@
 /* gallery.js
    - sequential image loading (placeholder -> load -> fade-in)
-   - precise masonry row calculation after load
-   - search filter
-   - modal viewer
-   - ad insertion every 10 images
+   - interaction disabled until image fully loaded
+   - precise masonry row calculation after each load
+   - ad insertion every 10 items
+   - search filtering
 */
 
 const imagesList = [
@@ -25,10 +25,9 @@ const imagesList = [
 const gallery = document.getElementById("galleryContainer");
 const searchInput = document.getElementById("searchInput");
 
-// ---------- filename parser (robust trimming) ----------
+// parse filename to metadata
 function parseFilename(filename) {
   const base = filename.split("/").pop().replace(/\.[^.]+$/, "");
-  // split by hyphen and trim each piece
   const rawParts = base.split("-").map(p => p.trim());
   const stylesPart = rawParts.pop() || "";
   const components = rawParts;
@@ -59,7 +58,7 @@ function parseFilename(filename) {
   };
 }
 
-// ---------- modal viewer ----------
+// modal viewer
 function openModal(meta) {
   document.body.style.overflow = "hidden";
   const backdrop = document.createElement("div");
@@ -89,11 +88,12 @@ function openModal(meta) {
   document.body.appendChild(backdrop);
 }
 
-// ---------- sequential loader with placeholder ----------
+// load images one-by-one with placeholder
 async function loadImagesSequentially(list) {
+  if (!gallery) return;
   gallery.innerHTML = "";
+
   for (let i = 0; i < list.length; i++) {
-    // insert ad every 10 images
     if (i > 0 && i % 10 === 0) {
       const ad = document.createElement("div");
       ad.className = "ad-card";
@@ -103,10 +103,10 @@ async function loadImagesSequentially(list) {
 
     const meta = parseFilename(list[i]);
     await loadImageWithPlaceholder(meta);
-    // call resize after each image to keep layout stable
+    // keep layout stable after each append
     resizeAllMasonryItems();
   }
-  // final pass
+  // final layout fix
   resizeAllMasonryItems();
 }
 
@@ -115,6 +115,7 @@ function loadImageWithPlaceholder(meta) {
     const card = document.createElement("div");
     card.className = "card";
 
+    // placeholder image (no hover)
     const placeholder = document.createElement("img");
     placeholder.src = "images/loading.gif";
     placeholder.alt = "Loading...";
@@ -123,31 +124,30 @@ function loadImageWithPlaceholder(meta) {
     card.appendChild(placeholder);
     gallery.appendChild(card);
 
+    // real image object
     const img = new Image();
     img.src = meta.src;
     img.alt = meta.rawBase;
-    img.className = "gallery-image hidden"; // hidden until fully loaded
+    img.className = "gallery-image hidden";
     img.draggable = false;
 
-    // Only allow click after loaded
+    // hook click (modal) — will work after load
     img.addEventListener("click", () => openModal(meta));
 
+    // when loaded: replace placeholder, show image, compute grid span
     img.addEventListener("load", () => {
-      // replace placeholder
       placeholder.remove();
-      // show image
       img.classList.remove("hidden");
       img.classList.add("fade-in");
-      // append to card
       card.appendChild(img);
 
-      // precise masonry calculation: use the rendered height
-      const grid = document.querySelector(".gallery");
-      const rowHeight = parseInt(window.getComputedStyle(grid).getPropertyValue("grid-auto-rows"));
-      const rowGap = parseInt(window.getComputedStyle(grid).getPropertyValue("gap"));
-      // sometimes image's layout is not yet finished; use requestAnimationFrame to be safer
+      // compute row span reliably on next frame
       requestAnimationFrame(() => {
-        const rowSpan = Math.max(1, Math.ceil((img.getBoundingClientRect().height + rowGap) / (rowHeight + rowGap)));
+        const grid = document.querySelector(".gallery");
+        const rowHeight = parseInt(window.getComputedStyle(grid).getPropertyValue("grid-auto-rows") || "10");
+        const rowGap = parseInt(window.getComputedStyle(grid).getPropertyValue("gap") || "10");
+        const height = img.getBoundingClientRect().height;
+        const rowSpan = Math.max(1, Math.ceil((height + rowGap) / (rowHeight + rowGap)));
         card.style.gridRowEnd = `span ${rowSpan}`;
         resolve();
       });
@@ -160,14 +160,15 @@ function loadImageWithPlaceholder(meta) {
   });
 }
 
-// ---------- search / filter ----------
+// search/filter
 function filterGallery(q) {
+  if (!gallery) return;
   q = (q || "").trim().toLowerCase();
   if (!q) {
     loadImagesSequentially(imagesList);
     return;
   }
-  const filtered = imagesList.filter((src) => {
+  const filtered = imagesList.filter(src => {
     const meta = parseFilename(src);
     const hay = [...meta.tags, meta.crew || "", meta.photographer, ...meta.styles].join(" ");
     return hay.includes(q);
@@ -179,29 +180,27 @@ if (searchInput) {
   searchInput.addEventListener("input", (e) => filterGallery(e.target.value));
 }
 
-// ---------- masonry resize helpers ----------
+// masonry resize helper
 function resizeAllMasonryItems() {
   const grid = document.querySelector(".gallery");
   if (!grid) return;
-  const rowHeight = parseInt(window.getComputedStyle(grid).getPropertyValue("grid-auto-rows"));
-  const rowGap = parseInt(window.getComputedStyle(grid).getPropertyValue("gap"));
-  document.querySelectorAll(".card, .ad-card").forEach((item) => {
+  const rowHeight = parseInt(window.getComputedStyle(grid).getPropertyValue("grid-auto-rows") || "10");
+  const rowGap = parseInt(window.getComputedStyle(grid).getPropertyValue("gap") || "10");
+
+  document.querySelectorAll(".card, .ad-card").forEach(item => {
     const img = item.querySelector("img");
-    if (!img) return;
-    // some items are ad-cards with no gallery-image; handle gracefully
-    const height = img.getBoundingClientRect().height || img.naturalHeight || rowHeight;
+    if (!img) {
+      // keep ad-cards default
+      item.style.gridRowEnd = null;
+      return;
+    }
+    const height = img.getBoundingClientRect().height || rowHeight;
     const rowSpan = Math.max(1, Math.ceil((height + rowGap) / (rowHeight + rowGap)));
     item.style.gridRowEnd = `span ${rowSpan}`;
   });
 }
 
-window.addEventListener("resize", () => {
-  // throttle with requestAnimationFrame for smoother resizing
-  requestAnimationFrame(resizeAllMasonryItems);
-});
-
 // start
-document.addEventListener("DOMContentLoaded", () => {
-  loadImagesSequentially(imagesList);
-});
+document.addEventListener("DOMContentLoaded", () => loadImagesSequentially(imagesList));
+window.addEventListener("resize", () => requestAnimationFrame(resizeAllMasonryItems));
 window.addEventListener("load", resizeAllMasonryItems);
