@@ -1,9 +1,8 @@
-/* darkmode.js
-   - toggles dark-mode class
-   - defaults new visitors to dark mode
-   - toggles dropdown with gear click only
-   - swaps mode icon between LightMode.png and DarkMode.png
-*/
+// darkmode.js
+// - defaults new visitors to dark
+// - toggles dropdown on gear click only (click gear to open/close)
+// - toggles dark mode and persists choice in localStorage
+// - centers dropdown content (CSS) — JS ensures dropdown is closed initially
 
 document.addEventListener("DOMContentLoaded", () => {
   const gear = document.querySelector(".gear-icon");
@@ -11,14 +10,20 @@ document.addEventListener("DOMContentLoaded", () => {
   const modeToggle = document.getElementById("modeToggle");
   const modeIcon = document.getElementById("modeIcon");
 
-  // default: if no saved preference, set dark mode true for new visitors
-  const saved = localStorage.getItem("darkMode");
-  if (saved === null) {
-    // default to dark
+  // Defensive: if elements missing, skip gracefully
+  if (!dropdown) {
+    // make sure nothing tries to show the dropdown if it doesn't exist
+  } else {
+    // ensure dropdown hidden on load
+    dropdown.classList.remove("show");
+  }
+
+  // default: if no saved preference -> set dark (per your request)
+  if (localStorage.getItem("darkMode") === null) {
     localStorage.setItem("darkMode", "true");
   }
 
-  const applyModeFromStorage = () => {
+  const applyMode = () => {
     const isDark = localStorage.getItem("darkMode") === "true";
     if (isDark) {
       document.body.classList.add("dark-mode");
@@ -29,28 +34,29 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
-  applyModeFromStorage();
+  applyMode();
 
-  // Gear click toggles dropdown (only toggled by gear click)
+  // Gear toggles dropdown (only gear toggles; clicking gear again closes)
   if (gear && dropdown) {
-    gear.addEventListener("click", (e) => {
-      e.stopPropagation();
+    gear.addEventListener("click", (ev) => {
+      ev.stopPropagation();
       dropdown.classList.toggle("show");
     });
-    // do NOT auto-close on outside click (per your request)
+    // Do NOT auto-close on outside click (per previous preference).
+    // If you later want outside-click to close, add a document click handler.
   }
 
-  // Mode toggle: single button toggles dark <-> light, switches icon
-  if (modeToggle && modeIcon) {
-    modeToggle.addEventListener("click", (e) => {
-      e.stopPropagation();
-      const isDark = !(localStorage.getItem("darkMode") === "true");
-      localStorage.setItem("darkMode", isDark ? "true" : "false");
-      applyModeFromStorage();
+  // Mode toggle button (single button)
+  if (modeToggle) {
+    modeToggle.addEventListener("click", (ev) => {
+      ev.stopPropagation();
+      const newMode = !(localStorage.getItem("darkMode") === "true");
+      localStorage.setItem("darkMode", newMode ? "true" : "false");
+      applyMode();
     });
   }
 
-  // optional: close dropdown when pressing Escape
+  // Escape to close dropdown
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape" && dropdown) dropdown.classList.remove("show");
   });
