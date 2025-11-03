@@ -7,22 +7,18 @@
 */
 
 const imagesList = [
-  "images/5G-5G-TroubledGuppy-piece.jpg",
-  "images/aura-OHK-troubledguppy-piece.jpg",
-  "images/blame-troubledguppy-piece.jpg",
-  "images/brik-PTG-troubledguppy-piece.jpg",
-  "images/burek-2GF-troubledguppy-piece.jpg",
-  "images/cache, pyle-BNE,OHK,PTG-troubledguppy-piece.jpg",
-  "images/feer, give-MFH-troubledguppy-piece, hand style.jpg",
-  "images/feer-troubledguppy-throie.jpg",
-  "images/enzyme-dpw-troubledguppy-throie.jpg",
-  "images/Enya-5G-troubledguppy-piece.jpg",
-  "images/catch-OHK,BNE,PTG-troubledguppy-piece.jpg",
-  "images/catch-OHK,BNE,PTG-troubledguppy-throie.jpg",
   "images/tabz, sloan-2gf,ptg,bne-RealArtMaine-hand style.jpg",   
   "images/catch, link, wake, hugo-OHK,PTG,LTB,5G-realartmaine-throwie, tag.jpg",
   "images/bunt, some1-LG-realartmaine-stencil, tag.jpg",
-  "images/ankle-LTB,2K69-realartmaine-throwie, hollow .jpg"
+  "images/ankle-LTB,2K69-realartmaine-throwie, hollow .jpg",
+  "images/SLT-SLT-realartmaine-paintroller.jpg",
+  "images/qjoe, link-5G-realartmaine-antistyle, straightletter.jpg",
+  "images/same, catch-SLT,PTG,BNE,OHK-realartmaine-tags.jpg",
+  "images/sloan-BNE,PTG-realartmaine-throwie, hollow.jpg",
+  "images/sloan-PTG,BNE-realartmaine-moniker, tag, character.jpg",
+  "images/songy-realartmaine-straightletter, hollow.jpg",
+  "images/thex-SLT-realartmaine-piece.jpg",
+  "images/uglyboy-5G-realartmaine-throwie, antistyle.jpg"
 ];
 
 const gallery = document.getElementById("galleryContainer");
