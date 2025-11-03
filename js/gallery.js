@@ -19,7 +19,9 @@ const imagesList = [
   "images/Enya-5G-troubledguppy-piece.jpg",
   "images/catch-OHK,BNE,PTG-troubledguppy-piece.jpg",
   "images/catch-OHK,BNE,PTG-troubledguppy-throie.jpg",
-  "images/tabz, sloan-2gf,ptg,bne-RealArtMaine-hand style.jpg"
+  "images/tabz, sloan-2gf,ptg,bne-RealArtMaine-hand style.jpg",   
+  "images/catch, link, wake, hugo-OHK,PTG,LTB,5G-realartmaine-throwie, tag.jpg",
+  "images/bunt, some1-LG-realartmaine-stencil, tag.jpg",
 ];
 
 const gallery = document.getElementById("galleryContainer");
