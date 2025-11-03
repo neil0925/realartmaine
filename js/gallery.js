@@ -22,6 +22,7 @@ const imagesList = [
   "images/tabz, sloan-2gf,ptg,bne-RealArtMaine-hand style.jpg",   
   "images/catch, link, wake, hugo-OHK,PTG,LTB,5G-realartmaine-throwie, tag.jpg",
   "images/bunt, some1-LG-realartmaine-stencil, tag.jpg",
+  "images/ankle-LTB,2K69-realartmaine-throwie, hollow .jpg"
 ];
 
 const gallery = document.getElementById("galleryContainer");
