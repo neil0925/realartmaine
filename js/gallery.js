@@ -22,7 +22,6 @@ const imagesList = [
   "images/27, learn-YME,SLT,CIRCLET,2GF,TSZ,2GF-minnowfeed-piece, stencil.JPG",
   "images/27, mobi, vazor, segway-TSZ,2GF,AWC,FTS-minnowfeed-piece, straightletter,stencil.JPG",
   "images/27, plato-HEX,TSZ,2GF-minnowfeed-tags.jpg”,
-  "images/segway-FTS-minnowfeed-throwie, hollow.JPG”
 ];
 
 const gallery = document.getElementById("galleryContainer");
