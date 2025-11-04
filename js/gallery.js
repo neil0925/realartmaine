@@ -22,15 +22,10 @@ const imagesList = [
   "images/27, learn-YME,SLT,CIRCLET,2GF,TSZ,2GF-minnowfeed-piece, stencil.JPG",
   "images/27, mobi, vazor, segway-TSZ,2GF,AWC,FTS-minnowfeed-piece, straightletter,stencil.JPG",
   "images/27, plato-HEX,TSZ,2GF-minnowfeed-tags.jpg”,
-  "images/27-TSZ,2GF-minnowfeed-tags.JPG”,
   "images/ankle-2K69,LTB-minnowfeed-tags.JPG”,
-  "images/catch-BNE,PTG,OHK-minnowfeed-throwie, hollow.JPG”,
   "images/feer, scipio-2GF-minnowfeed-piece, tags, antistyle.jpg”,
-  "images/mobi-TSZ-minnowfeed-straightletter.JPG”,
   "images/ojea3-HEX,OY!-minnowfeed-tags.JPG”,
-  "images/qjoe-5G-minnowfeed-tags.JPG”,
   "images/segway-FTS-minnowfeed-throwie, hollow.JPG”,
-  "images/wuhan,27-2GF,TSZ-minnowfeed-tags, stencil.JPG”
 
 
 ];
