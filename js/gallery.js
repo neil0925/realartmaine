@@ -22,23 +22,14 @@ const imagesList = [
   "images/27, learn-YME,SLT,CIRCLET,2GF,TSZ,2GF-minnowfeed-piece, stencil.JPG",
   "images/27, mobi, vazor, segway-TSZ,2GF,AWC,FTS-minnowfeed-piece, straightletter,stencil.JPG",
   "images/27, plato-HEX,TSZ,2GF-minnowfeed-tags.jpg”,
-  "images/27-2GF,TSZ-minnowfeed-antistyle, throwie, hollow.JPG”,
   "images/27-TSZ,2GF-minnowfeed-tags.JPG”,
-  "images/27-TSZ-minnowfeed-throwie, antistyle, hollow.JPG”,
   "images/ankle-2K69,LTB-minnowfeed-tags.JPG”,
-  "images/catch, link-5G,OHK,PTG,BNE-minnowfeed-throwie, fillin, hollow.JPG”,
   "images/catch-BNE,PTG,OHK-minnowfeed-throwie, hollow.JPG”,
   "images/feer, scipio-2GF-minnowfeed-piece, tags, antistyle.jpg”,
-  "images/grazi, 27-DWT,TSZ,2GF-minnowfeed-tags.JPG”,
-  "images/jumz-TSZ-minnowfeed-throwie, fillin, stencil.JPG”,
-  "images/lerk, 27-2GF-minnowfeed-tags, stencil.JPG”,
-  "images/LSE-LSE-minnowfeed-straightletter.jpg”,
   "images/mobi-TSZ-minnowfeed-straightletter.JPG”,
   "images/ojea3-HEX,OY!-minnowfeed-tags.JPG”,
   "images/qjoe-5G-minnowfeed-tags.JPG”,
-  "images/rune-LTB,2K69-minnowfeed-piece, antistyle.JPG”,
   "images/segway-FTS-minnowfeed-throwie, hollow.JPG”,
-  "images/spots, wilt, 27-VC,2K69,HKC-minnowfeed-blackbook, antistyle.JPG”,
   "images/wuhan,27-2GF,TSZ-minnowfeed-tags, stencil.JPG”
 
 
