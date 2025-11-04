@@ -7,7 +7,6 @@
 */
 
 const imagesList = [
-  "images/tabz, sloan-2gf,ptg,bne-RealArtMaine-hand style.jpg",   
   "images/catch, link, wake, hugo-OHK,PTG,LTB,5G-realartmaine-throwie, tag.jpg",
   "images/bunt, some1-LG-realartmaine-stencil, tag.jpg",
   "images/ankle-LTB,2K69-realartmaine-throwie, hollow .jpg",
@@ -16,9 +15,51 @@ const imagesList = [
   "images/same, catch-SLT,PTG,BNE,OHK-realartmaine-tags.jpg",
   "images/sloan-BNE,PTG-realartmaine-throwie, hollow.jpg",
   "images/sloan-PTG,BNE-realartmaine-moniker, tag, character.jpg",
+  "images/tabz, sloan-2gf,ptg,bne-RealArtMaine-hand style.jpg",   
   "images/songy-realartmaine-straightletter, hollow.jpg",
   "images/thex-SLT-realartmaine-piece.jpg",
-  "images/uglyboy-5G-realartmaine-throwie, antistyle.jpg"
+  "images/uglyboy-5G-realartmaine-throwie, antistyle.jpg",
+  "images/27, learn-YME,SLT,CIRCLET,2GF,TSZ,2GF-minnowfeed-piece, stencil.JPG",
+  "images/27, mobi, vazor, segway-TSZ,2GF,AWC,FTS-minnowfeed-piece, straightletter,         stencil.JPG",
+  “images/27, plato-HEX,TSZ,2GF-minnowfeed-tags.jpg”,
+  “images/27, vazor-TSZ,AWC-minnowfeed-straightletter, piece, stencil.jpg”,
+  “images/27-2GF,TSZ-minnowfeed-antistyle, throwie, hollow.JPG”,
+  “images/27-TSZ,2GF-minnowfeed-paintroller.jpg”,
+  “images/27-TSZ,2GF-minnowfeed-tags.JPG”,
+  “images/27-TSZ-minnowfeed-straightletter, stencil.JPG”,
+  “images/27-TSZ-minnowfeed-throwie, antistyle, hollow.JPG”,
+  “images/5G-5G-minnowfeed-straightletter, antistyle.JPG”,
+  “images/ankle-2K69,LTB-minnowfeed-tags.JPG”,
+  “images/ankle-LTB,2K69-minnowfeed-throwie, fillin.JPG”,
+  “images/catch, link-5G,OHK,PTG,BNE-minnowfeed-throwie, fillin, hollow.JPG”,
+  “images/catch, secret, 27-BNE,PTG,OHK,5G,TSZ-minnowfeed-antistyle, stencil, blackbook.JPG”,
+  “images/catch-BNE,PTG,OHK-minnowfeed-throwie, hollow.JPG”,
+  “source/catch-PTG,OHK,BNE-minnowfeed-tags, throwie, fillin.JPG”,
+  “images/feer, scipio-2GF-minnowfeed-piece, tags, antistyle.jpg”,
+  “images/gerv-YME-minnowfeed-piece.JPG”,
+  “images/grazi, 27-DWT,TSZ,2GF-minnowfeed-tags.JPG”,
+  “images/ichabod-YME,CIRLCET-minnowfeed-tag.jpg”,
+  “images/jumz-TSZ-minnowfeed-throwie, fillin, stencil.JPG”,
+  “images/kindbud-5G,SDH-minnowfeed-antistyle, piece.JPG”,
+  “images/lerk, 27-2GF-minnowfeed-tags, stencil.JPG”,
+  “images/lerk, link, obee-5G,OY!-minnowfeed-piece, paintroller.JPG”,
+  “images/LSE-LSE-minnowfeed-straightletter.jpg”,
+  “images/mobi, grazi-DWT,TSZ-minnowfeed-straightletter, tags.JPG”,
+  “images/mobi-TSZ-minnowfeed-straightletter.JPG”,
+  “images/ojea3-HEX,OY!-minnowfeed-piece.JPG”,
+  “images/ojea3-HEX,OY!-minnowfeed-tags.JPG”,
+  “images/qjoe-5G,UK-minnowfeed-antistyle, piece.JPG”,
+  “images/qjoe-5G-minnowfeed-tags.JPG”,
+  “images/rune, 27-LTB,2K69,TSZ,2GF-minnowfeed-throwie, fillin, antistyle.JPG”,
+  “images/rune-LTB,2K69-minnowfeed-piece, antistyle.JPG”,
+  “images/same, 27, enya-SLT,TVT,TSZ,5G-minnowfeed-tags, stencil.jpg”,
+  “images/segway-FTS-minnowfeed-throwie, hollow.JPG”,
+  “images/spek, segway, 27, port, melts, yalts-FTS,TSZ,CIRCLET,YME,IMS-minnowfeed-tags, moniker.JPG”,
+  “images/spots, wilt, 27-VC,2K69,HKC-minnowfeed-blackbook, antistyle.JPG”,
+  “images/wilt-2K69,VC-minnowfeed-blackbook.jpg”,
+  “images/wuhan,27-2GF,TSZ-minnowfeed-tags, stencil.JPG”
+
+
 ];
 
 const gallery = document.getElementById("galleryContainer");
