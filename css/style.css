@@ -1,4 +1,6 @@
-/* style.css - RealArtMaine (masonry + hover pop-out + dark mode) */
+/* style.css - RealArtMaine (masonry + hover pop-out + dark mode)
+   Full stylesheet: hover expands smoothly in all directions without affecting layout.
+*/
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html { scrollbar-gutter: stable both-edges; }
@@ -42,7 +44,7 @@ nav a::after { content: ''; display:block; height:2px; width:0; background:#fff;
 nav a:hover::after { width:100%; }
 
 /* Settings dropdown (gear) - gear is at right, nav stays centered */
-.settings-dropdown { position: absolute; right: 18px; top: 50%; transform: translateY(-50%); }
+.settings-dropdown { position: absolute; right: 18px; top: 50%; transform: translateY(-50%); pointer-events: auto; }
 .gear-box { display:inline-block; padding:3px; background:black; border:1px solid #fff; border-radius:6px; }
 .gear-icon { width:30px; height:30px; display:block; cursor:pointer; transition:transform .28s ease; }
 .gear-icon:hover { transform: rotate(18deg); } /* only the gear rotates */
@@ -115,33 +117,41 @@ footer hr { border:none; border-top:1px solid #aaa; margin:10px 0; }
 /* card must allow overflow so hovered image can pop out above neighbors */
 .card {
   position: relative;
-  overflow: visible !important; /* ensures hover pop-out is not clipped */
-  z-index: 1;
+  overflow: visible;    /* important: allow hover to grow outside box */
+  border-radius: 6px;
 }
-
 
 /* placeholder while loading (does NOT scale on hover) */
 .loading-placeholder {
-  width:100%; display:block; object-fit:cover; border-radius:6px; opacity:.85;
+  width:100%;
+  display:block;
+  object-fit:cover;
+  border-radius:6px;
+  opacity:.85;
+  pointer-events: none; /* ensure not interactive */
 }
 
-/* gallery images */
+/* gallery images - loaded images only */
 .gallery-image {
-  width:100%; height:auto; display:block; border-radius:6px;
+  width:100%;
+  height:auto;
+  display:block;
+  border-radius:6px;
   cursor:pointer;
   transition: transform .26s cubic-bezier(.2,.9,.3,1), box-shadow .26s ease;
   will-change: transform;
-  position: relative; z-index: 1;
+  position: relative;
+  z-index: 1;
   backface-visibility: hidden;
+  transform-origin: center center; /* expand equally in all directions */
 }
 
-/* hover pop-out (scales above neighbors) */
+/* Hover pop-out: scales smoothly in all directions, doesn't change layout */
 .gallery-image:hover {
-  transform: scale(1.12);
-  z-index: 999; /* huge so it always pops over neighbors */
-  box-shadow: 0 18px 40px rgba(0,0,0,0.55);
+  transform: scale(1.08);
+  z-index: 40; /* float above neighbors while hovered */
+  box-shadow: 0 14px 30px rgba(0,0,0,0.45);
 }
-
 
 /* fade-in animation for images when they finish loading */
 .gallery-image.fade-in { animation: fadeIn .45s ease forwards; }
