@@ -20,7 +20,7 @@ const imagesList = [
   "images/thex-SLT-realartmaine-piece.jpg",
   "images/uglyboy-5G-realartmaine-throwie, antistyle.jpg",
   "images/27, learn-YME,SLT,CIRCLET,2GF,TSZ,2GF-minnowfeed-piece, stencil.JPG",
-  "images/27, mobi, vazor, segway-TSZ,2GF,AWC,FTS-minnowfeed-piece, straightletter,stencil.JPG",
+  "images/27, mobi, vazor, segway-TSZ,2GF,AWC,FTS-minnowfeed-piece, straightletter, stencil.JPG",
   "images/27, plato-HEX,TSZ,2GF-minnowfeed-tags.jpg"
 ];
 
