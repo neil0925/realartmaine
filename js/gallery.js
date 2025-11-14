@@ -15,14 +15,15 @@ const imagesList = [
   "images/same, catch-SLT,PTG,BNE,OHK-realartmaine-tags.jpg",
   "images/sloan-BNE,PTG-realartmaine-throwie, hollow.jpg",
   "images/sloan-PTG,BNE-realartmaine-moniker, tag, character.jpg",
-  "images/tabz, sloan-2gf,ptg,bne-RealArtMaine-hand style.jpg",   
+  "images/tabz, sloan-2gf,ptg,bne-RealArtMaine-hand style.jpg",
   "images/songy-realartmaine-straightletter, hollow.jpg",
   "images/thex-SLT-realartmaine-piece.jpg",
   "images/uglyboy-5G-realartmaine-throwie, antistyle.jpg",
   "images/27, learn-YME,SLT,CIRCLET,2GF,TSZ,2GF-minnowfeed-piece, stencil.JPG",
   "images/27, mobi, vazor, segway-TSZ,2GF,AWC,FTS-minnowfeed-piece, straightletter,stencil.JPG",
-  "images/27, plato-HEX,TSZ,2GF-minnowfeed-tags.jpg”,
+  "images/27, plato-HEX,TSZ,2GF-minnowfeed-tags.jpg"
 ];
+
 
 const gallery = document.getElementById("galleryContainer");
 const searchInput = document.getElementById("searchInput");
