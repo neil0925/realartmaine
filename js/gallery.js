@@ -124,8 +124,8 @@ function openModal(meta) {
 
   const caption = document.createElement("div");
   caption.className = "caption";
-  const crewPart = meta.crew ? ` (${meta.crew})` : "";
-  caption.textContent = `"${meta.tags.join(", ")}" flicked by ${meta.photographer}${crewPart}`;
+  caption.textContent = `"${meta.tags.join(", ")}" flicked by ${meta.photographer}`;
+
 
   modal.appendChild(img);
   modal.appendChild(caption);
