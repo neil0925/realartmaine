@@ -37,11 +37,19 @@ document.addEventListener("DOMContentLoaded", () => {
   applyMode();
 
   // Gear toggles dropdown (only gear toggles; clicking gear again closes)
-  if (gear && dropdown) {
-    gear.addEventListener("click", (ev) => {
-      ev.stopPropagation();
-      dropdown.classList.toggle("show");
-    });
+if (gear && dropdown) {
+  gear.addEventListener("click", (ev) => {
+    ev.stopPropagation();
+    dropdown.classList.toggle("show");
+  });
+
+  document.addEventListener("click", (e) => {
+    if (!dropdown.contains(e.target) && !gear.contains(e.target)) {
+      dropdown.classList.remove("show");
+    }
+  });
+}
+
     // Do NOT auto-close on outside click (per previous preference).
     // If you later want outside-click to close, add a document click handler.
   }
