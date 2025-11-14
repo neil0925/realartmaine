@@ -45,8 +45,8 @@ const imagesList = [
   "images/catch, link-5G,OHK,PTG,BNE-minnowfeed-throw",
   "images/ankle-LTB,2K69-minnowfeed-throwie, fillin.JPG",
   "images/ankle-2K69,LTB-minnowfeed-tags.JPG",
-  "images/LSE-LSE-minnowfeed-straightletter.jpg
-  "images/5G-5G-TroubledGuppy-piece.jpg
+  "images/LSE-LSE-minnowfeed-straightletter.jpg",
+  "images/5G-5G-TroubledGuppy-piece.jpg",
   "images/mobi, grazi-DWT,TSZ-minnowfeed-straightletter, tags.JPG",
   "images/spots, wilt, 27-VC,2K69,HKC-minnowfeed-blackbook, antistyle.JPG",
   "images/hebrew-cts-ZPLK-straightletter.JPG",
