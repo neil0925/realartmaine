@@ -113,7 +113,12 @@ footer hr { border:none; border-top:1px solid #aaa; margin:10px 0; }
 }
 
 /* card must allow overflow so hovered image can pop out above neighbors */
-.card { position: relative; overflow: visible; border-radius:6px; }
+.card {
+  position: relative;
+  overflow: visible !important; /* ensures hover pop-out is not clipped */
+  z-index: 1;
+}
+
 
 /* placeholder while loading (does NOT scale on hover) */
 .loading-placeholder {
@@ -132,10 +137,11 @@ footer hr { border:none; border-top:1px solid #aaa; margin:10px 0; }
 
 /* hover pop-out (scales above neighbors) */
 .gallery-image:hover {
-  transform: scale(1.08);
-  z-index: 40;
-  box-shadow: 0 14px 30px rgba(0,0,0,0.45);
+  transform: scale(1.12);
+  z-index: 999; /* huge so it always pops over neighbors */
+  box-shadow: 0 18px 40px rgba(0,0,0,0.55);
 }
+
 
 /* fade-in animation for images when they finish loading */
 .gallery-image.fade-in { animation: fadeIn .45s ease forwards; }
