@@ -94,7 +94,7 @@ const imagesList = [
   "images/same, calcium, ducky, yart-SLT,IMS,TVT,OHK-realartmaine-throwie, fillin, character, antistyle.jpg",
   "images/skipio, pyle-2GF,PTG,OHK,BNE-realartmaine-throwie, fillin.jpg",
   "images/soft, same-SLT,2K69-realartmaine-throwie, fillin.jpg",
-  "images/some1-realartmaine-character, hollow.jpg
+  "images/some1-realartmaine-character, hollow.jpg",
   "images/suer, same-SLT,TVT,TMS-realartmaine-throwie, hollow, tags.jpg",
   "images/trak, hebrew-LTB,2K69-realartmaine-tags.jpg",
   "images/wake, ducky-LTB-realartmaine-throwie, hollow, character, antistyle.jpg",
