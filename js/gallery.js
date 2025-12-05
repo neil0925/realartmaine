@@ -8,6 +8,10 @@
 
 let imagesList = [
   "images/catch, link, wake, hugo-OHK,PTG,LTB,5G-realartmaine-throwie, tag.jpg",
+  "images/same-SLT,TVT-realartmaine-tags.jpg",
+  "images/same-SLT,TVT-realartmaine-piece, staightletter.jpg",
+  "images/salud-PTG-realartmaine-tags, character, hollow.jpg",
+  "images/salud-PTG-realartmaine-tags, hollow, character.jpg",
   "images/towel, sewer, salud, klerm, kindbud-FK,PTG,TNL,5G-realartmaine-tags, character.jpg",
   "images/bunt, some1-LG-realartmaine-stencil, tag.jpg",
   "images/ankle-LTB,2K69-realartmaine-throwie, hollow .jpg",
