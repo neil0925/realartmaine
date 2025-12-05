@@ -6,7 +6,7 @@
    - search filtering
 */
 
-const imagesList = [
+let imagesList = [
   "images/catch, link, wake, hugo-OHK,PTG,LTB,5G-realartmaine-throwie, tag.jpg",
   "images/bunt, some1-LG-realartmaine-stencil, tag.jpg",
   "images/ankle-LTB,2K69-realartmaine-throwie, hollow .jpg",
@@ -14,7 +14,6 @@ const imagesList = [
   "images/5G-5G-minnowfeed-straightletter, antistyle.JPG",
   "images/qjoe, link-5G-realartmaine-antistyle, straightletter.jpg",
   "images/link-5G,CRAFT-realartmaine-antistyle, piece.jpg",
-  "images/owell-realartmaine-antistyle, throwie.jpg",
   "images/prizm, ruski, cats-realartmaine-paintroller.jpg",
   "images/some1-realartmaine-stencil.jpg",
   "images/owell-realartmaine-antistyle, throwie.jpg",
@@ -137,6 +136,9 @@ const imagesList = [
   "images/27, mobi, vazor, segway-TSZ,2GF,AWC,FTS-minnowfeed-piece, straightletter, stencil.JPG",
   "images/27, plato-HEX,TSZ,2GF-minnowfeed-tags.jpg"
 ];
+// remove exact-duplicate paths while preserving first occurrence order
+imagesList = Array.from(new Set(imagesList.map(s => s.trim())));
+
 const gallery = document.getElementById("galleryContainer");
 const searchInput = document.getElementById("searchInput");
 
