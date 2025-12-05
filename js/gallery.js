@@ -142,6 +142,46 @@ imagesList = Array.from(new Set(imagesList.map(s => s.trim())));
 const gallery = document.getElementById("galleryContainer");
 const searchInput = document.getElementById("searchInput");
 
+// ----------------- CHANGES START -----------------
+// load token to prevent overlapping appends when searches change rapidly
+let currentLoadId = 0;
+
+// helper: normalize token string
+function normToken(s) {
+  return (s || "").toString().trim().toLowerCase();
+}
+
+// build a set of searchable tokens from parsed metadata
+function buildMetaTokens(meta) {
+  const tokens = new Set();
+
+  // tags and styles are arrays already (from parseFilename)
+  (meta.tags || []).forEach(t => {
+    const parts = t.split(/[\s,;]+/).map(normToken).filter(Boolean);
+    parts.forEach(p => tokens.add(p));
+  });
+  (meta.styles || []).forEach(s => {
+    const parts = s.split(/[\s,;]+/).map(normToken).filter(Boolean);
+    parts.forEach(p => tokens.add(p));
+  });
+
+  // crew (may contain commas/spaces)
+  if (meta.crew) {
+    meta.crew.split(/[\s,;]+/).map(normToken).filter(Boolean).forEach(p => tokens.add(p));
+  }
+
+  // photographer (may contain commas/spaces)
+  if (meta.photographer) {
+    meta.photographer.split(/[\s,;]+/).map(normToken).filter(Boolean).forEach(p => tokens.add(p));
+  }
+
+  // also include rawBase words (helpful for some filenames)
+  (meta.rawBase || "").split(/[\s,;,_-]+/).map(normToken).filter(Boolean).forEach(p => tokens.add(p));
+
+  return tokens;
+}
+// ----------------- CHANGES END -----------------
+
 // parse filename to metadata
 function parseFilename(filename) {
   const base = filename.split("/").pop().replace(/\.[^.]+$/, "");
@@ -208,10 +248,18 @@ function openModal(meta) {
 // load images one-by-one with placeholder
 async function loadImagesSequentially(list) {
   if (!gallery) return;
+  // increment token for this run
+  const myLoadId = ++currentLoadId;
+  // clear gallery for the new run
   gallery.innerHTML = "";
 
   for (let i = 0; i < list.length; i++) {
+    // If a new run started since this one began, abort
+    if (myLoadId !== currentLoadId) return;
+
     if (i > 0 && i % 10 === 0) {
+      // ensure still current before appending ad
+      if (myLoadId !== currentLoadId) return;
       const ad = document.createElement("div");
       ad.className = "ad-card";
       ad.textContent = "Ad / Featured";
@@ -219,16 +267,25 @@ async function loadImagesSequentially(list) {
     }
 
     const meta = parseFilename(list[i]);
-    await loadImageWithPlaceholder(meta);
+    // pass myLoadId so the loader can abort if a newer run started
+    const ok = await loadImageWithPlaceholder(meta, myLoadId);
+    // if the run was aborted while waiting for load, stop
+    if (myLoadId !== currentLoadId) return;
     // keep layout stable after each append
     resizeAllMasonryItems();
   }
-  // final layout fix
-  resizeAllMasonryItems();
+  // final layout fix (only if still current)
+  if (myLoadId === currentLoadId) resizeAllMasonryItems();
 }
 
-function loadImageWithPlaceholder(meta) {
+function loadImageWithPlaceholder(meta, expectedLoadId) {
   return new Promise((resolve) => {
+    // If run already obsolete, resolve quickly
+    if (expectedLoadId !== currentLoadId) {
+      resolve(false);
+      return;
+    }
+
     const card = document.createElement("div");
     card.className = "card";
 
@@ -238,6 +295,12 @@ function loadImageWithPlaceholder(meta) {
     placeholder.alt = "Loading...";
     placeholder.className = "loading-placeholder";
     placeholder.draggable = false;
+
+    // ensure still current before appending placeholder
+    if (expectedLoadId !== currentLoadId) {
+      resolve(false);
+      return;
+    }
     card.appendChild(placeholder);
     gallery.appendChild(card);
 
@@ -253,6 +316,14 @@ function loadImageWithPlaceholder(meta) {
 
     // when loaded: replace placeholder, show image, compute grid span
     img.addEventListener("load", () => {
+      // if a newer run started, don't append anything; just resolve
+      if (expectedLoadId !== currentLoadId) {
+        // cleanup created nodes if still in DOM
+        if (card.parentNode === gallery) gallery.removeChild(card);
+        resolve(false);
+        return;
+      }
+
       placeholder.remove();
       img.classList.remove("hidden");
       img.classList.add("fade-in");
@@ -266,13 +337,19 @@ function loadImageWithPlaceholder(meta) {
         const height = img.getBoundingClientRect().height;
         const rowSpan = Math.max(1, Math.ceil((height + rowGap) / (rowHeight + rowGap)));
         card.style.gridRowEnd = `span ${rowSpan}`;
-        resolve();
+        resolve(true);
       });
     });
 
     img.addEventListener("error", () => {
+      // if a newer run started, just resolve
+      if (expectedLoadId !== currentLoadId) {
+        if (card.parentNode === gallery) gallery.removeChild(card);
+        resolve(false);
+        return;
+      }
       placeholder.src = "images/error.png";
-      resolve();
+      resolve(true);
     });
   });
 }
@@ -285,11 +362,18 @@ function filterGallery(q) {
     loadImagesSequentially(imagesList);
     return;
   }
+
+  // split the query into tokens (space/comma/semicolon separated). Search matches if ANY token is present in the image tokens.
+  const queryTokens = q.split(/[\s,;]+/).map(s => s.trim().toLowerCase()).filter(Boolean);
+
   const filtered = imagesList.filter(src => {
     const meta = parseFilename(src);
-    const hay = [...meta.tags, meta.crew || "", meta.photographer, ...meta.styles].join(" ");
-    return hay.includes(q);
+    const metaTokens = buildMetaTokens(meta); // set of normalized tokens
+
+    // require that at least one query token equals one of the meta tokens (strict token match)
+    return queryTokens.some(qt => metaTokens.has(qt));
   });
+
   loadImagesSequentially(filtered);
 }
 
