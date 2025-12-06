@@ -62,7 +62,6 @@ let imagesList = [
 	"images/2GF-realartmaine-tag.jpg",
 	"images/27-TSZ,2GF-realartmaine-throwie, antistyle.jpg",
 	"images/ankle-LTB,2K69-realartmaine-tags.jpg",
-	
   "images/ankle, ne1, symbol, spud-LTB, 2K69, CTS-realartmaine-throwie, straightletter, tags, fillin_.jpg",
   "images/ankor-SFL-realartmaine-straightletter.jpg",
   "images/aura-OHK-realartmaine-straightletter, piece.jpg",
@@ -155,13 +154,15 @@ const searchInput = document.getElementById("searchInput");
 const DEFAULT_ASPECT = 0.66;
 
 // ----------------- CHANGES START -----------------
-// load-token must be initialized (was referenced before declaration, causing runtime error)
-let currentLoadId = 0;
-// small safety: surface unexpected startup errors in console
-try {
-	// ...existing startup code will run later; no-op here to indicate safety block...
-} catch (err) {
-	console.warn("gallery startup error:", err);
+// missing helper used throughout the file — compute stable rendered height
+function getRenderedImageHeight(img, availableWidth) {
+  if (!img) return 0;
+  const cw = (typeof availableWidth === "number" && availableWidth > 0) ? availableWidth : (img.clientWidth || 0);
+  if (img.naturalWidth && img.naturalHeight && cw > 0) {
+    return (cw * img.naturalHeight) / img.naturalWidth;
+  }
+  const rect = img.getBoundingClientRect ? img.getBoundingClientRect() : { height: 0 };
+  return rect.height || 0;
 }
 // ----------------- CHANGES END -----------------
 
