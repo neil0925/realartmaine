@@ -152,7 +152,14 @@ const gallery = document.getElementById("galleryContainer");
 const searchInput = document.getElementById("searchInput");
 
 // ----------------- CHANGES START -----------------
-const DEFAULT_ASPECT = 0.66; // height / width fallback for placeholders
+// load-token must be initialized (was referenced before declaration, causing runtime error)
+let currentLoadId = 0;
+// small safety: surface unexpected startup errors in console
+try {
+	// ...existing startup code will run later; no-op here to indicate safety block...
+} catch (err) {
+	console.warn("gallery startup error:", err);
+}
 // ----------------- CHANGES END -----------------
 
 // helper: normalize token string
