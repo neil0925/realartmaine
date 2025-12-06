@@ -263,72 +263,51 @@ function openModal(meta) {
   document.body.appendChild(backdrop);
 }
 
+/* Replace the existing loadImagesSequentially + loadImageWithPlaceholder logic
+   with a two-phase approach:
+   - Phase A: create and append all cards+placeholders (so the grid can form columns)
+   - Phase B: sequentially load each image into the already-appended card
+*/
+
 // load images one-by-one with placeholder
 async function loadImagesSequentially(list) {
   if (!gallery) return;
   const myLoadId = ++currentLoadId;
   gallery.innerHTML = "";
 
+  // read gallery metrics for column calculation
+  const grid = gallery;
+  const gap = parseInt(window.getComputedStyle(grid).getPropertyValue("gap") || "10");
+  const galleryWidth = Math.max(200, grid.clientWidth || document.documentElement.clientWidth);
+  // estimate number of columns based on min column width used in CSS (250px)
+  const minCol = 250;
+  const cols = Math.max(1, Math.floor((galleryWidth + gap) / (minCol + gap)));
+  const columnWidth = Math.max(120, Math.floor((galleryWidth - (cols - 1) * gap) / cols));
+
+  // Phase A: create all cards+placeholders synchronously
+  const cards = [];
   for (let i = 0; i < list.length; i++) {
     if (myLoadId !== currentLoadId) return;
 
+    // add ad card every 10 items (keep existing behavior)
     if (i > 0 && i % 10 === 0) {
-      if (myLoadId !== currentLoadId) return;
       const ad = document.createElement("div");
       ad.className = "ad-card";
       ad.textContent = "Ad / Featured";
       gallery.appendChild(ad);
+      // ad occupies its spot, but we don't add to cards array
     }
 
     const meta = parseFilename(list[i]);
-    // load each image (this function now creates the wrapper + placeholder immediately,
-    // and calculates the card's grid-row span for the placeholder to avoid one-line layout)
-    const ok = await loadImageWithPlaceholder(meta, myLoadId);
-    if (myLoadId !== currentLoadId) return;
-
-    // NOTE: removed per-image global resize here to avoid repeated full-layout recalcs
-    // resizeAllMasonryItems(); <-- no longer called inside loop
-  }
-
-  // one final pass to ensure everything matches (only once)
-  if (myLoadId === currentLoadId) resizeAllMasonryItems();
-}
-
-// compute the rendered height of an image using its intrinsic aspect ratio
-// so we don't measure transformed sizes (which can vary during hover/animation)
-function getRenderedImageHeight(img, availableWidth) {
-  if (!img) return 0;
-  // prefer natural sizes to compute consistent height (unaffected by CSS transforms)
-  const cw = typeof availableWidth === "number" ? availableWidth : (img.clientWidth || 0);
-  if (img.naturalWidth && img.naturalHeight && cw > 0) {
-    return (cw * img.naturalHeight) / img.naturalWidth;
-  }
-  // fallback to bounding rect if intrinsics are unavailable
-  const rect = img.getBoundingClientRect();
-  return rect.height || 0;
-}
-
-function loadImageWithPlaceholder(meta, expectedLoadId) {
-  return new Promise((resolve) => {
-    if (expectedLoadId !== currentLoadId) {
-      resolve(false);
-      return;
-    }
 
     const card = document.createElement("div");
     card.className = "card";
 
-    // create wrapper first so the grid has a stable box immediately
     const wrap = document.createElement("div");
     wrap.className = "image-wrap";
-    // set a conservative placeholder height based on current available width
-    // append wrap so clientWidth becomes measurable
-    card.appendChild(wrap);
-    gallery.appendChild(card);
 
-    // compute available width and set default placeholder height
-    const availW = wrap.clientWidth || card.clientWidth || (gallery.clientWidth / Math.max(1, Math.floor(gallery.clientWidth / 250)));
-    const defaultH = Math.max(80, Math.round(availW * DEFAULT_ASPECT));
+    // conservative placeholder height based on estimated column width
+    const defaultH = Math.max(80, Math.round(columnWidth * DEFAULT_ASPECT));
     wrap.style.height = `${defaultH}px`;
 
     // placeholder image fills the wrapper (positioned absolute by CSS)
@@ -339,14 +318,41 @@ function loadImageWithPlaceholder(meta, expectedLoadId) {
     placeholder.draggable = false;
     wrap.appendChild(placeholder);
 
-    // set initial grid-row span for the placeholder so layout forms into columns
-    const grid = document.querySelector(".gallery");
+    card.appendChild(wrap);
+    gallery.appendChild(card);
+
+    // set initial grid-row span so layout immediately forms columns
     const rowHeight = parseInt(window.getComputedStyle(grid).getPropertyValue("grid-auto-rows") || "10");
     const rowGap = parseInt(window.getComputedStyle(grid).getPropertyValue("gap") || "10");
     const initialRowSpan = Math.max(1, Math.ceil((defaultH + rowGap) / (rowHeight + rowGap)));
     card.style.gridRowEnd = `span ${initialRowSpan}`;
 
-    // real image object
+    // keep structure and metadata for phase B
+    cards.push({ meta, card, wrap, placeholder });
+  }
+
+  // Phase B: sequentially load real images into existing cards
+  for (let i = 0; i < cards.length; i++) {
+    if (myLoadId !== currentLoadId) return;
+    const { meta, card, wrap, placeholder } = cards[i];
+    // load into the existing card; this function updates wrap height and span
+    const ok = await loadImageIntoCard(meta, card, wrap, placeholder, myLoadId);
+    if (myLoadId !== currentLoadId) return;
+    // continue to next image
+  }
+
+  // final layout correction
+  if (myLoadId === currentLoadId) resizeAllMasonryItems();
+}
+
+// new helper: load image into an existing card/wrap/placeholder
+function loadImageIntoCard(meta, card, wrap, placeholder, expectedLoadId) {
+  return new Promise((resolve) => {
+    if (expectedLoadId !== currentLoadId) {
+      resolve(false);
+      return;
+    }
+
     const img = new Image();
     img.src = meta.src;
     img.alt = meta.rawBase;
@@ -355,6 +361,10 @@ function loadImageWithPlaceholder(meta, expectedLoadId) {
 
     img.addEventListener("click", () => openModal(meta));
 
+    const grid = document.querySelector(".gallery");
+    const rowHeight = parseInt(window.getComputedStyle(grid).getPropertyValue("grid-auto-rows") || "10");
+    const rowGap = parseInt(window.getComputedStyle(grid).getPropertyValue("gap") || "10");
+
     img.addEventListener("load", () => {
       if (expectedLoadId !== currentLoadId) {
         if (card.parentNode === gallery) gallery.removeChild(card);
@@ -362,15 +372,15 @@ function loadImageWithPlaceholder(meta, expectedLoadId) {
         return;
       }
 
-      // compute final height from intrinsic ratio using wrapper width
-      const finalH = getRenderedImageHeight(img, wrap.clientWidth) || defaultH;
+      // compute final height from intrinsic ratio using wrapper's current width
+      const finalH = getRenderedImageHeight(img, wrap.clientWidth) || parseInt(wrap.style.height) || 150;
       wrap.style.height = `${finalH}px`;
 
       // swap in the image (it is absolutely positioned and will fill the wrapper)
       img.classList.remove("hidden");
       img.classList.add("fade-in");
       // remove placeholder only after image is ready to avoid flicker
-      placeholder.remove();
+      if (placeholder && placeholder.parentNode === wrap) placeholder.remove();
       wrap.appendChild(img);
 
       // set final grid-row span and mark loaded so hover becomes active
@@ -388,8 +398,8 @@ function loadImageWithPlaceholder(meta, expectedLoadId) {
         resolve(false);
         return;
       }
-      // show a small error placeholder while preserving layout
-      placeholder.src = "images/error.png";
+      // fallback: show small error placeholder while preserving layout
+      if (placeholder) placeholder.src = "images/error.png";
       resolve(true);
     });
   });
