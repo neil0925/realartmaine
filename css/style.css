@@ -120,19 +120,30 @@ footer hr { border:none; border-top:1px solid #aaa; margin:10px 0; }
   border-radius: 6px;
 }
 
-/* wrapper that holds the image and provides the layout height.
-   The wrapper's height is set by JS based on image intrinsic ratio.
-   The inner img is absolutely positioned so enlarging it won't affect layout. */
+/* wrapper that holds the image and provides the layout height. */
 .image-wrap {
   position: relative;
   width: 100%;
   overflow: visible; /* allow inner img to grow outside without affecting grid size */
   border-radius: 6px;
+  /* while loading, prevent hover visual effect until JS marks it loaded */
 }
 
-/* gallery images - loaded images only
-   NOTE: when inside .image-wrap the image is absolutely positioned and sized to 100% of wrapper.
-*/
+/* placeholder while loading (fills the wrapper; won't scale visually) */
+.loading-placeholder {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display:block;
+  object-fit:cover;
+  border-radius:6px;
+  opacity:.85;
+  pointer-events: none; /* ensure not interactive */
+}
+
+/* gallery images - loaded images only (absolutely positioned inside wrapper) */
 .gallery-image {
   position: absolute;
   top: 0;
@@ -149,13 +160,14 @@ footer hr { border:none; border-top:1px solid #aaa; margin:10px 0; }
   backface-visibility: hidden;
 }
 
-/* Hover pop-out: grow exactly 5px on each side visually while keeping wrapper size */
-.image-wrap:hover .gallery-image {
+/* Hover pop-out only after wrapper has been finalized (JS adds .loaded)
+   Visual growth: 5px on each side without changing wrapper size */
+.image-wrap.loaded:hover .gallery-image {
   top: -5px;
   left: -5px;
   width: calc(100% + 10px);
   height: calc(100% + 10px);
-  z-index: 40; /* float above neighbors while hovered */
+  z-index: 40;
   box-shadow: 0 22px 44px rgba(0,0,0,0.52);
 }
 

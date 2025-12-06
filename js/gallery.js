@@ -152,8 +152,8 @@ const gallery = document.getElementById("galleryContainer");
 const searchInput = document.getElementById("searchInput");
 
 // ----------------- CHANGES START -----------------
-// load token to prevent overlapping appends when searches change rapidly
-let currentLoadId = 0;
+const DEFAULT_ASPECT = 0.66; // height / width fallback for placeholders
+// ----------------- CHANGES END -----------------
 
 // helper: normalize token string
 function normToken(s) {
@@ -189,7 +189,6 @@ function buildMetaTokens(meta) {
 
   return tokens;
 }
-// ----------------- CHANGES END -----------------
 
 // parse filename to metadata
 function parseFilename(filename) {
@@ -257,17 +256,13 @@ function openModal(meta) {
 // load images one-by-one with placeholder
 async function loadImagesSequentially(list) {
   if (!gallery) return;
-  // increment token for this run
   const myLoadId = ++currentLoadId;
-  // clear gallery for the new run
   gallery.innerHTML = "";
 
   for (let i = 0; i < list.length; i++) {
-    // If a new run started since this one began, abort
     if (myLoadId !== currentLoadId) return;
 
     if (i > 0 && i % 10 === 0) {
-      // ensure still current before appending ad
       if (myLoadId !== currentLoadId) return;
       const ad = document.createElement("div");
       ad.className = "ad-card";
@@ -276,14 +271,16 @@ async function loadImagesSequentially(list) {
     }
 
     const meta = parseFilename(list[i]);
-    // pass myLoadId so the loader can abort if a newer run started
+    // load each image (this function now creates the wrapper + placeholder immediately,
+    // and calculates the card's grid-row span for the placeholder to avoid one-line layout)
     const ok = await loadImageWithPlaceholder(meta, myLoadId);
-    // if the run was aborted while waiting for load, stop
     if (myLoadId !== currentLoadId) return;
-    // keep layout stable after each append
-    resizeAllMasonryItems();
+
+    // NOTE: removed per-image global resize here to avoid repeated full-layout recalcs
+    // resizeAllMasonryItems(); <-- no longer called inside loop
   }
-  // final layout fix (only if still current)
+
+  // one final pass to ensure everything matches (only once)
   if (myLoadId === currentLoadId) resizeAllMasonryItems();
 }
 
@@ -303,7 +300,6 @@ function getRenderedImageHeight(img, availableWidth) {
 
 function loadImageWithPlaceholder(meta, expectedLoadId) {
   return new Promise((resolve) => {
-    // If run already obsolete, resolve quickly
     if (expectedLoadId !== currentLoadId) {
       resolve(false);
       return;
@@ -312,20 +308,33 @@ function loadImageWithPlaceholder(meta, expectedLoadId) {
     const card = document.createElement("div");
     card.className = "card";
 
-    // placeholder image (no hover)
+    // create wrapper first so the grid has a stable box immediately
+    const wrap = document.createElement("div");
+    wrap.className = "image-wrap";
+    // set a conservative placeholder height based on current available width
+    // append wrap so clientWidth becomes measurable
+    card.appendChild(wrap);
+    gallery.appendChild(card);
+
+    // compute available width and set default placeholder height
+    const availW = wrap.clientWidth || card.clientWidth || (gallery.clientWidth / Math.max(1, Math.floor(gallery.clientWidth / 250)));
+    const defaultH = Math.max(80, Math.round(availW * DEFAULT_ASPECT));
+    wrap.style.height = `${defaultH}px`;
+
+    // placeholder image fills the wrapper (positioned absolute by CSS)
     const placeholder = document.createElement("img");
     placeholder.src = "images/loading.gif";
     placeholder.alt = "Loading...";
     placeholder.className = "loading-placeholder";
     placeholder.draggable = false;
+    wrap.appendChild(placeholder);
 
-    // ensure still current before appending placeholder
-    if (expectedLoadId !== currentLoadId) {
-      resolve(false);
-      return;
-    }
-    card.appendChild(placeholder);
-    gallery.appendChild(card);
+    // set initial grid-row span for the placeholder so layout forms into columns
+    const grid = document.querySelector(".gallery");
+    const rowHeight = parseInt(window.getComputedStyle(grid).getPropertyValue("grid-auto-rows") || "10");
+    const rowGap = parseInt(window.getComputedStyle(grid).getPropertyValue("gap") || "10");
+    const initialRowSpan = Math.max(1, Math.ceil((defaultH + rowGap) / (rowHeight + rowGap)));
+    card.style.gridRowEnd = `span ${initialRowSpan}`;
 
     // real image object
     const img = new Image();
@@ -334,59 +343,42 @@ function loadImageWithPlaceholder(meta, expectedLoadId) {
     img.className = "gallery-image hidden";
     img.draggable = false;
 
-    // hook click (modal) — will work after load
     img.addEventListener("click", () => openModal(meta));
 
-    // when loaded: replace placeholder, show image, compute grid span
     img.addEventListener("load", () => {
-      // if a newer run started, don't append anything; just resolve
       if (expectedLoadId !== currentLoadId) {
-        // cleanup created nodes if still in DOM
         if (card.parentNode === gallery) gallery.removeChild(card);
         resolve(false);
         return;
       }
 
-      // remove placeholder
-      placeholder.remove();
+      // compute final height from intrinsic ratio using wrapper width
+      const finalH = getRenderedImageHeight(img, wrap.clientWidth) || defaultH;
+      wrap.style.height = `${finalH}px`;
 
-      // create a wrapper that keeps layout size stable
-      const wrap = document.createElement("div");
-      wrap.className = "image-wrap";
-
-      // compute height from intrinsic ratio using the card's current width (which equals wrapper width)
-      // temporarily append wrapper invisibly to measure width if needed
-      wrap.style.width = "100%";
-      card.appendChild(wrap);
-      // width available for the image equals wrap.clientWidth (or card.clientWidth)
-      const availW = wrap.clientWidth || card.clientWidth || parseInt(window.getComputedStyle(document.querySelector(".gallery") || document.body).getPropertyValue("min-width")) || 250;
-      const computedHeight = getRenderedImageHeight(img, availW) || 150;
-      wrap.style.height = `${computedHeight}px`;
-
-      // attach the image into the wrapper (img is absolutely positioned by CSS)
+      // swap in the image (it is absolutely positioned and will fill the wrapper)
       img.classList.remove("hidden");
       img.classList.add("fade-in");
+      // remove placeholder only after image is ready to avoid flicker
+      placeholder.remove();
       wrap.appendChild(img);
 
-      // compute grid-row span reliably on next frame using wrapper height
+      // set final grid-row span and mark loaded so hover becomes active
       requestAnimationFrame(() => {
-        const grid = document.querySelector(".gallery");
-        const rowHeight = parseInt(window.getComputedStyle(grid).getPropertyValue("grid-auto-rows") || "10");
-        const rowGap = parseInt(window.getComputedStyle(grid).getPropertyValue("gap") || "10");
-        const height = wrap.getBoundingClientRect().height;
-        const rowSpan = Math.max(1, Math.ceil((height + rowGap) / (rowHeight + rowGap)));
+        const rowSpan = Math.max(1, Math.ceil((finalH + rowGap) / (rowHeight + rowGap)));
         card.style.gridRowEnd = `span ${rowSpan}`;
+        wrap.classList.add("loaded"); // enables hover visual effect
         resolve(true);
       });
     });
 
     img.addEventListener("error", () => {
-      // if a newer run started, just resolve
       if (expectedLoadId !== currentLoadId) {
         if (card.parentNode === gallery) gallery.removeChild(card);
         resolve(false);
         return;
       }
+      // show a small error placeholder while preserving layout
       placeholder.src = "images/error.png";
       resolve(true);
     });
@@ -427,19 +419,19 @@ function resizeAllMasonryItems() {
   const rowHeight = parseInt(window.getComputedStyle(grid).getPropertyValue("grid-auto-rows") || "10");
   const rowGap = parseInt(window.getComputedStyle(grid).getPropertyValue("gap") || "10");
 
-  document.querySelectorAll(".card, .ad-card").forEach(item => {
+  // batch DOM reads & writes in one loop to reduce layout thrash
+  const items = Array.from(document.querySelectorAll(".card, .ad-card"));
+  items.forEach(item => {
     const wrap = item.querySelector(".image-wrap");
     const img = item.querySelector(".gallery-image");
 
     if (!img || !wrap) {
-      // keep ad-cards default
       item.style.gridRowEnd = null;
       return;
     }
 
-    // recompute wrapper height from intrinsic ratio using current wrapper width
     const availW = wrap.clientWidth || item.clientWidth || 0;
-    const height = getRenderedImageHeight(img, availW) || rowHeight;
+    const height = getRenderedImageHeight(img, availW) || (availW * DEFAULT_ASPECT) || rowHeight;
     wrap.style.height = `${height}px`;
 
     const rowSpan = Math.max(1, Math.ceil((height + rowGap) / (rowHeight + rowGap)));
