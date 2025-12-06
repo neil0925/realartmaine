@@ -147,11 +147,12 @@ footer hr { border:none; border-top:1px solid #aaa; margin:10px 0; }
   transform: translateZ(0);
 }
 
-/* Hover pop-out: scales smoothly in all directions, doesn't change layout */
+/* Hover pop-out: scales smoothly in all directions, doesn't change layout
+   -> increased scale for a more noticeable effect */
 .gallery-image:hover {
-  transform: scale(1.12) translateZ(0);
+  transform: scale(1.18) translateZ(0); /* stronger pop-out */
   z-index: 40; /* float above neighbors while hovered */
-  box-shadow: 0 18px 36px rgba(0,0,0,0.48);
+  box-shadow: 0 22px 44px rgba(0,0,0,0.52);
 }
 
 /* fade-in animation for images when they finish loading */

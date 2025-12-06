@@ -343,7 +343,8 @@ function loadImageWithPlaceholder(meta, expectedLoadId) {
         const grid = document.querySelector(".gallery");
         const rowHeight = parseInt(window.getComputedStyle(grid).getPropertyValue("grid-auto-rows") || "10");
         const rowGap = parseInt(window.getComputedStyle(grid).getPropertyValue("gap") || "10");
-        const height = img.getBoundingClientRect().height;
+        // use the helper so transforms (hover/animation) don't change measured height
+        const height = getRenderedImageHeight(img);
         const rowSpan = Math.max(1, Math.ceil((height + rowGap) / (rowHeight + rowGap)));
         card.style.gridRowEnd = `span ${rowSpan}`;
         resolve(true);
@@ -390,6 +391,20 @@ if (searchInput) {
   searchInput.addEventListener("input", (e) => filterGallery(e.target.value));
 }
 
+// compute the rendered height of an image using its intrinsic aspect ratio
+// so we don't measure transformed sizes (which can vary during hover/animation)
+function getRenderedImageHeight(img) {
+  if (!img) return 0;
+  const cw = img.clientWidth || 0;
+  // prefer natural sizes to compute consistent height (unaffected by CSS transforms)
+  if (img.naturalWidth && img.naturalHeight) {
+    return (cw * img.naturalHeight) / img.naturalWidth;
+  }
+  // fallback to bounding rect if intrinsics are unavailable
+  const rect = img.getBoundingClientRect();
+  return rect.height || 0;
+}
+
 // masonry resize helper
 function resizeAllMasonryItems() {
   const grid = document.querySelector(".gallery");
@@ -404,7 +419,8 @@ function resizeAllMasonryItems() {
       item.style.gridRowEnd = null;
       return;
     }
-    const height = img.getBoundingClientRect().height || rowHeight;
+    // use intrinsic-based rendered height (stable during hover/transform)
+    const height = getRenderedImageHeight(img) || rowHeight;
     const rowSpan = Math.max(1, Math.ceil((height + rowGap) / (rowHeight + rowGap)));
     item.style.gridRowEnd = `span ${rowSpan}`;
   });
