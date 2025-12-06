@@ -120,37 +120,41 @@ footer hr { border:none; border-top:1px solid #aaa; margin:10px 0; }
   border-radius: 6px;
 }
 
-/* placeholder while loading (does NOT scale on hover) */
-.loading-placeholder {
-  width:100%;
-  display:block;
-  object-fit:cover;
-  border-radius:6px;
-  opacity:.85;
-  pointer-events: none; /* ensure not interactive */
+/* wrapper that holds the image and provides the layout height.
+   The wrapper's height is set by JS based on image intrinsic ratio.
+   The inner img is absolutely positioned so enlarging it won't affect layout. */
+.image-wrap {
+  position: relative;
+  width: 100%;
+  overflow: visible; /* allow inner img to grow outside without affecting grid size */
+  border-radius: 6px;
 }
 
-/* gallery images - loaded images only */
+/* gallery images - loaded images only
+   NOTE: when inside .image-wrap the image is absolutely positioned and sized to 100% of wrapper.
+*/
 .gallery-image {
-  width:100%;
-  height:auto;
-  display:block;
-  border-radius:6px;
-  cursor:pointer;
-  transition: transform .26s cubic-bezier(.2,.9,.3,1), box-shadow .26s ease;
-  will-change: transform;
-  position: relative;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: top .22s ease, left .22s ease, width .22s ease, height .22s ease, box-shadow .22s ease;
+  will-change: top, left, width, height;
   z-index: 1;
   backface-visibility: hidden;
-  transform-origin: center center; /* expand equally in all directions */
-  /* GPU hint to ensure smoother scaling */
-  transform: translateZ(0);
 }
 
-/* Hover pop-out: scales smoothly in all directions, doesn't change layout
-   -> increased scale for a more noticeable effect */
-.gallery-image:hover {
-  transform: scale(1.18) translateZ(0); /* stronger pop-out */
+/* Hover pop-out: grow exactly 5px on each side visually while keeping wrapper size */
+.image-wrap:hover .gallery-image {
+  top: -5px;
+  left: -5px;
+  width: calc(100% + 10px);
+  height: calc(100% + 10px);
   z-index: 40; /* float above neighbors while hovered */
   box-shadow: 0 22px 44px rgba(0,0,0,0.52);
 }

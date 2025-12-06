@@ -287,6 +287,20 @@ async function loadImagesSequentially(list) {
   if (myLoadId === currentLoadId) resizeAllMasonryItems();
 }
 
+// compute the rendered height of an image using its intrinsic aspect ratio
+// so we don't measure transformed sizes (which can vary during hover/animation)
+function getRenderedImageHeight(img, availableWidth) {
+  if (!img) return 0;
+  // prefer natural sizes to compute consistent height (unaffected by CSS transforms)
+  const cw = typeof availableWidth === "number" ? availableWidth : (img.clientWidth || 0);
+  if (img.naturalWidth && img.naturalHeight && cw > 0) {
+    return (cw * img.naturalHeight) / img.naturalWidth;
+  }
+  // fallback to bounding rect if intrinsics are unavailable
+  const rect = img.getBoundingClientRect();
+  return rect.height || 0;
+}
+
 function loadImageWithPlaceholder(meta, expectedLoadId) {
   return new Promise((resolve) => {
     // If run already obsolete, resolve quickly
@@ -333,18 +347,33 @@ function loadImageWithPlaceholder(meta, expectedLoadId) {
         return;
       }
 
+      // remove placeholder
       placeholder.remove();
+
+      // create a wrapper that keeps layout size stable
+      const wrap = document.createElement("div");
+      wrap.className = "image-wrap";
+
+      // compute height from intrinsic ratio using the card's current width (which equals wrapper width)
+      // temporarily append wrapper invisibly to measure width if needed
+      wrap.style.width = "100%";
+      card.appendChild(wrap);
+      // width available for the image equals wrap.clientWidth (or card.clientWidth)
+      const availW = wrap.clientWidth || card.clientWidth || parseInt(window.getComputedStyle(document.querySelector(".gallery") || document.body).getPropertyValue("min-width")) || 250;
+      const computedHeight = getRenderedImageHeight(img, availW) || 150;
+      wrap.style.height = `${computedHeight}px`;
+
+      // attach the image into the wrapper (img is absolutely positioned by CSS)
       img.classList.remove("hidden");
       img.classList.add("fade-in");
-      card.appendChild(img);
+      wrap.appendChild(img);
 
-      // compute row span reliably on next frame
+      // compute grid-row span reliably on next frame using wrapper height
       requestAnimationFrame(() => {
         const grid = document.querySelector(".gallery");
         const rowHeight = parseInt(window.getComputedStyle(grid).getPropertyValue("grid-auto-rows") || "10");
         const rowGap = parseInt(window.getComputedStyle(grid).getPropertyValue("gap") || "10");
-        // use the helper so transforms (hover/animation) don't change measured height
-        const height = getRenderedImageHeight(img);
+        const height = wrap.getBoundingClientRect().height;
         const rowSpan = Math.max(1, Math.ceil((height + rowGap) / (rowHeight + rowGap)));
         card.style.gridRowEnd = `span ${rowSpan}`;
         resolve(true);
@@ -391,20 +420,6 @@ if (searchInput) {
   searchInput.addEventListener("input", (e) => filterGallery(e.target.value));
 }
 
-// compute the rendered height of an image using its intrinsic aspect ratio
-// so we don't measure transformed sizes (which can vary during hover/animation)
-function getRenderedImageHeight(img) {
-  if (!img) return 0;
-  const cw = img.clientWidth || 0;
-  // prefer natural sizes to compute consistent height (unaffected by CSS transforms)
-  if (img.naturalWidth && img.naturalHeight) {
-    return (cw * img.naturalHeight) / img.naturalWidth;
-  }
-  // fallback to bounding rect if intrinsics are unavailable
-  const rect = img.getBoundingClientRect();
-  return rect.height || 0;
-}
-
 // masonry resize helper
 function resizeAllMasonryItems() {
   const grid = document.querySelector(".gallery");
@@ -413,14 +428,20 @@ function resizeAllMasonryItems() {
   const rowGap = parseInt(window.getComputedStyle(grid).getPropertyValue("gap") || "10");
 
   document.querySelectorAll(".card, .ad-card").forEach(item => {
-    const img = item.querySelector("img");
-    if (!img) {
+    const wrap = item.querySelector(".image-wrap");
+    const img = item.querySelector(".gallery-image");
+
+    if (!img || !wrap) {
       // keep ad-cards default
       item.style.gridRowEnd = null;
       return;
     }
-    // use intrinsic-based rendered height (stable during hover/transform)
-    const height = getRenderedImageHeight(img) || rowHeight;
+
+    // recompute wrapper height from intrinsic ratio using current wrapper width
+    const availW = wrap.clientWidth || item.clientWidth || 0;
+    const height = getRenderedImageHeight(img, availW) || rowHeight;
+    wrap.style.height = `${height}px`;
+
     const rowSpan = Math.max(1, Math.ceil((height + rowGap) / (rowHeight + rowGap)));
     item.style.gridRowEnd = `span ${rowSpan}`;
   });
