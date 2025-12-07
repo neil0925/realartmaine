@@ -147,10 +147,13 @@ let imagesList = [
 // remove exact-duplicate paths while preserving first occurrence order
 imagesList = Array.from(new Set(imagesList.map(s => s.trim())));
 
+// <-- ADDITION: ensure DOM refs and load token exist before any function runs -->
 const gallery = document.getElementById("galleryContainer");
 const searchInput = document.getElementById("searchInput");
+// load-run token used to cancel obsolete loads
+let currentLoadId = 0;
+// <-- end addition -->
 
-// provide default aspect ratio used for placeholders and fallbacks
 const DEFAULT_ASPECT = 0.66;
 
 // ----------------- CHANGES START -----------------
