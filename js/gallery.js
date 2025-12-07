@@ -314,12 +314,17 @@ async function loadImagesSequentially(list) {
     const defaultH = Math.max(80, Math.round(columnWidth * DEFAULT_ASPECT));
     wrap.style.height = `${defaultH}px`;
 
-    // placeholder image fills the wrapper (positioned absolute by CSS)
-    const placeholder = document.createElement("img");
-    placeholder.src = "images/loading.gif";
-    placeholder.alt = "Loading...";
-    placeholder.className = "loading-placeholder";
-    placeholder.draggable = false;
+    // placeholder wrapper fills the wrapper (contains gif or error text)
+    const placeholder = document.createElement("div");
+    placeholder.className = "placeholder-box";
+
+    const loadingImg = document.createElement("img");
+    loadingImg.src = "images/loading.gif";
+    loadingImg.alt = "Loading...";
+    loadingImg.className = "loading-placeholder-img";
+    loadingImg.draggable = false;
+
+    placeholder.appendChild(loadingImg);
     wrap.appendChild(placeholder);
 
     card.appendChild(wrap);
@@ -381,7 +386,9 @@ function loadImageIntoCard(meta, card, wrap, placeholder, expectedLoadId) {
 
       img.classList.remove("hidden");
       img.classList.add("fade-in");
+      // { changed code: remove placeholder wrapper if present }
       if (placeholder && placeholder.parentNode === wrap) placeholder.remove();
+      // { end changed code }
       wrap.appendChild(img);
 
       requestAnimationFrame(() => {
@@ -398,8 +405,24 @@ function loadImageIntoCard(meta, card, wrap, placeholder, expectedLoadId) {
         resolve(false);
         return;
       }
-      if (placeholder) placeholder.src = "images/error.png";
+      // { changed code: replace placeholder with filename text (basename) }
+      try {
+        const filename = (meta && meta.src) ? meta.src.split("/").pop() : "unknown";
+        const errEl = document.createElement("div");
+        errEl.className = "loading-error";
+        errEl.textContent = `Failed: ${filename}`;
+        if (placeholder && placeholder.parentNode === wrap) {
+          placeholder.replaceWith(errEl);
+        } else {
+          wrap.appendChild(errEl);
+        }
+      } catch (e) {
+        if (placeholder && placeholder.parentNode === wrap) {
+          placeholder.textContent = "Failed to load";
+        }
+      }
       resolve(true);
+      // { end changed code }
     });
 
     // only set src after handlers attached
