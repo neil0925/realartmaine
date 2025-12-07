@@ -283,8 +283,8 @@ async function loadImagesSequentially(list) {
   const grid = gallery;
   const gap = parseInt(window.getComputedStyle(grid).getPropertyValue("gap") || "10");
   const galleryWidth = Math.max(200, grid.clientWidth || document.documentElement.clientWidth);
-  // estimate number of columns based on min column width used in CSS (250px)
-  const minCol = 250;
+  // estimate number of columns based on min column width used in CSS (keep in sync)
+  const minCol = 180; // changed to match CSS minmax(180px, 1fr)
   const cols = Math.max(1, Math.floor((galleryWidth + gap) / (minCol + gap)));
   const columnWidth = Math.max(120, Math.floor((galleryWidth - (cols - 1) * gap) / cols));
 
@@ -358,7 +358,6 @@ function loadImageIntoCard(meta, card, wrap, placeholder, expectedLoadId) {
     }
 
     const img = new Image();
-    img.src = meta.src;
     img.alt = meta.rawBase;
     img.className = "gallery-image hidden";
     img.draggable = false;
@@ -369,6 +368,7 @@ function loadImageIntoCard(meta, card, wrap, placeholder, expectedLoadId) {
     const rowHeight = parseInt(window.getComputedStyle(grid).getPropertyValue("grid-auto-rows") || "10");
     const rowGap = parseInt(window.getComputedStyle(grid).getPropertyValue("gap") || "10");
 
+    // attach handlers BEFORE setting src to avoid race where load fires before handler attached
     img.addEventListener("load", () => {
       if (expectedLoadId !== currentLoadId) {
         if (card.parentNode === gallery) gallery.removeChild(card);
@@ -376,22 +376,18 @@ function loadImageIntoCard(meta, card, wrap, placeholder, expectedLoadId) {
         return;
       }
 
-      // compute final height from intrinsic ratio using wrapper's current width
       const finalH = getRenderedImageHeight(img, wrap.clientWidth) || parseInt(wrap.style.height) || 150;
       wrap.style.height = `${finalH}px`;
 
-      // swap in the image (it is absolutely positioned and will fill the wrapper)
       img.classList.remove("hidden");
       img.classList.add("fade-in");
-      // remove placeholder only after image is ready to avoid flicker
       if (placeholder && placeholder.parentNode === wrap) placeholder.remove();
       wrap.appendChild(img);
 
-      // set final grid-row span and mark loaded so hover becomes active
       requestAnimationFrame(() => {
         const rowSpan = Math.max(1, Math.ceil((finalH + rowGap) / (rowHeight + rowGap)));
         card.style.gridRowEnd = `span ${rowSpan}`;
-        wrap.classList.add("loaded"); // enables hover visual effect
+        wrap.classList.add("loaded");
         resolve(true);
       });
     });
@@ -402,10 +398,12 @@ function loadImageIntoCard(meta, card, wrap, placeholder, expectedLoadId) {
         resolve(false);
         return;
       }
-      // fallback: show small error placeholder while preserving layout
       if (placeholder) placeholder.src = "images/error.png";
       resolve(true);
     });
+
+    // only set src after handlers attached
+    img.src = meta.src;
   });
 }
 

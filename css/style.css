@@ -88,7 +88,7 @@ nav a:hover::after { width:100%; }
 #modeIcon { width:150px; height:130px; object-fit:contain; display:block; }
 
 /* Main and footer */
-main { padding:30px; max-width:1100px; margin:auto; flex:1; }
+main { padding:30px; /* allow gallery to use full width */ max-width: none; margin:auto; width:100%; flex:1; }
 main h1 { text-align:center; margin-bottom:20px; }
 main p { margin-bottom:14px; }
 
@@ -107,7 +107,7 @@ footer hr { border:none; border-top:1px solid #aaa; margin:10px 0; }
 /* Masonry / puzzle-style gallery */
 .gallery {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); /* changed from 250px -> 180px */
   grid-auto-rows: 10px; /* base row height (JS uses this) */
   gap: 10px;
   padding: 20px;
