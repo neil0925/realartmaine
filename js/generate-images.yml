@@ -1,0 +1,38 @@
+name: Generate images.json
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install dependencies (none required, but keep node available)
+        run: npm ci || true
+
+      - name: Run generator
+        run: node ./scripts/generate-images.js
+
+      - name: Commit generated images.json
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add images.json || true
+          if ! git diff --cached --quiet; then
+            git commit -m "chore: update images.json (automated)"
+            git push
+          else
+            echo "No changes to images.json"
+          fi
