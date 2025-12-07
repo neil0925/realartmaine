@@ -7,11 +7,16 @@
 */
 
 // ---------- Replace the static imagesList with an automatic fetch from GitHub ----------
-// Optional: if the fetch fails we fall back to a small manual list (or you can keep your big list here)
 let imagesList = [
   // fallback minimal example (keeps behavior if API fails). You can leave this empty.
   "images/placeholder.jpg"
 ];
+
+// <-- ADDITION: ensure DOM refs and load token exist before any function runs -->
+const gallery = document.getElementById("galleryContainer");
+const searchInput = document.getElementById("searchInput");
+let currentLoadId = 0;
+// <-- end addition -->
 
 // Configure these values for your repo (update to your GitHub account/repo/branch)
 const GITHUB_OWNER = "YOUR_GITHUB_USERNAME";
@@ -22,6 +27,12 @@ const IMAGES_DIR    = "images";
 // Try to list images from the GitHub repo using the Contents API (public repos only)
 async function fetchImagesFromGitHub() {
   try {
+    // If user has not configured owner/repo, skip the API call to avoid 404 spam
+    if (!GITHUB_OWNER || GITHUB_OWNER.includes("YOUR_") || !GITHUB_REPO || GITHUB_REPO.includes("YOUR_")) {
+      console.info("fetchImagesFromGitHub: GITHUB_OWNER/GITHUB_REPO not configured; skipping API call.");
+      return null;
+    }
+
     const apiUrl = `https://api.github.com/repos/${encodeURIComponent(GITHUB_OWNER)}/${encodeURIComponent(GITHUB_REPO)}/contents/${encodeURIComponent(IMAGES_DIR)}?ref=${encodeURIComponent(GITHUB_BRANCH)}`;
     const res = await fetch(apiUrl);
     if (!res.ok) {
@@ -34,10 +45,7 @@ async function fetchImagesFromGitHub() {
     // Keep only files with image extensions, build raw.githubusercontent URLs
     const imgs = items
       .filter(f => f.type === "file" && /\.(jpe?g|png|gif|webp|bmp|svg)$/i.test(f.name))
-      .map(f => {
-        // raw URL for direct access
-        return `https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/${GITHUB_BRANCH}/${IMAGES_DIR}/${encodeURIComponent(f.name)}`;
-      });
+      .map(f => `https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/${GITHUB_BRANCH}/${IMAGES_DIR}/${encodeURIComponent(f.name)}`);
 
     if (imgs.length === 0) return null;
     return imgs;
@@ -436,6 +444,5 @@ function resizeAllMasonryItems() {
 }
 
 // start
-document.addEventListener("DOMContentLoaded", () => loadImagesSequentially(imagesList));
 window.addEventListener("resize", () => requestAnimationFrame(resizeAllMasonryItems));
 window.addEventListener("load", resizeAllMasonryItems);
