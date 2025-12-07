@@ -329,11 +329,23 @@ async function loadImagesSequentially(list) {
 
   // Phase B: sequentially load real images into existing cards — strictly one at a time
   let loadedCount = 0;
+  // mark the first placeholder active so single spinner shows
+  if (cards.length > 0 && cards[0].placeholder) cards[0].placeholder.classList.add("active");
+
   for (let i = 0; i < cards.length; i++) {
     if (myLoadId !== currentLoadId) return;
     const { meta, card, wrap, placeholder } = cards[i];
     const ok = await loadImageIntoCard(meta, card, wrap, placeholder, myLoadId);
     if (myLoadId !== currentLoadId) return;
+
+    // ensure this placeholder is no longer active (spinner moves)
+    if (placeholder && placeholder.classList.contains("active")) {
+      placeholder.classList.remove("active");
+    }
+    // activate next placeholder (single spinner moves forward)
+    if (i + 1 < cards.length && cards[i + 1].placeholder) {
+      cards[i + 1].placeholder.classList.add("active");
+    }
 
     // only count as "loaded" if ok was true (load succeeded or error handled)
     loadedCount++;
@@ -357,8 +369,7 @@ async function loadImagesSequentially(list) {
       } else {
         gallery.appendChild(ad);
       }
-      // ensure grid recalculation (small, local update)
-      // No heavy full resize every insertion — just compute rows for the ad is already set.
+      // small local update; full recalculation will run at the end
     }
   }
 
@@ -398,9 +409,12 @@ function loadImageIntoCard(meta, card, wrap, placeholder, expectedLoadId) {
 
       img.classList.remove("hidden");
       img.classList.add("fade-in");
-      // { changed code: remove placeholder wrapper if present }
-      if (placeholder && placeholder.parentNode === wrap) placeholder.remove();
-      // { end changed code }
+
+      // remove placeholder wrapper if present
+      if (placeholder && placeholder.parentNode === wrap) {
+        // remove placeholder (spinner won't show because active removed by loop)
+        placeholder.remove();
+      }
       wrap.appendChild(img);
 
       requestAnimationFrame(() => {
@@ -417,7 +431,7 @@ function loadImageIntoCard(meta, card, wrap, placeholder, expectedLoadId) {
         resolve(false);
         return;
       }
-      // { changed code: replace placeholder with filename text (basename) }
+      // replace placeholder with filename text (basename)
       try {
         const filename = (meta && meta.src) ? meta.src.split("/").pop() : "unknown";
         const errEl = document.createElement("div");
@@ -433,8 +447,8 @@ function loadImageIntoCard(meta, card, wrap, placeholder, expectedLoadId) {
           placeholder.textContent = "Failed to load";
         }
       }
+      // ensure wrap height remains reasonable (keep default set earlier)
       resolve(true);
-      // { end changed code }
     });
 
     // only set src after handlers attached
@@ -479,18 +493,40 @@ function resizeAllMasonryItems() {
   // batch DOM reads & writes in one loop to reduce layout thrash
   const items = Array.from(document.querySelectorAll(".card, .ad-card"));
   items.forEach(item => {
+    // handle ad-cards specially: compute its height and set row span (do not nullify)
+    if (item.classList.contains("ad-card")) {
+      const h = item.getBoundingClientRect().height || 140;
+      const adRowSpan = Math.max(1, Math.ceil((h + rowGap) / (rowHeight + rowGap)));
+      item.style.gridRowEnd = `span ${adRowSpan}`;
+      return;
+    }
+
     const wrap = item.querySelector(".image-wrap");
     const img = item.querySelector(".gallery-image");
+    const err = item.querySelector(".loading-error");
 
-    if (!img || !wrap) {
+    if (!wrap) {
+      // fallback: nothing to size
       item.style.gridRowEnd = null;
       return;
     }
 
-    const availW = wrap.clientWidth || item.clientWidth || 0;
-    const height = getRenderedImageHeight(img, availW) || (availW * DEFAULT_ASPECT) || rowHeight;
-    wrap.style.height = `${height}px`;
+    // Determine height:
+    // - If image exists: use intrinsic-based rendered height
+    // - Else if error exists: use wrap's rendered height (it was set earlier or based on default)
+    // - Else fallback to current wrap height or default aspect ratio
+    let height = 0;
+    if (img) {
+      const availW = wrap.clientWidth || item.clientWidth || 0;
+      height = getRenderedImageHeight(img, availW) || (availW * DEFAULT_ASPECT) || rowHeight;
+    } else if (err) {
+      height = wrap.getBoundingClientRect().height || rowHeight;
+    } else {
+      height = wrap.getBoundingClientRect().height || (wrap.clientWidth * DEFAULT_ASPECT) || rowHeight;
+    }
 
+    // apply height and row span
+    wrap.style.height = `${height}px`;
     const rowSpan = Math.max(1, Math.ceil((height + rowGap) / (rowHeight + rowGap)));
     item.style.gridRowEnd = `span ${rowSpan}`;
   });
