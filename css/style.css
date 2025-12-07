@@ -111,6 +111,12 @@ footer hr { border:none; border-top:1px solid #aaa; margin:10px 0; }
   grid-auto-rows: 10px; /* base row height (JS uses this) */
   gap: 10px;
   padding: 20px;
+
+  /* Ensure grid auto-flow is row-based and items stretch to column width */
+  grid-auto-flow: row;
+  justify-items: stretch;
+  align-items: start;
+  width: 100%;
 }
 
 /* card must allow overflow so hovered image can pop out above neighbors */
@@ -118,12 +124,17 @@ footer hr { border:none; border-top:1px solid #aaa; margin:10px 0; }
   position: relative;
   overflow: visible;    /* important: allow hover to grow outside box */
   border-radius: 6px;
+  /* ensure the card fills the grid column width */
+  display: block;
+  width: 100%;
+  align-self: start;
 }
 
 /* wrapper that holds the image and provides the layout height. */
 .image-wrap {
   position: relative;
   width: 100%;
+  display: block; /* ensure it occupies column width */
   overflow: visible; /* allow inner img to grow outside without affecting grid size */
   border-radius: 6px;
   /* while loading, prevent hover visual effect until JS marks it loaded */
