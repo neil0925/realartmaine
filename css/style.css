@@ -192,16 +192,7 @@ footer hr { border:none; border-top:1px solid #aaa; margin:10px 0; }
 /* hidden while loading (no hover, no clicks) */
 .gallery-image.hidden { display:none; pointer-events:none; }
 
-/* ad card */
-.ad-card {
-  background:#f8f8f8; border:2px dashed #ccc;
-  display:flex; justify-content:center; align-items:center;
-  color:#666; font-style:italic; border-radius:6px; min-height:140px;
-  position: relative;   /* ensure it creates a stacking context */
-  z-index: 1000;        /* keep ads visually above images */
-}
-
-/* placeholder wrapper (contains loading gif or error text) */
+/* placeholder wrapper (contains CSS spinner or error text) */
 .placeholder-box {
   position: absolute;
   inset: 0;
@@ -209,40 +200,50 @@ footer hr { border:none; border-top:1px solid #aaa; margin:10px 0; }
   align-items: center;
   justify-content: center;
   border-radius: 6px;
-  background: #fafafa; /* subtle background while loading */
+  background: transparent; /* transparent so no white framed box */
   color: #666;
   font-size: 0.95rem;
   text-align: center;
   padding: 6px;
+  z-index: 1000; /* ensure placeholder/error sit above images */
 }
 
-/* internal loading gif (kept contained) */
-.loading-placeholder-img {
-  max-width: 50%;
-  max-height: 50%;
-  object-fit: contain;
-  opacity: .9;
-  pointer-events: none;
+/* small CSS spinner (transparent background) */
+.spinner {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 3px solid rgba(0,0,0,0.12);
+  border-top-color: rgba(0,0,0,0.48);
+  animation: spin 0.9s linear infinite;
+  display:block;
 }
+@keyframes spin { to { transform: rotate(360deg); } }
 
-/* error state shows filename clearly */
+/* error state shows filename clearly and sits above images */
 .loading-error {
   padding: 6px 8px;
   font-size: 0.9rem;
   color: #a33;
-  background: rgba(255,255,255,0.9);
+  background: rgba(255,255,255,0.95);
   border-radius: 4px;
   box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  z-index: 1000;
 }
 
-/* Modal / lightbox */
-.modal-backdrop {
-  position:fixed; inset:0; display:flex; justify-content:center; align-items:center;
-  background: rgba(0,0,0,.65); z-index:1100; padding:16px;
+/* ad card — ensure it occupies grid and visually sits above images (prevents images overlapping) */
+.ad-card {
+  background:#f8f8f8; border:2px dashed #ccc;
+  display:flex; justify-content:center; align-items:center;
+  color:#666; font-style:italic; border-radius:6px; min-height:140px;
+  position: relative;
+  z-index: 1100; /* above images and placeholders */
 }
-.modal { background:#fff; border-radius:8px; padding:12px; max-width:92%; max-height:92%; overflow:hidden; box-shadow: 0 18px 50px rgba(0,0,0,.6); }
-.modal img { display:block; max-width:100%; max-height:80vh; width:auto; height:auto; border-radius:6px; margin-bottom:8px; }
-.caption { font-size:.95rem; color:#111; opacity:.95; }
+
+/* ensure gallery images still sit below ad/error when hovered */
+.gallery-image { z-index: 1; }
+/* hover pop-out remains but below ad/error */
+.image-wrap.loaded:hover .gallery-image { z-index: 40; }
 
 /* responsive tweaks */
 @media (max-width:600px) {

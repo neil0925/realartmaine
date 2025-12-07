@@ -284,23 +284,14 @@ async function loadImagesSequentially(list) {
   const gap = parseInt(window.getComputedStyle(grid).getPropertyValue("gap") || "10");
   const galleryWidth = Math.max(200, grid.clientWidth || document.documentElement.clientWidth);
   // estimate number of columns based on min column width used in CSS (keep in sync)
-  const minCol = 180; // changed to match CSS minmax(180px, 1fr)
+  const minCol = 180; // match CSS
   const cols = Math.max(1, Math.floor((galleryWidth + gap) / (minCol + gap)));
   const columnWidth = Math.max(120, Math.floor((galleryWidth - (cols - 1) * gap) / cols));
 
-  // Phase A: create all cards+placeholders synchronously
+  // Phase A: create all image cards+placeholders synchronously (NO ads here)
   const cards = [];
   for (let i = 0; i < list.length; i++) {
     if (myLoadId !== currentLoadId) return;
-
-    // add ad card every 10 items (keep existing behavior)
-    if (i > 0 && i % 10 === 0) {
-      const ad = document.createElement("div");
-      ad.className = "ad-card";
-      ad.textContent = "Ad / Featured";
-      gallery.appendChild(ad);
-      // ad occupies its spot, but we don't add to cards array
-    }
 
     const meta = parseFilename(list[i]);
 
@@ -314,19 +305,15 @@ async function loadImagesSequentially(list) {
     const defaultH = Math.max(80, Math.round(columnWidth * DEFAULT_ASPECT));
     wrap.style.height = `${defaultH}px`;
 
-    // placeholder wrapper fills the wrapper (contains gif or error text)
+    // placeholder wrapper (CSS spinner, not an img)
     const placeholder = document.createElement("div");
     placeholder.className = "placeholder-box";
 
-    const loadingImg = document.createElement("img");
-    loadingImg.src = "images/loading.gif";
-    loadingImg.alt = "Loading...";
-    loadingImg.className = "loading-placeholder-img";
-    loadingImg.draggable = false;
+    const spinner = document.createElement("div");
+    spinner.className = "spinner";
+    placeholder.appendChild(spinner);
 
-    placeholder.appendChild(loadingImg);
     wrap.appendChild(placeholder);
-
     card.appendChild(wrap);
     gallery.appendChild(card);
 
@@ -340,17 +327,42 @@ async function loadImagesSequentially(list) {
     cards.push({ meta, card, wrap, placeholder });
   }
 
-  // Phase B: sequentially load real images into existing cards
+  // Phase B: sequentially load real images into existing cards — strictly one at a time
+  let loadedCount = 0;
   for (let i = 0; i < cards.length; i++) {
     if (myLoadId !== currentLoadId) return;
     const { meta, card, wrap, placeholder } = cards[i];
-    // load into the existing card; this function updates wrap height and span
     const ok = await loadImageIntoCard(meta, card, wrap, placeholder, myLoadId);
     if (myLoadId !== currentLoadId) return;
-    // continue to next image
+
+    // only count as "loaded" if ok was true (load succeeded or error handled)
+    loadedCount++;
+    // insert ad only when loadedCount hits the interval (e.g. every 10 loaded items)
+    const AD_INTERVAL = 10;
+    if (loadedCount > 0 && loadedCount % AD_INTERVAL === 0) {
+      // compute ad row span using same rowHeight/rowGap logic
+      const rowHeight = parseInt(window.getComputedStyle(grid).getPropertyValue("grid-auto-rows") || "10");
+      const rowGap = parseInt(window.getComputedStyle(grid).getPropertyValue("gap") || "10");
+      const adMinH = 140; // should match CSS min-height
+      const adRowSpan = Math.max(1, Math.ceil((adMinH + rowGap) / (rowHeight + rowGap)));
+
+      const ad = document.createElement("div");
+      ad.className = "ad-card";
+      ad.textContent = "Ad / Featured";
+      ad.style.gridRowEnd = `span ${adRowSpan}`;
+
+      // insert ad into DOM directly after the card for the loadedCount-th item
+      if (card && card.parentNode) {
+        card.parentNode.insertBefore(ad, card.nextSibling);
+      } else {
+        gallery.appendChild(ad);
+      }
+      // ensure grid recalculation (small, local update)
+      // No heavy full resize every insertion — just compute rows for the ad is already set.
+    }
   }
 
-  // final layout correction
+  // final layout correction (one final pass)
   if (myLoadId === currentLoadId) resizeAllMasonryItems();
 }
 
