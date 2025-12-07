@@ -107,7 +107,7 @@ footer hr { border:none; border-top:1px solid #aaa; margin:10px 0; }
 /* Masonry / puzzle-style gallery */
 .gallery {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   grid-auto-rows: 10px; /* base row height (JS uses this) */
   gap: 10px;
   padding: 20px;
@@ -128,6 +128,8 @@ footer hr { border:none; border-top:1px solid #aaa; margin:10px 0; }
   display: block;
   width: 100%;
   align-self: start;
+  /* allow the card to shrink inside the grid column (prevents forcing one column) */
+  min-width: 0;
 }
 
 /* wrapper that holds the image and provides the layout height. */
@@ -137,6 +139,8 @@ footer hr { border:none; border-top:1px solid #aaa; margin:10px 0; }
   display: block; /* ensure it occupies column width */
   overflow: visible; /* allow inner img to grow outside without affecting grid size */
   border-radius: 6px;
+  /* allow shrink */
+  min-width: 0;
   /* while loading, prevent hover visual effect until JS marks it loaded */
 }
 
