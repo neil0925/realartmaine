@@ -234,63 +234,59 @@ footer hr { border:none; border-top:1px solid #aaa; margin:10px 0; }
 .loading-error { z-index: 1000; }
 .ad-card { z-index: 1100; }
 
-/* Modal / Spotlight (match JS usage: .modal + <img> + .caption) */
+/* Modal / Spotlight — constrained to viewport with internal scrolling */
 .modal {
-  /* make modal width content-driven but bounded, reduce padding for snug frame */
-  width: auto;               /* allow content to determine width */
-  max-width: 92vw;          /* still constrain to viewport */
-  max-width: min(920px, 92vw); /* cap absolute size for large screens */
-  padding: 6px;             /* tighter padding */
+  box-sizing: border-box;
+  width: auto;
+  /* always keep a comfortable margin from the viewport edges */
+  max-width: min(840px, calc(100vw - 48px));
+  max-height: calc(100vh - 48px);
+  padding: 8px;                /* snug padding */
   border-radius: 8px;
-  gap: 6px;                 /* small gap between elements */
+  gap: 8px;
   box-shadow: 0 14px 36px rgba(0,0,0,0.55);
   display: flex;
   flex-direction: column;
-  overflow: hidden;
-  align-items: stretch;     /* let content fill available modal width */
+  overflow: auto;              /* scroll inside modal if content is too tall */
+  align-items: stretch;
+  background: inherit;         /* respects dark-mode background */
 }
-body.dark-mode .modal { background: #111; color: #eee; }
 
-.modal-title {
-  font-weight: 700;
-  font-size: 1.05rem;       /* slightly smaller */
-  text-align: center;
-  padding: 0 6px;           /* less vertical padding */
-  margin-top: 2px;
-  margin-bottom: 2px;
-  word-break: break-word;
-}
+/* Title + meta stay tight to the image */
+.modal-title { padding: 0 6px; font-size: 1.02rem; margin: 2px 0; }
+.modal-meta  { padding: 0 6px 6px 6px; gap:4px; }
 
 .modal-imgwrap {
-  /* remove extra horizontal padding so image hugs the sides */
   padding: 0;
-  max-height: calc(66vh);   /* reduce to fit snugly with metadata */
-  display:flex;
-  justify-content:center;
-  align-items:center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /* reserve vertical space for title/meta; this prevents image from pushing modal off-screen */
+  max-height: calc(100vh - 220px);
+  overflow: hidden;
 }
 
-/* ensure modal image uses available content width but stays within viewport */
+/* ensure modal image never grows beyond the constrained modal area */
 .modal img,
 .modal .modal-image {
   max-width: 100%;
+  max-height: calc(100vh - 260px); /* slightly smaller than wrapper to leave room for text/padding */
+  width: auto;
   height: auto;
   object-fit: contain;
   display: block;
 }
 
-/* metadata lines beneath image: smaller and tighter */
-.modal-meta {
-  width: 100%;
-  display:flex;
-  flex-direction:column;
-  gap:4px;                  /* reduced gap */
-  font-size:0.92rem;        /* slightly smaller */
-  color: inherit;
-  padding: 0 6px 6px 6px;
+/* Backdrop padding keeps modal away from screen edges; responsive adjustments */
+.modal-backdrop {
+  padding: 20px; /* comfortable margin on desktop */
 }
-.modal-meta .meta-row { line-height:1.25; }
-.modal-meta .meta-filename { color: #666; font-size:0.82rem; }
+@media (max-width:600px) {
+  .modal-backdrop { padding: 10px; } /* smaller margin on small screens */
+  .modal { max-width: calc(100vw - 20px); max-height: calc(100vh - 20px); }
+  .modal-imgwrap { max-height: calc(100vh - 160px); }
+  .modal img, .modal .modal-image { max-height: calc(100vh - 180px); }
+}
 
 /* Slightly reduce backdrop padding so modal sits closer to edges on small screens */
 .modal-backdrop { padding: 8px; }
