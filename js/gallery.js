@@ -6,63 +6,62 @@
    - search filtering
 */
 
-// ---------- Images list (manual) ----------
 let imagesList = [
-  "images/catch, link, wake, hugo-OHK,PTG,LTB,5G-realartmaine-throwie, tag.jpg",
-  "images/same-SLT,TVT-realartmaine-tags.jpg",
-  "images/same-SLT,TVT-realartmaine-piece, staightletter.jpg",
-  "images/peck-SLF-realartmaine-throwie, bubble letter, hollow.jpg",
-  "images/salud-PTG-realartmaine-tags, character, hollow.jpg",
-  "images/salud-PTG-realartmaine-tags, hollow, character.jpg",
-  "images/bunt, some1-LG-realartmaine-stencil, tag.jpg",
-  "images/ankle-LTB,2K69-realartmaine-throwie, hollow .jpg",
-  "images/wake-LTB-realartmaine-fillin, throwie.jpg",
-  "images/SLT-SLT-realartmaine-paintroller.jpg",
-  "images/pest-realartmaine-throwie, bubble letter, hollow.jpg",
-  "images/rune-LTB,2K69-realartmaine-throwie, hollow, bubble letter.jpg",
-  "images/5G-5G-minnowfeed-straightletter, antistyle.JPG",
-  "images/qjoe, link-5G-realartmaine-antistyle, straightletter.jpg",
-  "images/link-5G,CRAFT-realartmaine-antistyle, piece.jpg",
-  "images/prizm, ruski, cats-realartmaine-paintroller.jpg",
-  "images/some1-realartmaine-stencil.jpg",
-  "images/owell-realartmaine-antistyle, throwie.jpg",
-  "images/owell-realartmaine-antistyle, throwie, fillin.jpg",
-  "images/same, catch-SLT,PTG,BNE,OHK-realartmaine-tags.jpg",
-  "images/sloan-BNE,PTG-realartmaine-throwie, hollow.jpg",
-  "images/zone-ZPLK-antistyle, wildstyle.JPG",
-  "images/vroom-ZPLK-piece, character.JPG",
-  "images/lufa-hex-ZPLK-tags, piece.JPG",
-  "images/nare-az-ZPLK-piece, character.JPG",
-  "images/wilt-2K69,VC-minnowfeed-blackbook.jpg",
-  "images/spek, segway, 27, port, melts, yalts-FTS,TSZ,CIRCLET,YME,IMS-minnowfeed-tags, moniker.JPG",
-  "images/segway-FTS-minnowfeed-throwie, hollow.JPG",
-  "images/same, catch-SLT,PTG,BNE,OHK-realartmaine-tag.jpg",
-  "images/same, 27, enya-SLT,TVT,TSZ,5G-minnowfeed-tags, stencil.jpg",
-  "images/rune-LTB,2K69-minnowfeed-piece, antistyle.JPG",
-  "images/rune, 27-LTB,2K69,TSZ,2GF-minnowfeed-throwie, fillin, antistyle.JPG",
-  "images/qjoe-5G,UK-minnowfeed-antistyle, piece.JPG",
-  "images/qjoe, link-5G-realartmaine-antistyle, straightletter.jpg",
-  "images/ojea3-HEX,OY!-minnowfeed-piece.JPG",
-  "images/ojea3-HEX,OY!-minnowfeed-tags.JPG",
-  "images/mobi-TSZ-minnowfeed-straightletter.JPG",
-  "images/lerk, link, obee-5G,OY!-minnowfeed-piece, paintroller.JPG",
-  "images/lerk, 27-2GF-minnowfeed-tags, stencil.JPG",
-  "images/kindbud-5G,SDH-minnowfeed-antistyle, piece.JPG",
-  "images/jumz-TSZ-minnowfeed-throwie, fillin, stencil.JPG",
-  "images/ichabod-YME,CIRLCET-minnowfeed-tag.jpg",
-  "images/grazi, 27-DWT,TSZ,2GF-minnowfeed-tags.JPG",
-  "images/gerv-YME-minnowfeed-piece.JPG",
-  "images/feer, scipio-2GF-minnowfeed-piece, tags, antistyle.jpg",
-  "images/catch-PTG,OHK,BNE-minnowfeed-tags, throwie, fillin.JPG",
-  "images/catch-BNE,PTG,OHK-minnowfeed-throwie, hollow.JPG",
-  "images/catch, secret, 27-BNE,PTG,OHK,5G,TSZ-minnowfeed-antistyle, stencil, blackbook.JPG",
-  "images/catch, link-5G,OHK,PTG,BNE-minnowfeed-throw.jpg",
-  "images/ankle-LTB,2K69-minnowfeed-throwie, fillin.JPG",
-  "images/ankle-2K69,LTB-minnowfeed-tags.JPG",
-  "images/LSE-LSE-minnowfeed-straightletter.jpg",
-  "images/2GF-realartmaine-tag.jpg",
-  "images/27-TSZ,2GF-realartmaine-throwie, antistyle.jpg",
-  "images/ankle-LTB,2K69-realartmaine-tags.jpg",
+	"images/catch, link, wake, hugo-OHK,PTG,LTB,5G-realartmaine-throwie, tag.jpg",
+	"images/same-SLT,TVT-realartmaine-tags.jpg",
+	"images/same-SLT,TVT-realartmaine-piece, staightletter.jpg",
+	"images/peck-SLF-realartmaine-throwie, bubble letter, hollow.jpg",
+	"images/salud-PTG-realartmaine-tags, character, hollow.jpg",
+	"images/salud-PTG-realartmaine-tags, hollow, character.jpg",
+	"images/bunt, some1-LG-realartmaine-stencil, tag.jpg",
+	"images/ankle-LTB,2K69-realartmaine-throwie, hollow .jpg",
+	"images/wake-LTB-realartmaine-fillin, throwie.jpg",
+	"images/SLT-SLT-realartmaine-paintroller.jpg",
+	"images/pest-realartmaine-throwie, bubble letter, hollow.jpg",
+	"images/rune-LTB,2K69-realartmaine-throwie, hollow, bubble letter.jpg",
+	"images/5G-5G-minnowfeed-straightletter, antistyle.JPG",
+	"images/qjoe, link-5G-realartmaine-antistyle, straightletter.jpg",
+	"images/link-5G,CRAFT-realartmaine-antistyle, piece.jpg",
+	"images/prizm, ruski, cats-realartmaine-paintroller.jpg",
+	"images/some1-realartmaine-stencil.jpg",
+	"images/owell-realartmaine-antistyle, throwie.jpg",
+	"images/owell-realartmaine-antistyle, throwie, fillin.jpg",
+	"images/same, catch-SLT,PTG,BNE,OHK-realartmaine-tags.jpg",
+	"images/sloan-BNE,PTG-realartmaine-throwie, hollow.jpg",
+	"images/zone-ZPLK-antistyle, wildstyle.JPG",
+	"images/vroom-ZPLK-piece, character.JPG",
+	"images/lufa-hex-ZPLK-tags, piece.JPG",
+	"images/nare-az-ZPLK-piece, character.JPG",
+	"images/wilt-2K69,VC-minnowfeed-blackbook.jpg",
+	"images/spek, segway, 27, port, melts, yalts-FTS,TSZ,CIRCLET,YME,IMS-minnowfeed-tags, moniker.JPG",
+	"images/segway-FTS-minnowfeed-throwie, hollow.JPG",
+	"images/same, catch-SLT,PTG,BNE,OHK-realartmaine-tag.jpg",
+	"images/same, 27, enya-SLT,TVT,TSZ,5G-minnowfeed-tags, stencil.jpg",
+	"images/rune-LTB,2K69-minnowfeed-piece, antistyle.JPG",
+	"images/rune, 27-LTB,2K69,TSZ,2GF-minnowfeed-throwie, fillin, antistyle.JPG",
+	"images/qjoe-5G,UK-minnowfeed-antistyle, piece.JPG",
+	"images/qjoe, link-5G-realartmaine-antistyle, straightletter.jpg",
+	"images/ojea3-HEX,OY!-minnowfeed-piece.JPG",
+	"images/ojea3-HEX,OY!-minnowfeed-tags.JPG",
+	"images/mobi-TSZ-minnowfeed-straightletter.JPG",
+	"images/lerk, link, obee-5G,OY!-minnowfeed-piece, paintroller.JPG",
+	"images/lerk, 27-2GF-minnowfeed-tags, stencil.JPG",
+	"images/kindbud-5G,SDH-minnowfeed-antistyle, piece.JPG",
+	"images/jumz-TSZ-minnowfeed-throwie, fillin, stencil.JPG",
+	"images/ichabod-YME,CIRLCET-minnowfeed-tag.jpg",
+	"images/grazi, 27-DWT,TSZ,2GF-minnowfeed-tags.JPG",
+	"images/gerv-YME-minnowfeed-piece.JPG",
+	"images/feer, scipio-2GF-minnowfeed-piece, tags, antistyle.jpg",
+	"images/catch-PTG,OHK,BNE-minnowfeed-tags, throwie, fillin.JPG",
+	"images/catch-BNE,PTG,OHK-minnowfeed-throwie, hollow.JPG",
+	"images/catch, secret, 27-BNE,PTG,OHK,5G,TSZ-minnowfeed-antistyle, stencil, blackbook.JPG",
+	"images/catch, link-5G,OHK,PTG,BNE-minnowfeed-throw.jpg",
+	"images/ankle-LTB,2K69-minnowfeed-throwie, fillin.JPG",
+	"images/ankle-2K69,LTB-minnowfeed-tags.JPG",
+	"images/LSE-LSE-minnowfeed-straightletter.jpg",
+	"images/2GF-realartmaine-tag.jpg",
+	"images/27-TSZ,2GF-realartmaine-throwie, antistyle.jpg",
+	"images/ankle-LTB,2K69-realartmaine-tags.jpg",
   "images/ankle, ne1, symbol, spud-LTB, 2K69, CTS-realartmaine-throwie, straightletter, tags, fillin_.jpg",
   "images/ankor-SFL-realartmaine-straightletter.jpg",
   "images/aura-OHK-realartmaine-straightletter, piece.jpg",
@@ -119,7 +118,7 @@ let imagesList = [
   "images/soft, same-SLT,2K69-realartmaine-throwie, fillin.jpg",
   "images/some1-realartmaine-character, hollow.jpg",
   "images/suer, same-SLT,TVT,TMS-realartmaine-throwie, hollow, tags.jpg",
-  "images/trak, hebrew-LTB,2K69-tags.jpg",
+  "images/trak, hebrew-LTB,2K69-realartmaine-tags.jpg",
   "images/wake, ducky-LTB-realartmaine-throwie, hollow, character, antistyle.jpg",
   "images/mobi, grazi-DWT,TSZ-minnowfeed-straightletter, tags.JPG",
   "images/spots, wilt, 27-VC,2K69,HKC-minnowfeed-blackbook, antistyle.JPG",
@@ -142,91 +141,18 @@ let imagesList = [
   "images/thex-SLT-realartmaine-piece.jpg",
   "images/uglyboy-5G-realartmaine-throwie, antistyle.jpg",
   "images/27, learn-YME,SLT,CIRCLET,2GF,TSZ,2GF-minnowfeed-piece, stencil.JPG",
-  "images/27, mobi, vazor, segway-TSZ,2GF,AWC,FTS-minnowfeed-piece, straightletter, stencil.JPG"
+  "images/27, mobi, vazor, segway-TSZ,2GF,AWC,FTS-minnowfeed-piece, straightletter, stencil.JPG",
+  "images/27, plato-HEX,TSZ,2GF-minnowfeed-tags.jpg"
 ];
+// remove exact-duplicate paths while preserving first occurrence order
+imagesList = Array.from(new Set(imagesList.map(s => s.trim())));
 
-// <-- ensure DOM refs and load token exist (single declaration) -->
+// <-- ADDITION: ensure DOM refs and load token exist before any function runs -->
 const gallery = document.getElementById("galleryContainer");
 const searchInput = document.getElementById("searchInput");
+// load-run token used to cancel obsolete loads
 let currentLoadId = 0;
-
-// Configure these values for your repo (update to your GitHub account/repo/branch)
-const GITHUB_OWNER = "neil0925";
-const GITHUB_REPO  = "realartmaine";
-const GITHUB_BRANCH = "main"; // change to "master" only if your repo uses master
-const IMAGES_DIR    = "images";
-
-// Try to list images from the GitHub repo using the Contents API (public repos only)
-async function fetchImagesFromGitHub() {
-  try {
-    // If user has not configured owner/repo, skip the API call to avoid 404 spam
-    if (!GITHUB_OWNER || GITHUB_OWNER.includes("YOUR_") || !GITHUB_REPO || GITHUB_REPO.includes("YOUR_")) {
-      console.info("fetchImagesFromGitHub: GITHUB_OWNER/GITHUB_REPO not configured; skipping API call.");
-      return null;
-    }
-
-    const apiUrl = `https://api.github.com/repos/${encodeURIComponent(GITHUB_OWNER)}/${encodeURIComponent(GITHUB_REPO)}/contents/${encodeURIComponent(IMAGES_DIR)}?ref=${encodeURIComponent(GITHUB_BRANCH)}`;
-    const res = await fetch(apiUrl);
-    if (!res.ok) {
-      console.warn("GitHub API returned", res.status, res.statusText);
-      return null;
-    }
-    const items = await res.json();
-    if (!Array.isArray(items)) return null;
-
-    // Keep only files with image extensions; prefer the provided download_url when present
-    const imgs = items
-      .filter(f => f.type === "file" && /\.(jpe?g|png|gif|webp|bmp|svg)$/i.test(f.name))
-      .map(f => (f.download_url && f.download_url.length) ? f.download_url : `https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/${GITHUB_BRANCH}/${IMAGES_DIR}/${encodeURIComponent(f.name)}`);
-
-    if (imgs.length === 0) return null;
-    return imgs;
-  } catch (err) {
-    console.warn("Failed to fetch images from GitHub:", err);
-    return null;
-  }
-}
-
-// small helper: show a friendly message in the gallery when no images can be loaded
-function showNoImagesMessage(text) {
-  if (!gallery) return;
-  gallery.innerHTML = "";
-  const msg = document.createElement("div");
-  msg.className = "ad-card"; // reuse ad-card styling for centered message
-  msg.style.minHeight = "120px";
-  msg.style.display = "flex";
-  msg.style.alignItems = "center";
-  msg.style.justifyContent = "center";
-  msg.textContent = text || "No images available — check repository settings or configuration.";
-  gallery.appendChild(msg);
-}
-
-// NEW: only accept images that follow the "metadata" naming (must contain a dash in basename)
-function selectNamedImages(list) {
-  if (!Array.isArray(list)) return [];
-  return list.filter(src => {
-    try {
-      const base = src.split("/").pop() || "";
-      // require at least one dash before the extension (e.g. tag-...jpg)
-      return /-[^\/]+?\.[a-z0-9]{1,5}$/i.test(base);
-    } catch (e) {
-      return false;
-    }
-  });
-}
-
-// On DOM ready: load the manual list (filtered to dash-based naming) so gallery is manual again
-document.addEventListener("DOMContentLoaded", () => {
-  if (Array.isArray(imagesList) && imagesList.length > 0) {
-    const manual = typeof selectNamedImages === "function" ? selectNamedImages(imagesList) : imagesList;
-    if (manual.length > 0) {
-      imagesList = manual;
-      loadImagesSequentially(imagesList);
-      return;
-    }
-  }
-  showNoImagesMessage("No images found in the manual list. Ensure filenames include '-' metadata (e.g. tag-artist-style.jpg).");
-});
+// <-- end addition -->
 
 const DEFAULT_ASPECT = 0.66;
 
@@ -311,7 +237,7 @@ function parseFilename(filename) {
   };
 }
 
-// modal viewer — restore responsive framed spotlight with title + metadata
+// modal viewer
 function openModal(meta) {
   document.body.style.overflow = "hidden";
   const backdrop = document.createElement("div");
@@ -326,69 +252,19 @@ function openModal(meta) {
   const modal = document.createElement("div");
   modal.className = "modal";
 
-  // Title (derived from parsed metadata - human readable)
-  const title = document.createElement("div");
-  title.className = "modal-title";
-  // Prefer tags or rawBase as title
-  title.textContent = (meta && meta.tags && meta.tags.length) ? meta.tags.join(", ") : meta.rawBase;
-
-  const imgWrap = document.createElement("div");
-  imgWrap.className = "modal-imgwrap";
-
   const img = document.createElement("img");
   img.src = meta.src;
   img.alt = meta.rawBase;
-  img.className = "modal-image";
 
-  imgWrap.appendChild(img);
+  const caption = document.createElement("div");
+  caption.className = "caption";
+  caption.textContent = `"${meta.tags.join(", ")}" flicked by ${meta.photographer}`;
 
-  const metaBox = document.createElement("div");
-  metaBox.className = "modal-meta";
 
-  // photographer / crew / styles rows (only add if present)
-  if (meta.photographer) {
-    const p = document.createElement("div");
-    p.className = "meta-row";
-    p.innerHTML = `<strong>Photographer:</strong> ${meta.photographer}`;
-    metaBox.appendChild(p);
-  }
-  if (meta.crew) {
-    const c = document.createElement("div");
-    c.className = "meta-row";
-    c.innerHTML = `<strong>Crew:</strong> ${meta.crew}`;
-    metaBox.appendChild(c);
-  }
-  if (meta.styles && meta.styles.length) {
-    const s = document.createElement("div");
-    s.className = "meta-row";
-    s.innerHTML = `<strong>Styles:</strong> ${meta.styles.join(", ")}`;
-    metaBox.appendChild(s);
-  }
-  // filename rawBase as small footer line
-  const raw = document.createElement("div");
-  raw.className = "meta-row meta-filename";
-  raw.textContent = meta.rawBase;
-  metaBox.appendChild(raw);
-
-  // Assemble modal
-  modal.appendChild(title);
-  modal.appendChild(imgWrap);
-  modal.appendChild(metaBox);
-
+  modal.appendChild(img);
+  modal.appendChild(caption);
   backdrop.appendChild(modal);
   document.body.appendChild(backdrop);
-
-  // Close on Escape
-  const onKey = (e) => {
-    if (e.key === "Escape") {
-      if (backdrop.parentNode) {
-        document.body.removeChild(backdrop);
-        document.body.style.overflow = "";
-      }
-      document.removeEventListener("keydown", onKey);
-    }
-  };
-  document.addEventListener("keydown", onKey);
 }
 
 /* Replace the existing loadImagesSequentially + loadImageWithPlaceholder logic
@@ -437,9 +313,6 @@ async function loadImagesSequentially(list) {
     spinner.className = "spinner";
     placeholder.appendChild(spinner);
 
-    // DO NOT activate every placeholder here — keep them ready and activate only one spinner at a time
-    // placeholder.classList.add("active");
-
     wrap.appendChild(placeholder);
     card.appendChild(wrap);
     gallery.appendChild(card);
@@ -456,8 +329,7 @@ async function loadImagesSequentially(list) {
 
   // Phase B: sequentially load real images into existing cards — strictly one at a time
   let loadedCount = 0;
-
-  // mark the first placeholder active so a single spinner shows and will move forward
+  // mark the first placeholder active so single spinner shows
   if (cards.length > 0 && cards[0].placeholder) cards[0].placeholder.classList.add("active");
 
   for (let i = 0; i < cards.length; i++) {
@@ -466,10 +338,11 @@ async function loadImagesSequentially(list) {
     const ok = await loadImageIntoCard(meta, card, wrap, placeholder, myLoadId);
     if (myLoadId !== currentLoadId) return;
 
-    // move the single-spinner: remove from current placeholder, add to next (if any)
+    // ensure this placeholder is no longer active (spinner moves)
     if (placeholder && placeholder.classList.contains("active")) {
       placeholder.classList.remove("active");
     }
+    // activate next placeholder (single spinner moves forward)
     if (i + 1 < cards.length && cards[i + 1].placeholder) {
       cards[i + 1].placeholder.classList.add("active");
     }
@@ -660,5 +533,6 @@ function resizeAllMasonryItems() {
 }
 
 // start
+document.addEventListener("DOMContentLoaded", () => loadImagesSequentially(imagesList));
 window.addEventListener("resize", () => requestAnimationFrame(resizeAllMasonryItems));
 window.addEventListener("load", resizeAllMasonryItems);
