@@ -327,7 +327,7 @@ function parseFilename(filename) {
   };
 }
 
-// modal viewer
+// modal viewer — restore responsive framed spotlight with title + metadata
 function openModal(meta) {
   document.body.style.overflow = "hidden";
   const backdrop = document.createElement("div");
@@ -342,19 +342,69 @@ function openModal(meta) {
   const modal = document.createElement("div");
   modal.className = "modal";
 
+  // Title (derived from parsed metadata - human readable)
+  const title = document.createElement("div");
+  title.className = "modal-title";
+  // Prefer tags or rawBase as title
+  title.textContent = (meta && meta.tags && meta.tags.length) ? meta.tags.join(", ") : meta.rawBase;
+
+  const imgWrap = document.createElement("div");
+  imgWrap.className = "modal-imgwrap";
+
   const img = document.createElement("img");
   img.src = meta.src;
   img.alt = meta.rawBase;
+  img.className = "modal-image";
 
-  const caption = document.createElement("div");
-  caption.className = "caption";
-  caption.textContent = `"${meta.tags.join(", ")}" flicked by ${meta.photographer}`;
+  imgWrap.appendChild(img);
 
+  const metaBox = document.createElement("div");
+  metaBox.className = "modal-meta";
 
-  modal.appendChild(img);
-  modal.appendChild(caption);
+  // photographer / crew / styles rows (only add if present)
+  if (meta.photographer) {
+    const p = document.createElement("div");
+    p.className = "meta-row";
+    p.innerHTML = `<strong>Photographer:</strong> ${meta.photographer}`;
+    metaBox.appendChild(p);
+  }
+  if (meta.crew) {
+    const c = document.createElement("div");
+    c.className = "meta-row";
+    c.innerHTML = `<strong>Crew:</strong> ${meta.crew}`;
+    metaBox.appendChild(c);
+  }
+  if (meta.styles && meta.styles.length) {
+    const s = document.createElement("div");
+    s.className = "meta-row";
+    s.innerHTML = `<strong>Styles:</strong> ${meta.styles.join(", ")}`;
+    metaBox.appendChild(s);
+  }
+  // filename rawBase as small footer line
+  const raw = document.createElement("div");
+  raw.className = "meta-row meta-filename";
+  raw.textContent = meta.rawBase;
+  metaBox.appendChild(raw);
+
+  // Assemble modal
+  modal.appendChild(title);
+  modal.appendChild(imgWrap);
+  modal.appendChild(metaBox);
+
   backdrop.appendChild(modal);
   document.body.appendChild(backdrop);
+
+  // Close on Escape
+  const onKey = (e) => {
+    if (e.key === "Escape") {
+      if (backdrop.parentNode) {
+        document.body.removeChild(backdrop);
+        document.body.style.overflow = "";
+      }
+      document.removeEventListener("keydown", onKey);
+    }
+  };
+  document.addEventListener("keydown", onKey);
 }
 
 /* Replace the existing loadImagesSequentially + loadImageWithPlaceholder logic
@@ -403,8 +453,8 @@ async function loadImagesSequentially(list) {
     spinner.className = "spinner";
     placeholder.appendChild(spinner);
 
-    // show spinner per-card (restore previous behaviour: each card shows spinner until its image loads)
-    placeholder.classList.add("active");
+    // DO NOT activate every placeholder here — keep them ready and activate only one spinner at a time
+    // placeholder.classList.add("active");
 
     wrap.appendChild(placeholder);
     card.appendChild(wrap);
@@ -423,13 +473,22 @@ async function loadImagesSequentially(list) {
   // Phase B: sequentially load real images into existing cards — strictly one at a time
   let loadedCount = 0;
 
+  // mark the first placeholder active so a single spinner shows and will move forward
+  if (cards.length > 0 && cards[0].placeholder) cards[0].placeholder.classList.add("active");
+
   for (let i = 0; i < cards.length; i++) {
     if (myLoadId !== currentLoadId) return;
     const { meta, card, wrap, placeholder } = cards[i];
     const ok = await loadImageIntoCard(meta, card, wrap, placeholder, myLoadId);
     if (myLoadId !== currentLoadId) return;
 
-    // (no single-spinner movement here — each placeholder handled per-card by loadImageIntoCard)
+    // move the single-spinner: remove from current placeholder, add to next (if any)
+    if (placeholder && placeholder.classList.contains("active")) {
+      placeholder.classList.remove("active");
+    }
+    if (i + 1 < cards.length && cards[i + 1].placeholder) {
+      cards[i + 1].placeholder.classList.add("active");
+    }
 
     // only count as "loaded" if ok was true (load succeeded or error handled)
     loadedCount++;
