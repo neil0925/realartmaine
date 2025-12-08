@@ -201,24 +201,47 @@ function showNoImagesMessage(text) {
   gallery.appendChild(msg);
 }
 
+// NEW: only accept images that follow the "metadata" naming (must contain a dash in basename)
+function selectNamedImages(list) {
+  if (!Array.isArray(list)) return [];
+  return list.filter(src => {
+    try {
+      const base = src.split("/").pop() || "";
+      // require at least one dash before the extension (e.g. tag-...jpg)
+      return /-[^\/]+?\.[a-z0-9]{1,5}$/i.test(base);
+    } catch (e) {
+      return false;
+    }
+  });
+}
+
 // On DOM ready: use GitHub Contents API (client-side) as the primary source.
 // This avoids any Node or CI requirement; it works for public repos (rate-limited).
 document.addEventListener("DOMContentLoaded", async () => {
   // try the GitHub API first to discover images automatically
   const fetched = await fetchImagesFromGitHub();
   if (Array.isArray(fetched) && fetched.length > 0) {
-    imagesList = fetched;
-    loadImagesSequentially(imagesList);
-    return;
+    // only keep named images (dash-based metadata files)
+    const chosen = selectNamedImages(fetched);
+    if (chosen.length > 0) {
+      imagesList = chosen;
+      loadImagesSequentially(imagesList);
+      return;
+    }
   }
 
-  // If API failed, fallback: if imagesList has items (manual fallback) use them,
+  // If API failed or returned none that match naming, fallback: if imagesList has items (manual fallback) use them,
   // otherwise show a clear message so the site doesn't look broken.
   if (Array.isArray(imagesList) && imagesList.length > 0) {
-    loadImagesSequentially(imagesList);
-  } else {
-    showNoImagesMessage("No images found via GitHub API. Make sure your repo is public, images are in the images/ folder, and GITHUB_OWNER/GITHUB_REPO in gallery.js are set correctly (currently: " + GITHUB_OWNER + "/"+ GITHUB_REPO +").");
+    // ensure the manual list is filtered to only the dash-based names
+    const manual = selectNamedImages(imagesList);
+    if (manual.length > 0) {
+      loadImagesSequentially(manual);
+      return;
+    }
   }
+
+  showNoImagesMessage("No images found via GitHub API or manual list using the dash-based naming convention. Make sure your filenames include '-' metadata segments (e.g. tag-artist-style.jpg).");
 });
 
 const DEFAULT_ASPECT = 0.66;
@@ -380,6 +403,9 @@ async function loadImagesSequentially(list) {
     spinner.className = "spinner";
     placeholder.appendChild(spinner);
 
+    // show spinner per-card (restore previous behaviour: each card shows spinner until its image loads)
+    placeholder.classList.add("active");
+
     wrap.appendChild(placeholder);
     card.appendChild(wrap);
     gallery.appendChild(card);
@@ -396,8 +422,6 @@ async function loadImagesSequentially(list) {
 
   // Phase B: sequentially load real images into existing cards — strictly one at a time
   let loadedCount = 0;
-  // mark the first placeholder active so single spinner shows
-  if (cards.length > 0 && cards[0].placeholder) cards[0].placeholder.classList.add("active");
 
   for (let i = 0; i < cards.length; i++) {
     if (myLoadId !== currentLoadId) return;
@@ -405,14 +429,7 @@ async function loadImagesSequentially(list) {
     const ok = await loadImageIntoCard(meta, card, wrap, placeholder, myLoadId);
     if (myLoadId !== currentLoadId) return;
 
-    // ensure this placeholder is no longer active (spinner moves)
-    if (placeholder && placeholder.classList.contains("active")) {
-      placeholder.classList.remove("active");
-    }
-    // activate next placeholder (single spinner moves forward)
-    if (i + 1 < cards.length && cards[i + 1].placeholder) {
-      cards[i + 1].placeholder.classList.add("active");
-    }
+    // (no single-spinner movement here — each placeholder handled per-card by loadImageIntoCard)
 
     // only count as "loaded" if ok was true (load succeeded or error handled)
     loadedCount++;
