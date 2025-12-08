@@ -215,33 +215,17 @@ function selectNamedImages(list) {
   });
 }
 
-// On DOM ready: use GitHub Contents API (client-side) as the primary source.
-// This avoids any Node or CI requirement; it works for public repos (rate-limited).
-document.addEventListener("DOMContentLoaded", async () => {
-  // try the GitHub API first to discover images automatically
-  const fetched = await fetchImagesFromGitHub();
-  if (Array.isArray(fetched) && fetched.length > 0) {
-    // only keep named images (dash-based metadata files)
-    const chosen = selectNamedImages(fetched);
-    if (chosen.length > 0) {
-      imagesList = chosen;
+// On DOM ready: load the manual list (filtered to dash-based naming) so gallery is manual again
+document.addEventListener("DOMContentLoaded", () => {
+  if (Array.isArray(imagesList) && imagesList.length > 0) {
+    const manual = typeof selectNamedImages === "function" ? selectNamedImages(imagesList) : imagesList;
+    if (manual.length > 0) {
+      imagesList = manual;
       loadImagesSequentially(imagesList);
       return;
     }
   }
-
-  // If API failed or returned none that match naming, fallback: if imagesList has items (manual fallback) use them,
-  // otherwise show a clear message so the site doesn't look broken.
-  if (Array.isArray(imagesList) && imagesList.length > 0) {
-    // ensure the manual list is filtered to only the dash-based names
-    const manual = selectNamedImages(imagesList);
-    if (manual.length > 0) {
-      loadImagesSequentially(manual);
-      return;
-    }
-  }
-
-  showNoImagesMessage("No images found via GitHub API or manual list using the dash-based naming convention. Make sure your filenames include '-' metadata segments (e.g. tag-artist-style.jpg).");
+  showNoImagesMessage("No images found in the manual list. Ensure filenames include '-' metadata (e.g. tag-artist-style.jpg).");
 });
 
 const DEFAULT_ASPECT = 0.66;
