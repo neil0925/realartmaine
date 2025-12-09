@@ -95,7 +95,6 @@ let imagesList = [
   "images/wake-LTB-realartmaine-throwie, fillin.jpg",
   "images/27-TSZ,2GF-minnowfeed-paintroller.jpg",
   "images/jipso, alps, goal-PTG-paintroller, tags, throwie, straightletter, fillin, character.jpg",
-  "images/doves, 2yung-pieces-realartmaine-pieces.jpg",
   "images/ducky-realartmaine-antistyle, paintroller.jpg",
   "images/enya-5G-realartmaine-antistyle.jpg",
   "images/enzyme-DPW-realartmaine-throwie, fillin.jpg",
