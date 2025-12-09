@@ -152,7 +152,7 @@ const DEFAULT_ASPECT = 0.66;
 // Leave empty ('') to keep plain "Ad placeholder" boxes.
 const ADS_CONFIG = {
   publisherId: 'ca-pub-6627789827798682', // <-- set to your publisher id
-  adInterval: 25   // insert ad every 25 images
+  adInterval: 50   // insert ad every 25 images
 };
 
 // helper to ensure the AdSense loader script is present (only if publisherId provided)
@@ -316,8 +316,8 @@ async function loadImagesSequentially(list) {
     const wrap = document.createElement("div");
     wrap.className = "image-wrap";
 
-    // conservative placeholder height based on estimated column width
-    const defaultH = Math.max(80, Math.round(columnWidth * DEFAULT_ASPECT));
+    // cap the placeholder height so many unloaded items don't create huge blank scroll space
+    const defaultH = Math.min(Math.max(80, Math.round(columnWidth * DEFAULT_ASPECT)), 160);
     wrap.style.height = `${defaultH}px`;
 
     // placeholder wrapper (CSS spinner, not an img)
@@ -436,6 +436,8 @@ function loadImageIntoCard(meta, card, wrap, placeholder, expectedLoadId) {
         const rowSpan = Math.max(1, Math.ceil((finalH + rowGap) / (rowHeight + rowGap)));
         card.style.gridRowEnd = `span ${rowSpan}`;
         wrap.classList.add("loaded");
+        // keep the full grid recalculated after each image reveals to avoid gaps/overscroll
+        requestAnimationFrame(resizeAllMasonryItems);
         resolve(true);
       });
     });
