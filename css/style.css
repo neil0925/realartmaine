@@ -105,7 +105,6 @@ footer hr { border:none; border-top:1px solid #aaa; margin:10px 0; }
 }
 
 /* Masonry / puzzle-style gallery */
-/* add internal scrolling and max-height so the document scrollbar can't extend far past the gallery */
 .gallery {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); /* changed from 250px -> 180px */
@@ -118,10 +117,6 @@ footer hr { border:none; border-top:1px solid #aaa; margin:10px 0; }
   justify-items: stretch;
   align-items: start;
   width: 100%;
-
-  /* make the gallery itself scrollable and cap its height to the viewport area */
-  overflow-y: auto;
-  max-height: calc(100vh - 140px); /* JS refines this at runtime */
 }
 
 /* card must allow overflow so hovered image can pop out above neighbors */
@@ -142,18 +137,62 @@ footer hr { border:none; border-top:1px solid #aaa; margin:10px 0; }
   position: relative;
   width: 100%;
   display: block; /* ensure it occupies column width */
-  /* keep inner images clipped while loading; JS flips to .loaded when ready */
-  overflow: hidden;
+  overflow: visible; /* allow inner img to grow outside without affecting grid size */
   border-radius: 6px;
   /* allow shrink */
   min-width: 0;
   /* while loading, prevent hover visual effect until JS marks it loaded */
 }
 
-/* once the wrapper has been finalized by JS allow the hover pop-out */
-.image-wrap.loaded { overflow: visible; }
-
 /* placeholder while loading (fills the wrapper; won't scale visually) */
+.loading-placeholder {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display:block;
+  object-fit:cover;
+  border-radius:6px;
+  opacity:.85;
+  pointer-events: none; /* ensure not interactive */
+}
+
+/* gallery images - loaded images only (absolutely positioned inside wrapper) */
+.gallery-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: top .22s ease, left .22s ease, width .22s ease, height .22s ease, box-shadow .22s ease;
+  will-change: top, left, width, height;
+  z-index: 1;
+  backface-visibility: hidden;
+}
+
+/* Hover pop-out only after wrapper has been finalized (JS adds .loaded)
+   Visual growth: 5px on each side without changing wrapper size */
+.image-wrap.loaded:hover .gallery-image {
+  top: -5px;
+  left: -5px;
+  width: calc(100% + 10px);
+  height: calc(100% + 10px);
+  z-index: 40;
+  box-shadow: 0 22px 44px rgba(0,0,0,0.52);
+}
+
+/* fade-in animation for images when they finish loading */
+.gallery-image.fade-in { animation: fadeIn .45s ease forwards; }
+
+/* hidden while loading (no hover, no clicks) */
+.gallery-image.hidden { display:none; pointer-events:none; }
+
+/* placeholder wrapper (contains CSS spinner or error text) */
 .placeholder-box {
   position: absolute;
   inset: 0;
@@ -161,8 +200,7 @@ footer hr { border:none; border-top:1px solid #aaa; margin:10px 0; }
   align-items: center;
   justify-content: center;
   border-radius: 6px;
-  /* subtle background to provide contrast for the spinner without creating strong boxes */
-  background: rgba(0,0,0,0.04);
+  background: transparent; /* transparent so no white framed box */
   color: #666;
   font-size: 0.95rem;
   text-align: center;
@@ -175,21 +213,15 @@ footer hr { border:none; border-top:1px solid #aaa; margin:10px 0; }
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  /* neutral ring with highlighted top that follows current text color for contrast in both themes */
   border: 3px solid rgba(0,0,0,0.12);
-  border-top-color: currentColor;
+  border-top-color: rgba(0,0,0,0.48);
   animation: spin 0.9s linear infinite;
   display:none; /* hidden by default */
 }
+@keyframes spin { to { transform: rotate(360deg); } }
 
 /* show spinner only when placeholder is active (single spinner at a time) */
 .placeholder-box.active .spinner { display: block; }
-
-/* ensure spinner is readable in dark mode */
-body.dark-mode .placeholder-box {
-  color: #ddd;
-  background: rgba(255,255,255,0.02);
-}
 
 /* ensure modal/backdrop overlays everything */
 .modal-backdrop {
