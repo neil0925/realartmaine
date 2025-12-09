@@ -150,7 +150,7 @@ const DEFAULT_ASPECT = 0.66;
 // Leave empty ('') to keep plain "Ad placeholder" boxes.
 const ADS_CONFIG = {
   publisherId: 'ca-pub-6627789827798682', // <-- set to your publisher id
-  adInterval: 50   // insert ad every 25 images
+  adInterval: 25   // insert ad every 25 images
 };
 
 // helper to ensure the AdSense loader script is present (only if publisherId provided)
@@ -362,8 +362,8 @@ async function loadImagesSequentially(list) {
 
     // only count as "loaded" if ok was true (load succeeded or error handled)
     loadedCount++;
-    // insert ad only when loadedCount hits the interval (e.g. every 10 loaded items)
-    const AD_INTERVAL = 10;
+    // insert ad only when loadedCount hits the interval (e.g. every 25 loaded items)
+    const AD_INTERVAL = ADS_CONFIG.adInterval;
     if (loadedCount > 0 && loadedCount % AD_INTERVAL === 0) {
       // compute ad row span using same rowHeight/rowGap logic
       const rowHeight = parseInt(window.getComputedStyle(grid).getPropertyValue("grid-auto-rows") || "10");
