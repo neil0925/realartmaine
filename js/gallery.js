@@ -156,6 +156,25 @@ let currentLoadId = 0;
 
 const DEFAULT_ASPECT = 0.66;
 
+// Ad configuration: set publisherId to 'ca-pub-XXXXXXXXXXXX' to enable real AdSense.
+// Leave empty ('') to keep plain "Ad placeholder" boxes.
+const ADS_CONFIG = {
+  publisherId: '', // e.g. 'ca-pub-1234567890123456'
+  adInterval: 25   // insert ad every 25 images
+};
+
+// helper to ensure the AdSense loader script is present (only if publisherId provided)
+function ensureAdsLoader(publisherId) {
+  if (!publisherId) return;
+  const existing = document.querySelector('script[data-ad-client]');
+  if (existing) return;
+  const s = document.createElement('script');
+  s.async = true;
+  s.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js';
+  s.setAttribute('data-ad-client', publisherId);
+  document.head.appendChild(s);
+}
+
 // ----------------- CHANGES START -----------------
 // missing helper used throughout the file — compute stable rendered height
 function getRenderedImageHeight(img, availableWidth) {
@@ -360,7 +379,7 @@ async function loadImagesSequentially(list) {
 
       const ad = document.createElement("div");
       ad.className = "ad-card";
-      ad.textContent = "Ad / Featured";
+      ad.textContent = "Advertisment placeholder";
       ad.style.gridRowEnd = `span ${adRowSpan}`;
 
       // insert ad into DOM directly after the card for the loadedCount-th item
@@ -530,6 +549,64 @@ function resizeAllMasonryItems() {
     const rowSpan = Math.max(1, Math.ceil((height + rowGap) / (rowHeight + rowGap)));
     item.style.gridRowEnd = `span ${rowSpan}`;
   });
+}
+
+// replace the previous ad-insertion logic with this block
+function maybeInsertAdAfter(card, index, gallery) {
+  // index is zero-based count of images inserted so far
+  const insertAfterCount = ADS_CONFIG.adInterval;
+  if (insertAfterCount <= 0) return;
+
+  // Insert an ad after every adInterval images
+  if ((index + 1) % insertAfterCount !== 0) return;
+
+  // compute grid row span if you use that logic elsewhere (fallback = 1)
+  const adRowSpan = 1;
+
+  const ad = document.createElement('div');
+  ad.className = 'ad-card';
+  ad.style.gridRowEnd = `span ${adRowSpan}`;
+
+  if (ADS_CONFIG.publisherId) {
+    // ensure loader present then build real AdSense container
+    ensureAdsLoader(ADS_CONFIG.publisherId);
+
+    const ins = document.createElement('ins');
+    ins.className = 'adsbygoogle';
+    ins.style.display = 'block';
+    // optional: set a specific slot by uncommenting and filling data-ad-slot
+    // ins.setAttribute('data-ad-slot', 'YOUR_AD_SLOT_ID');
+    ins.setAttribute('data-ad-format', 'auto');
+    ins.setAttribute('data-full-width-responsive', 'true');
+
+    ad.appendChild(ins);
+
+    // attempt to render the ad (will fail silently in dev/localhost)
+    try {
+      (window.adsbygoogle = window.adsbygoogle || []).push({});
+    } catch (e) {
+      // development environments often throw here; keep placeholder visible
+      console.warn('adsbygoogle push failed', e);
+      // keep a visible fallback label if rendering failed
+      const label = document.createElement('div');
+      label.className = 'ad-fallback-label';
+      label.textContent = 'Ad placeholder';
+      ad.appendChild(label);
+    }
+  } else {
+    // no publisher id: keep the same visible placeholder as before
+    const label = document.createElement('div');
+    label.className = 'ad-fallback-label';
+    label.textContent = 'Ad placeholder';
+    ad.appendChild(label);
+  }
+
+  // insert into DOM after the related card (or at end)
+  if (card && card.parentNode) {
+    card.parentNode.insertBefore(ad, card.nextSibling);
+  } else {
+    gallery.appendChild(ad);
+  }
 }
 
 // start
