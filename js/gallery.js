@@ -151,18 +151,22 @@ const DEFAULT_ASPECT = 0.66;
 // Ad configuration: set publisherId to 'ca-pub-XXXXXXXXXXXX' to enable real AdSense.
 // Leave empty ('') to keep plain "Ad placeholder" boxes.
 const ADS_CONFIG = {
-  publisherId: '', // e.g. 'ca-pub-1234567890123456'
+  publisherId: 'ca-pub-6627789827798682', // <-- set to your publisher id
   adInterval: 25   // insert ad every 25 images
 };
 
 // helper to ensure the AdSense loader script is present (only if publisherId provided)
 function ensureAdsLoader(publisherId) {
   if (!publisherId) return;
-  const existing = document.querySelector('script[data-ad-client]');
+  // detect existing loader either by data-ad-client attribute or by src path
+  const existing = document.querySelector('script[data-ad-client], script[src*="pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"]');
   if (existing) return;
   const s = document.createElement('script');
   s.async = true;
-  s.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js';
+  // use the same src + client query param and crossorigin attribute that AdSense provided
+  s.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=' + encodeURIComponent(publisherId);
+  s.crossOrigin = "anonymous";
+  // set data-ad-client for script detection consistency
   s.setAttribute('data-ad-client', publisherId);
   document.head.appendChild(s);
 }
