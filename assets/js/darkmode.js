@@ -43,10 +43,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const isDark = safeGet("darkMode") === "true";
     if (isDark) {
       document.body.classList.add("dark-mode");
-      if (modeIcon) modeIcon.src = "images/DarkMode.png";
+      if (modeIcon) modeIcon.src = "assets/images/DarkMode.png";
     } else {
       document.body.classList.remove("dark-mode");
-      if (modeIcon) modeIcon.src = "images/LightMode.png";
+      if (modeIcon) modeIcon.src = "assets/images/LightMode.png";
     }
   };
 
