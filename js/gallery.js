@@ -373,20 +373,19 @@ async function loadImagesSequentially(list) {
       placeholder.classList.remove("active");
     }
 
-    // Append one new placeholder (if any left) and ensure it becomes the active spinner
-    if (nextCreateIndex < total) {
+    // Determine the next placeholder and make it active.
+    // Priority: existing next placeholder in sequence (cards[i+1]),
+    // otherwise create one (if items remain) and activate it immediately.
+    let nextPlaceholder = null;
+    if (cards[i + 1] && cards[i + 1].placeholder) {
+      nextPlaceholder = cards[i + 1].placeholder;
+    } else if (nextCreateIndex < total) {
       const newCard = createCardForIndex(nextCreateIndex++);
       cards.push(newCard);
-      // if the newly created placeholder is the immediate next in sequence, mark it active
-      const nextIdx = i + 1;
-      if (cards[nextIdx] && cards[nextIdx].placeholder) {
-        cards[nextIdx].placeholder.classList.add("active");
-      }
-    } else {
-      // otherwise, if there is already a next placeholder in DOM, activate it
-      if (cards[i + 1] && cards[i + 1].placeholder) {
-        cards[i + 1].placeholder.classList.add("active");
-      }
+      nextPlaceholder = newCard.placeholder;
+    }
+    if (nextPlaceholder && nextPlaceholder.classList) {
+      nextPlaceholder.classList.add("active");
     }
 
     // count loaded and insert ad periodically (existing ad insert logic)

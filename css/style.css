@@ -142,12 +142,16 @@ footer hr { border:none; border-top:1px solid #aaa; margin:10px 0; }
   position: relative;
   width: 100%;
   display: block; /* ensure it occupies column width */
-  overflow: visible; /* allow inner img to grow outside without affecting grid size */
+  /* keep inner images clipped while loading; JS flips to .loaded when ready */
+  overflow: hidden;
   border-radius: 6px;
   /* allow shrink */
   min-width: 0;
   /* while loading, prevent hover visual effect until JS marks it loaded */
 }
+
+/* once the wrapper has been finalized by JS allow the hover pop-out */
+.image-wrap.loaded { overflow: visible; }
 
 /* placeholder while loading (fills the wrapper; won't scale visually) */
 .placeholder-box {
