@@ -105,6 +105,7 @@ footer hr { border:none; border-top:1px solid #aaa; margin:10px 0; }
 }
 
 /* Masonry / puzzle-style gallery */
+/* add internal scrolling and max-height so the document scrollbar can't extend far past the gallery */
 .gallery {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); /* changed from 250px -> 180px */
@@ -117,6 +118,10 @@ footer hr { border:none; border-top:1px solid #aaa; margin:10px 0; }
   justify-items: stretch;
   align-items: start;
   width: 100%;
+
+  /* make the gallery itself scrollable and cap its height to the viewport area */
+  overflow-y: auto;
+  max-height: calc(100vh - 140px); /* JS refines this at runtime */
 }
 
 /* card must allow overflow so hovered image can pop out above neighbors */

@@ -294,22 +294,32 @@ async function loadImagesSequentially(list) {
   const myLoadId = ++currentLoadId;
   gallery.innerHTML = "";
 
+  // compute available height for the gallery (viewport minus nav/footer areas)
+  const nav = document.querySelector("nav");
+  const footer = document.querySelector("footer");
+  const navH = nav ? nav.getBoundingClientRect().height : 0;
+  const footerH = footer ? footer.getBoundingClientRect().height : 0;
+  const availableH = Math.max(200, window.innerHeight - navH - footerH - 48); // comfortable padding
+  gallery.style.maxHeight = `${availableH}px`;
+  gallery.style.overflowY = "auto";
+
   // read gallery metrics for column calculation
   const grid = gallery;
   const gap = parseInt(window.getComputedStyle(grid).getPropertyValue("gap") || "10");
   const galleryWidth = Math.max(200, grid.clientWidth || document.documentElement.clientWidth);
-  // estimate number of columns based on min column width used in CSS (keep in sync)
   const minCol = 180; // match CSS
   const cols = Math.max(1, Math.floor((galleryWidth + gap) / (minCol + gap)));
   const columnWidth = Math.max(120, Math.floor((galleryWidth - (cols - 1) * gap) / cols));
 
-  // Phase A: create all image cards+placeholders synchronously (NO ads here)
+  // Phase A: create only a limited initial pool of placeholders (prevents huge scroll)
   const cards = [];
-  for (let i = 0; i < list.length; i++) {
-    if (myLoadId !== currentLoadId) return;
+  const total = list.length;
+  const initialPool = Math.min(total, Math.max(cols * 3, 6)); // ~3 rows of placeholders
+  let nextCreateIndex = initialPool;
 
+  // helper to create a card for a given index (keeps code concise)
+  function createCardForIndex(i) {
     const meta = parseFilename(list[i]);
-
     const card = document.createElement("div");
     card.className = "card";
 
@@ -320,7 +330,6 @@ async function loadImagesSequentially(list) {
     const defaultH = Math.min(Math.max(80, Math.round(columnWidth * DEFAULT_ASPECT)), 160);
     wrap.style.height = `${defaultH}px`;
 
-    // placeholder wrapper (CSS spinner, not an img)
     const placeholder = document.createElement("div");
     placeholder.className = "placeholder-box";
 
@@ -332,45 +341,61 @@ async function loadImagesSequentially(list) {
     card.appendChild(wrap);
     gallery.appendChild(card);
 
-    // set initial grid-row span so layout immediately forms columns
+    // initial grid-row span so layout immediately forms columns
     const rowHeight = parseInt(window.getComputedStyle(grid).getPropertyValue("grid-auto-rows") || "10");
     const rowGap = parseInt(window.getComputedStyle(grid).getPropertyValue("gap") || "10");
     const initialRowSpan = Math.max(1, Math.ceil((defaultH + rowGap) / (rowHeight + rowGap)));
     card.style.gridRowEnd = `span ${initialRowSpan}`;
 
-    // keep structure and metadata for phase B
-    cards.push({ meta, card, wrap, placeholder });
+    return { meta, card, wrap, placeholder };
   }
 
-  // Phase B: sequentially load real images into existing cards — strictly one at a time
+  // create only the initial pool synchronously
+  for (let i = 0; i < initialPool; i++) {
+    if (myLoadId !== currentLoadId) return;
+    cards.push(createCardForIndex(i));
+  }
+
+  // Phase B: sequentially load images; after each load append one more placeholder if available.
   let loadedCount = 0;
-  // mark the first placeholder active so single spinner shows
   if (cards.length > 0 && cards[0].placeholder) cards[0].placeholder.classList.add("active");
 
   for (let i = 0; i < cards.length; i++) {
     if (myLoadId !== currentLoadId) return;
     const { meta, card, wrap, placeholder } = cards[i];
+
+    // actually load this card's image
     const ok = await loadImageIntoCard(meta, card, wrap, placeholder, myLoadId);
     if (myLoadId !== currentLoadId) return;
 
-    // ensure this placeholder is no longer active (spinner moves)
-    if (placeholder && placeholder.classList.contains("active")) {
+    // move the spinner forward: remove active from this placeholder (if still present)
+    if (placeholder && placeholder.classList && placeholder.classList.contains("active")) {
       placeholder.classList.remove("active");
     }
-    // activate next placeholder (single spinner moves forward)
-    if (i + 1 < cards.length && cards[i + 1].placeholder) {
-      cards[i + 1].placeholder.classList.add("active");
+
+    // Append one new placeholder (if any left) and ensure it becomes the active spinner
+    if (nextCreateIndex < total) {
+      const newCard = createCardForIndex(nextCreateIndex++);
+      cards.push(newCard);
+      // if the newly created placeholder is the immediate next in sequence, mark it active
+      const nextIdx = i + 1;
+      if (cards[nextIdx] && cards[nextIdx].placeholder) {
+        cards[nextIdx].placeholder.classList.add("active");
+      }
+    } else {
+      // otherwise, if there is already a next placeholder in DOM, activate it
+      if (cards[i + 1] && cards[i + 1].placeholder) {
+        cards[i + 1].placeholder.classList.add("active");
+      }
     }
 
-    // only count as "loaded" if ok was true (load succeeded or error handled)
+    // count loaded and insert ad periodically (existing ad insert logic)
     loadedCount++;
-    // insert ad only when loadedCount hits the interval (e.g. every 10 loaded items)
     const AD_INTERVAL = 10;
     if (loadedCount > 0 && loadedCount % AD_INTERVAL === 0) {
-      // compute ad row span using same rowHeight/rowGap logic
       const rowHeight = parseInt(window.getComputedStyle(grid).getPropertyValue("grid-auto-rows") || "10");
       const rowGap = parseInt(window.getComputedStyle(grid).getPropertyValue("gap") || "10");
-      const adMinH = 140; // should match CSS min-height
+      const adMinH = 140;
       const adRowSpan = Math.max(1, Math.ceil((adMinH + rowGap) / (rowHeight + rowGap)));
 
       const ad = document.createElement("div");
@@ -378,17 +403,37 @@ async function loadImagesSequentially(list) {
       ad.textContent = "Advertisment placeholder";
       ad.style.gridRowEnd = `span ${adRowSpan}`;
 
-      // insert ad into DOM directly after the card for the loadedCount-th item
       if (card && card.parentNode) {
         card.parentNode.insertBefore(ad, card.nextSibling);
       } else {
         gallery.appendChild(ad);
       }
-      // small local update; full recalculation will run at the end
+    }
+
+    // After each reveal, recalc layout and ensure gallery scroll doesn't overshoot too far
+    requestAnimationFrame(resizeAllMasonryItems);
+    // optionally keep the viewport clamped near last revealed image:
+    // scroll the gallery to ensure the newly loaded item is visible but do not scroll beyond it
+    try {
+      const cardRect = card.getBoundingClientRect();
+      const galleryRect = gallery.getBoundingClientRect();
+      // If the loaded card is below the visible gallery viewport, scroll just enough so it's visible.
+      if (cardRect.bottom > galleryRect.bottom) {
+        const delta = cardRect.bottom - galleryRect.bottom + 10; // small padding
+        gallery.scrollTop += delta;
+      }
+      // clamp maximum scroll to the last appended card's bottom + 10px
+      const lastCard = cards[cards.length - 1].card;
+      if (lastCard) {
+        const lastBottom = lastCard.getBoundingClientRect().bottom - galleryRect.top;
+        const maxScroll = Math.max(0, Math.ceil(lastBottom + 10 - galleryRect.height));
+        if (gallery.scrollTop > maxScroll) gallery.scrollTop = maxScroll;
+      }
+    } catch (e) {
+      // ignore measurement errors in odd environments
     }
   }
 
-  // final layout correction (one final pass)
   if (myLoadId === currentLoadId) resizeAllMasonryItems();
 }
 
