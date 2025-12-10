@@ -225,64 +225,68 @@ footer hr { border:none; border-top:1px solid #aaa; margin:10px 0; }
 
 /* ensure modal/backdrop overlays everything */
 .modal-backdrop {
-  position:fixed; inset:0; display:flex; justify-content:center; align-items:center;
-  background: rgba(0,0,0,.65); z-index:99999; padding:16px; /* raised z-index */
+  position: fixed;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.65);
+  z-index: 99999;
+  padding: 8px;
 }
-
-/* ensure ad/error/placeholder sit above images (unchanged but for clarity) */
-.placeholder-box { z-index: 1000; }
-.loading-error { z-index: 1000; }
-.ad-card { z-index: 1100; }
 
 /* Modal / Spotlight — constrained to viewport with internal scrolling */
 .modal {
   box-sizing: border-box;
+  position: relative;
   width: auto;
-  /* always keep a comfortable margin from the viewport edges */
   max-width: min(840px, calc(100vw - 48px));
   max-height: calc(100vh - 48px);
-  padding: 8px;                /* snug padding */
+  padding: 16px;
   border-radius: 8px;
   gap: 8px;
-  box-shadow: 0 14px 36px rgba(0,0,0,0.55);
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.55);
   display: flex;
   flex-direction: column;
-  overflow: auto;              /* scroll inside modal if content is too tall */
+  overflow: auto;
   align-items: stretch;
-  background: white;           /* explicit white background */
+  background: #fff;
+  color: #000;
 }
 
-/* Title + meta stay tight to the image */
-.modal-title { padding: 0 6px; font-size: 1.02rem; margin: 2px 0; }
-.modal-meta  { padding: 0 6px 6px 6px; gap:4px; }
+body.dark-mode .modal {
+  background: #1a1a1a;
+  color: #eee;
+}
+
+.caption {
+  padding: 8px 12px;
+  font-size: 0.95rem;
+  text-align: center;
+  color: inherit;
+}
 
 .modal-imgwrap {
   padding: 0;
   display: flex;
   justify-content: center;
   align-items: center;
-  /* reserve vertical space for title/meta; this prevents image from pushing modal off-screen */
   max-height: calc(100vh - 220px);
   overflow: hidden;
 }
 
-/* ensure modal image never grows beyond the constrained modal area */
 .modal img,
 .modal .modal-image {
   max-width: 100%;
-  max-height: calc(100vh - 260px); /* slightly smaller than wrapper to leave room for text/padding */
+  max-height: calc(100vh - 260px);
   width: auto;
   height: auto;
   object-fit: contain;
   display: block;
 }
 
-/* Backdrop padding keeps modal away from screen edges; responsive adjustments */
-.modal-backdrop {
-  padding: 20px; /* comfortable margin on desktop */
-}
-@media (max-width:600px) {
-  .modal-backdrop { padding: 10px; } /* smaller margin on small screens */
+@media (max-width: 600px) {
+  .modal-backdrop { padding: 10px; }
   .modal { max-width: calc(100vw - 20px); max-height: calc(100vh - 20px); }
   .modal-imgwrap { max-height: calc(100vh - 160px); }
   .modal img, .modal .modal-image { max-height: calc(100vh - 180px); }

@@ -281,6 +281,17 @@ function openModal(meta) {
   caption.textContent = `"${meta.tags.join(", ")}" flicked by ${meta.photographer}`;
   modal.appendChild(caption);
 
+  // add close button
+  const closeBtn = document.createElement("button");
+  closeBtn.textContent = "×";
+  closeBtn.style.cssText = "position:absolute; top:8px; right:8px; background:none; border:none; font-size:28px; cursor:pointer; color:inherit; z-index:100001;";
+  closeBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    document.body.removeChild(backdrop);
+    document.body.style.overflow = "";
+  });
+  modal.appendChild(closeBtn);
+
   backdrop.appendChild(modal);
   document.body.appendChild(backdrop);
 }
