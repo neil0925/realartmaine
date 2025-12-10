@@ -448,10 +448,6 @@ function loadImageIntoCard(meta, card, wrap, placeholder, expectedLoadId) {
         card.style.gridRowEnd = `span ${rowSpan}`;
         wrap.classList.add("loaded");
         // after image is visible, attach click listener to the actual DOM element
-        img.addEventListener("click", (e) => {
-          e.stopPropagation();
-          openModal(meta);
-        });
         resolve(true);
       });
     });
@@ -484,7 +480,14 @@ function loadImageIntoCard(meta, card, wrap, placeholder, expectedLoadId) {
     });
 
     // only set src after handlers attached
+    // attach click handler to wrap immediately (not waiting for image load)
+    wrap.addEventListener("click", (e) => {
+      e.stopPropagation();
+      openModal(meta);
+    });
+
     img.src = meta.src;
+
   });
 }
 
