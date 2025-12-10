@@ -423,9 +423,9 @@ function loadImageIntoCard(meta, card, wrap, placeholder, expectedLoadId) {
       img.classList.remove("hidden");
       img.classList.add("fade-in");
 
-      // remove placeholder spinner display but keep the placeholder box
+      // clear placeholder box contents (remove spinner) but keep the box
       if (placeholder && placeholder.parentNode === wrap) {
-        placeholder.style.display = "none";
+        placeholder.innerHTML = "";
       }
       wrap.appendChild(img);
 
@@ -443,15 +443,15 @@ function loadImageIntoCard(meta, card, wrap, placeholder, expectedLoadId) {
         resolve(false);
         return;
       }
-      // replace placeholder with filename text (basename)
+      // replace placeholder contents with error text
       try {
         const filename = (meta && meta.src) ? meta.src.split("/").pop() : "unknown";
         const errEl = document.createElement("div");
         errEl.className = "loading-error";
         errEl.textContent = `Failed: ${filename}`;
         if (placeholder && placeholder.parentNode === wrap) {
-          placeholder.style.display = "none";
-          wrap.appendChild(errEl);
+          placeholder.innerHTML = "";
+          placeholder.appendChild(errEl);
         } else {
           wrap.appendChild(errEl);
         }
