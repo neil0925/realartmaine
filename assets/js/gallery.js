@@ -389,21 +389,39 @@ function openModal(meta) {
   const caption = document.createElement("div");
   caption.className = "caption";
   
-  // Extract tags (everything before the last dash, comma-separated) and photographer
-  // from the label. Format: "tag(s) flicked by photographer"
+  // Extract tags and photographer from the label.
+  // Format: tag(s)-[crew(s)]-photographer-style(s)
+  // - If 3 dashes: tag(s)-crew(s)-photographer-style(s)
+  // - If 2 dashes: tag(s)-photographer-style(s)
+  // Display: "tag(s) flicked by photographer"
   let tagText = '';
   let photographerText = '';
   
   if (meta && meta.label) {
-    // Split by hyphen to separate tag part from photographer part
-    const parts = meta.label.split('-');
-    if (parts.length > 0) {
-      // All parts except the last are tags
-      tagText = parts.slice(0, -1).join('-').trim();
-      // The last part is photographer (may contain commas/styles, take first word)
-      const lastPart = parts[parts.length - 1].trim();
-      // Extract just the photographer name (first word/token)
-      const photoTokens = lastPart.split(/[\s,]/);
+    // Split by dash to separate components
+    const dashParts = meta.label.split('-');
+    
+    // First part (before first dash) is always the tags
+    if (dashParts.length > 0) {
+      tagText = dashParts[0].trim();
+    }
+    
+    // Determine if there's a crew by counting dashes
+    // 3+ dashes means: tag-crew-photographer-styles (photographer is index 2)
+    // 2 dashes means: tag-photographer-styles (photographer is index 1)
+    let photographerIndex = -1;
+    if (dashParts.length >= 4) {
+      // 3+ dashes: photographer is at index 2 (after crew)
+      photographerIndex = 2;
+    } else if (dashParts.length >= 3) {
+      // 2 dashes: photographer is at index 1
+      photographerIndex = 1;
+    }
+    
+    // Extract photographer (first word/token if it contains commas/spaces)
+    if (photographerIndex >= 0 && dashParts[photographerIndex]) {
+      const photoStr = dashParts[photographerIndex].trim();
+      const photoTokens = photoStr.split(/[\s,]+/);
       photographerText = photoTokens[0];
     }
   }
