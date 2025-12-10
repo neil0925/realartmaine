@@ -265,17 +265,22 @@ function openModal(meta) {
   const modal = document.createElement("div");
   modal.className = "modal";
 
+  const imgwrap = document.createElement("div");
+  imgwrap.className = "modal-imgwrap";
+
   const img = document.createElement("img");
   img.src = meta.src;
   img.alt = meta.rawBase;
+  img.className = "modal-image";
+
+  imgwrap.appendChild(img);
+  modal.appendChild(imgwrap);
 
   const caption = document.createElement("div");
   caption.className = "caption";
   caption.textContent = `"${meta.tags.join(", ")}" flicked by ${meta.photographer}`;
-
-
-  modal.appendChild(img);
   modal.appendChild(caption);
+
   backdrop.appendChild(modal);
   document.body.appendChild(backdrop);
 }
