@@ -423,10 +423,9 @@ function loadImageIntoCard(meta, card, wrap, placeholder, expectedLoadId) {
       img.classList.remove("hidden");
       img.classList.add("fade-in");
 
-      // remove placeholder wrapper if present
+      // remove placeholder spinner display but keep the placeholder box
       if (placeholder && placeholder.parentNode === wrap) {
-        // remove placeholder (spinner won't show because active removed by loop)
-        placeholder.remove();
+        placeholder.style.display = "none";
       }
       wrap.appendChild(img);
 
@@ -451,7 +450,8 @@ function loadImageIntoCard(meta, card, wrap, placeholder, expectedLoadId) {
         errEl.className = "loading-error";
         errEl.textContent = `Failed: ${filename}`;
         if (placeholder && placeholder.parentNode === wrap) {
-          placeholder.replaceWith(errEl);
+          placeholder.style.display = "none";
+          wrap.appendChild(errEl);
         } else {
           wrap.appendChild(errEl);
         }
