@@ -408,8 +408,6 @@ function loadImageIntoCard(meta, card, wrap, placeholder, expectedLoadId) {
     img.className = "gallery-image hidden";
     img.draggable = false;
 
-    img.addEventListener("click", () => openModal(meta));
-
     const grid = document.querySelector(".gallery");
     const rowHeight = parseInt(window.getComputedStyle(grid).getPropertyValue("grid-auto-rows") || "10");
     const rowGap = parseInt(window.getComputedStyle(grid).getPropertyValue("gap") || "10");
@@ -438,6 +436,11 @@ function loadImageIntoCard(meta, card, wrap, placeholder, expectedLoadId) {
         const rowSpan = Math.max(1, Math.ceil((finalH + rowGap) / (rowHeight + rowGap)));
         card.style.gridRowEnd = `span ${rowSpan}`;
         wrap.classList.add("loaded");
+        // after image is visible, attach click listener to the actual DOM element
+        img.addEventListener("click", (e) => {
+          e.stopPropagation();
+          openModal(meta);
+        });
         resolve(true);
       });
     });
