@@ -388,9 +388,36 @@ function openModal(meta) {
 
   const caption = document.createElement("div");
   caption.className = "caption";
-  const labelText = (meta && meta.label) ? meta.label : (meta && meta.rawBase) ? meta.rawBase : '';
-  const byText = (meta && meta.photographer) ? ` flicked by ${meta.photographer}` : '';
-  caption.textContent = `${labelText}${byText}`;
+  
+  // Extract tags (everything before the last dash, comma-separated) and photographer
+  // from the label. Format: "tag(s) flicked by photographer"
+  let tagText = '';
+  let photographerText = '';
+  
+  if (meta && meta.label) {
+    // Split by hyphen to separate tag part from photographer part
+    const parts = meta.label.split('-');
+    if (parts.length > 0) {
+      // All parts except the last are tags
+      tagText = parts.slice(0, -1).join('-').trim();
+      // The last part is photographer (may contain commas/styles, take first word)
+      const lastPart = parts[parts.length - 1].trim();
+      // Extract just the photographer name (first word/token)
+      const photoTokens = lastPart.split(/[\s,]/);
+      photographerText = photoTokens[0];
+    }
+  }
+  
+  // Build caption: "tag(s) flicked by photographer"
+  let captionText = '';
+  if (tagText) {
+    captionText = tagText;
+  }
+  if (photographerText) {
+    captionText += (captionText ? ' ' : '') + `flicked by ${photographerText}`;
+  }
+  
+  caption.textContent = captionText || (meta && meta.rawBase) || '';
   modal.appendChild(caption);
 
   // add close button
