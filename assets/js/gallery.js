@@ -6,136 +6,229 @@
    - search filtering
 */
 
-let imagesList = [
-  "/assets/images/catch, link, wake, hugo-OHK,PTG,LTB,5G-realartmaine-throwie, tag.jpg",
-  "/assets/images/same-SLT,TVT-realartmaine-tags.jpg",
-  "/assets/images/same-SLT,TVT-realartmaine-piece, staightletter.jpg",
-  "/assets/images/peck-SLF-realartmaine-throwie, bubble letter, hollow.jpg",
-  "/assets/images/salud-PTG-realartmaine-tags, character, hollow.jpg",
-  "/assets/images/salud-PTG-realartmaine-tags, hollow, character.jpg",
-  "/assets/images/bunt, some1-LG-realartmaine-stencil, tag.jpg",
-  "/assets/images/ankle-LTB,2K69-realartmaine-throwie, hollow .jpg",
-  "/assets/images/wake-LTB-realartmaine-fillin, throwie.jpg",
-  "/assets/images/SLT-SLT-realartmaine-paintroller.jpg",
-  "/assets/images/pest-realartmaine-throwie, bubble letter, hollow.jpg",
-  "/assets/images/rune-LTB,2K69-realartmaine-throwie, hollow, bubble letter.jpg",
-  "/assets/images/5G-5G-minnowfeed-straightletter, antistyle.JPG",
-  "/assets/images/qjoe, link-5G-realartmaine-antistyle, straightletter.jpg",
-  "/assets/images/link-5G,CRAFT-realartmaine-antistyle, piece.jpg",
-  "/assets/images/prizm, ruski, cats-realartmaine-paintroller.jpg",
-  "/assets/images/some1-realartmaine-stencil.jpg",
-  "/assets/images/owell-realartmaine-antistyle, throwie.jpg",
-  "/assets/images/owell-realartmaine-antistyle, throwie, fillin.jpg",
-  "/assets/images/sloan-BNE,PTG-realartmaine-throwie, hollow.jpg",
-  "/assets/images/zone-ZPLK-antistyle, wildstyle.JPG",
-  "/assets/images/vroom-ZPLK-piece, character.JPG",
-  "/assets/images/lufa-hex-ZPLK-tags, piece.JPG",
-  "/assets/images/nare-az-ZPLK-piece, character.JPG",
-  "/assets/images/wilt-2K69,VC-minnowfeed-blackbook.jpg",
-  "/assets/images/spek, segway, 27, port, melts, yalts-FTS,TSZ,CIRCLET,YME,IMS-minnowfeed-tags, moniker.JPG",
-  "/assets/images/segway-FTS-minnowfeed-throwie, hollow.JPG",
-  "/assets/images/same, catch-SLT,PTG,BNE,OHK-realartmaine-tag.jpg",
-  "/assets/images/same, 27, enya-SLT,TVT,TSZ,5G-minnowfeed-tags, stencil.jpg",
-  "/assets/images/rune-LTB,2K69-minnowfeed-piece, antistyle.JPG",
-  "/assets/images/rune, 27-LTB,2K69,TSZ,2GF-minnowfeed-throwie, fillin, antistyle.JPG",
-  "/assets/images/qjoe-5G,UK-minnowfeed-antistyle, piece.JPG",
-  "/assets/images/qjoe, link-5G-realartmaine-antistyle, straightletter.jpg",
-  "/assets/images/ojea3-HEX,OY!-minnowfeed-piece.JPG",
-  "/assets/images/ojea3-HEX,OY!-minnowfeed-tags.JPG",
-  "/assets/images/mobi-TSZ-minnowfeed-straightletter.JPG",
-  "/assets/images/lerk, link, obee-5G,OY!-minnowfeed-piece, paintroller.JPG",
-  "/assets/images/lerk, 27-2GF-minnowfeed-tags, stencil.JPG",
-  "/assets/images/kindbud-5G,SDH-minnowfeed-antistyle, piece.JPG",
-  "/assets/images/jumz-TSZ-minnowfeed-throwie, fillin, stencil.JPG",
-  "/assets/images/ichabod-YME,CIRLCET-minnowfeed-tag.jpg",
-  "/assets/images/grazi, 27-DWT,TSZ,2GF-minnowfeed-tags.JPG",
-  "/assets/images/gerv-YME-minnowfeed-piece.JPG",
-  "/assets/images/feer, scipio-2GF-minnowfeed-piece, tags, antistyle.jpg",
-  "/assets/images/catch-PTG,OHK,BNE-minnowfeed-tags, throwie, fillin.JPG",
-  "/assets/images/catch-BNE,PTG,OHK-minnowfeed-throwie, hollow.JPG",
-  "/assets/images/catch, secret, 27-BNE,PTG,OHK,5G,TSZ-minnowfeed-antistyle, stencil, blackbook.JPG",
-  "/assets/images/ankle-LTB,2K69-minnowfeed-throwie, fillin.JPG",
-  "/assets/images/ankle-2K69,LTB-minnowfeed-tags.JPG",
-  "/assets/images/LSE-LSE-minnowfeed-straightletter.jpg",
-  "/assets/images/2GF-realartmaine-tag.jpg",
-  "/assets/images/27-TSZ,2GF-realartmaine-throwie, antistyle.jpg",
-  "/assets/images/ankle-LTB,2K69-realartmaine-tags.jpg",
-  "/assets/images/ankle, ne1, symbol, spud-LTB, 2K69, CTS-realartmaine-throwie, straightletter, tags, fillin_.jpg",
-  "/assets/images/ankor-SFL-realartmaine-straightletter.jpg",
-  "/assets/images/aura-OHK-realartmaine-straightletter, piece.jpg",
-  "/assets/images/auto-CTS,TNL-realartmaine-tags, character.jpg",
-  "/assets/images/bosh, doves-SLT-realartmaine-throwie, fillin, tags.jpg",
-  "/assets/images/catch-OHK,PTG,BNE-realartmaine-piece, antistyle.jpg",
-  "/assets/images/catch, payze-PTG,OHK,BNE,IMS-realartmaine-straightletter, fillin.jpg",
-  "/assets/images/catch, pyle-PTG,BNE,OHK-realartmaine-throwie, hollow, notmaine.jpg",
-  "/assets/images/chew-realartmaine-throwie, hollow.jpg",
-  "/assets/images/digitalnail-realartmaine-stencil.jpg",
-  "/assets/images/digitalnail-realartmaine-stencil(1).jpg",
-  "/assets/images/wake, dean, link, auto, dove-LTB,CFM,SLT,5G,CTS,TNL,SDH,CRAFT-realartmaine-piece, antistyle, paintroller.jpg",
-  "/assets/images/wake, rune, doves, same-SLT,LTB,TVT-realartmaine-throwie, piece, fillin, tags.jpg",
-  "/assets/images/wd40-realartmaine-tags.jpg",
-  "/assets/images/write-SFL-realartmaine-piece, straightletter.jpg",
-  "/assets/images/yami, high8, wake, secret-5G,LTB,OHK-realartmaine-antistyle, tags, pieces.jpg",
-  "/assets/images/feer, kite, enzyme, loupe, auto-DWT,DPW,TNL,CTS-realartmaine-tags, piece, straightletter, antistyle.jpg",
-  "/assets/images/gervs-YME-realartmaine-piece.jpg",
-  "/assets/images/grazi-DWT-realartmaine-antistyle, throwie, hollow.jpg",
-  "/assets/images/grazi-DWT-realartmaine-straightletter.jpg",
-  "/assets/images/grazi-DWT-realartmaine-throwie, hollow.jpg",
-  "/assets/images/grazi, some1-DWT-realartmaine-tags, stencil.jpg",
-  "/assets/images/heart, knave, pout, ojea3, doves, merlin-CTS,TNL,HEX,OY!,CTS,SK8-realartmaine-throwie, fillin, straightletter, tags.jpg",
-  "/assets/images/hiphop, ducky-realartmaine-antistyle, character, portlandbee.jpg",
-  "/assets/images/key-2K69-realartmaine-throwie, fillin.jpg",
-  "/assets/images/solar-DNB-realartmaine-tags.jpg",
-  "/assets/images/slug, pest, some1, vane, brik-PTG,SFL-realartmaine-stencil, tags.jpg",
-  "/assets/images/some1-realartmaine-stencil.jpg",
-  "/assets/images/some1-realartmaine-piece.jpg",
-  "/assets/images/towel-FK-realartmaine-tags.jpg",
-  "/assets/images/towel, sewer, salud, klerm, kindbud-FK,PTG,TNL,5G-realartmaine-tags, character.jpg",
-  "/assets/images/wake-LTB-realartmaine-throwie, fillin.jpg",
-  "/assets/images/27-TSZ,2GF-minnowfeed-paintroller.jpg",
-  "/assets/images/jipso, alps, goal-PTG-paintroller, tags, throwie, straightletter, fillin, character.jpg",
-  "/assets/images/ducky-realartmaine-antistyle, paintroller.jpg",
-  "/assets/images/enya-5G-realartmaine-antistyle.jpg",
-  "/assets/images/enzyme-DPW-realartmaine-throwie, fillin.jpg",
-  "/assets/images/epser-UK,TMS-realartmaine-straightletter.jpg",
-  "/assets/images/epser-UK,TMS-realartmaine-tag.jpg",
-  "/assets/images/muska, piza-KYS-realartmaine-piece.jpg",
-  "/assets/images/muska, piza-KYS-realartmaine-straightletter.jpg",
-  "/assets/images/neptune, mobi-DNB,AWC,TSZ-realartmaine-tags, character, hollow.jpg",
-  "/assets/images/notice-realartmaine-straightletter.jpg",
-  "/assets/images/pigeon-realartmaine-character.jpg",
-  "/assets/images/salud, senegra-PTG,OHK-realartmaine-tags.jpg",
-  "/assets/images/same, calcium, ducky, yart-SLT,IMS,TVT,OHK-realartmaine-throwie, fillin, character, antistyle.jpg",
-  "/assets/images/skipio, pyle-2GF,PTG,OHK,BNE-realartmaine-throwie, fillin.jpg",
-  "/assets/images/soft, same-SLT,2K69-realartmaine-throwie, fillin.jpg",
-  "/assets/images/some1-realartmaine-character, hollow.jpg",
-  "/assets/images/suer, same-SLT,TVT,TMS-realartmaine-throwie, hollow, tags.jpg",
-  "/assets/images/trak, hebrew-LTB,2K69-realartmaine-tags.jpg",
-  "/assets/images/wake, ducky-LTB-realartmaine-throwie, hollow, character, antistyle.jpg",
-  "/assets/images/mobi, grazi-DWT,TSZ-minnowfeed-straightletter, tags.JPG",
-  "/assets/images/spots, wilt, 27-VC,2K69,HKC-minnowfeed-blackbook, antistyle.JPG",
-  "/assets/images/hebrew-cts-ZPLK-straightletter.JPG",
-  "/assets/images/fish, symbol, grazi, spots, loupe-TNL,CTS,DWT,2K69,VC-ZPLK-piece, throwie, fillin, antistyle, tags.JPG",
-  "/assets/images/catch, soepo-PTG,BNE,OHK-throwie, fillin.JPG",
-  "/assets/images/aira-ZPLK-piece.JPG",
-  "/assets/images/aira-ZPLK-piece, character.JPG",
-  "/assets/images/aidan, grazi, loupe-CTS,TNL,DWT-ZPLK-straightletter, piece, fillin.JPG",
-  "/assets/images/sloan-PTG,BNE-realartmaine-moniker, tag, character.jpg",
-  "/assets/images/tabz, sloan-2gf,ptg,bne-RealArtMaine-hand style.jpg",
-  "/assets/images/songy-realartmaine-straightletter, hollow.jpg",
-  "/assets/images/salud-PTG,OHK-realartmaine-tags, character.jpg",
-  "/assets/images/learn-YME,CIRCLET-realartmaine-piece.jpg",
-  "/assets/images/iowa-3FK-realartmaine-tags.jpg",
-  "/assets/images/enya, osha, auto, lego, sloan-PTG,BNE,CTS,TNL,5G-realartmaine-tags.jpg",
-  "/assets/images/port-IMS-realartmaine-piece.jpg",
-  "/assets/images/thex-SLT-realartmaine-piece.jpg",
-  "/assets/images/uglyboy-5G-realartmaine-throwie, antistyle.jpg",
-  "/assets/images/27, learn-YME,SLT,CIRCLET,2GF,TSZ,2GF-minnowfeed-piece, stencil.JPG",
-  "/assets/images/27, mobi, vazor, segway-TSZ,2GF,AWC,FTS-minnowfeed-piece, straightletter, stencil.JPG",
-  "/assets/images/27, plato-HEX,TSZ,2GF-minnowfeed-tags.jpg"
-];
+// ORIGINAL_IMAGES removed: image metadata is now sourced from `IMAGE_LABELS`.
+// We no longer rely on a long list of original filenames. metaList is
+// generated from `IMAGE_LABELS` (1-based) below.
+
+// IMAGE_LABELS: editable mapping for human-readable labels per numeric image.
+// The following block contains explicit 1-based assignments so you can
+// open this file and edit labels directly (e.g. `IMAGE_LABELS[1] = "..."`).
+// We generate defaults from the original filenames but you can override any
+// line by editing the string literal.
+const IMAGE_LABELS = [null]; // 1-based (IMAGE_LABELS[1] -> label for image 1)
+
+// ----- AUTO-GENERATED LABELS (editable) -----
+// You may change any right-hand string to a preferred, human-readable label.
+
+IMAGE_LABELS[1] = "catch, link, wake, hugo-OHK,PTG,LTB,5G-realartmaine-throwie, tag";
+IMAGE_LABELS[2] = "same-SLT,TVT-realartmaine-tags";
+IMAGE_LABELS[3] = "same-SLT,TVT-realartmaine-piece, staightletter";
+IMAGE_LABELS[4] = "peck-SLF-realartmaine-throwie, bubble letter, hollow";
+IMAGE_LABELS[5] = "salud-PTG-realartmaine-tags, character, hollow";
+IMAGE_LABELS[6] = "salud-PTG-realartmaine-tags, hollow, character";
+IMAGE_LABELS[7] = "bunt, some1-LG-realartmaine-stencil, tag";
+IMAGE_LABELS[8] = "ankle-LTB,2K69-realartmaine-throwie, hollow";
+IMAGE_LABELS[9] = "wake-LTB-realartmaine-fillin, throwie";
+IMAGE_LABELS[10] = "SLT-SLT-realartmaine-paintroller";
+IMAGE_LABELS[11] = "pest-realartmaine-throwie, bubble letter, hollow";
+IMAGE_LABELS[12] = "rune-LTB,2K69-realartmaine-throwie, hollow, bubble letter";
+IMAGE_LABELS[13] = "5G-5G-minnowfeed-straightletter, antistyle";
+IMAGE_LABELS[14] = "qjoe, link-5G-realartmaine-antistyle, straightletter";
+IMAGE_LABELS[15] = "link-5G,CRAFT-realartmaine-antistyle, piece";
+IMAGE_LABELS[16] = "prizm, ruski, cats-realartmaine-paintroller";
+IMAGE_LABELS[17] = "some1-realartmaine-stencil";
+IMAGE_LABELS[18] = "owell-realartmaine-antistyle, throwie";
+IMAGE_LABELS[19] = "owell-realartmaine-antistyle, throwie, fillin";
+IMAGE_LABELS[20] = "sloan-BNE,PTG-realartmaine-throwie, hollow";
+IMAGE_LABELS[21] = "zone-ZPLK-antistyle, wildstyle";
+IMAGE_LABELS[22] = "vroom-ZPLK-piece, character";
+IMAGE_LABELS[23] = "lufa-hex-ZPLK-tags, piece";
+IMAGE_LABELS[24] = "nare-az-ZPLK-piece, character";
+IMAGE_LABELS[25] = "wilt-2K69,VC-minnowfeed-blackbook";
+IMAGE_LABELS[26] = "spek, segway, 27, port, melts, yalts-FTS,TSZ,CIRCLET,YME,IMS-minnowfeed-tags, moniker";
+IMAGE_LABELS[27] = "segway-FTS-minnowfeed-throwie, hollow";
+IMAGE_LABELS[28] = "same, catch-SLT,PTG,BNE,OHK-realartmaine-tag";
+IMAGE_LABELS[29] = "same, 27, enya-SLT,TVT,TSZ,5G-minnowfeed-tags, stencil";
+IMAGE_LABELS[30] = "rune-LTB,2K69-minnowfeed-piece, antistyle";
+IMAGE_LABELS[31] = "rune, 27-LTB,2K69,TSZ,2GF-minnowfeed-throwie, fillin, antistyle";
+IMAGE_LABELS[32] = "qjoe-5G,UK-minnowfeed-antistyle, piece";
+IMAGE_LABELS[33] = "qjoe, link-5G-realartmaine-antistyle, straightletter";
+IMAGE_LABELS[34] = "ojea3-HEX,OY!-minnowfeed-piece";
+IMAGE_LABELS[35] = "ojea3-HEX,OY!-minnowfeed-tags";
+IMAGE_LABELS[36] = "mobi-TSZ-minnowfeed-straightletter";
+IMAGE_LABELS[37] = "lerk, link, obee-5G,OY!-minnowfeed-piece, paintroller";
+IMAGE_LABELS[38] = "lerk, 27-2GF-minnowfeed-tags, stencil";
+IMAGE_LABELS[39] = "kindbud-5G,SDH-minnowfeed-antistyle, piece";
+IMAGE_LABELS[40] = "jumz-TSZ-minnowfeed-throwie, fillin, stencil";
+IMAGE_LABELS[41] = "ichabod-YME,CIRLCET-minnowfeed-tag";
+IMAGE_LABELS[42] = "grazi, 27-DWT,TSZ,2GF-minnowfeed-tags";
+IMAGE_LABELS[43] = "gerv-YME-minnowfeed-piece";
+IMAGE_LABELS[44] = "feer, scipio-2GF-minnowfeed-piece, tags, antistyle";
+IMAGE_LABELS[45] = "catch-PTG,OHK,BNE-minnowfeed-tags, throwie, fillin";
+IMAGE_LABELS[46] = "catch-BNE,PTG,OHK-minnowfeed-throwie, hollow";
+IMAGE_LABELS[47] = "catch, secret, 27-BNE,PTG,OHK,5G,TSZ-minnowfeed-antistyle, stencil, blackbook";
+IMAGE_LABELS[48] = "ankle-LTB,2K69-minnowfeed-throwie, fillin";
+IMAGE_LABELS[49] = "ankle-2K69,LTB-minnowfeed-tags";
+IMAGE_LABELS[50] = "LSE-LSE-minnowfeed-straightletter";
+IMAGE_LABELS[51] = "2GF-realartmaine-tag";
+IMAGE_LABELS[52] = "27-TSZ,2GF-realartmaine-throwie, antistyle";
+IMAGE_LABELS[53] = "ankle-LTB,2K69-realartmaine-tags";
+IMAGE_LABELS[54] = "ankle, ne1, symbol, spud-LTB, 2K69, CTS-realartmaine-throwie, straightletter, tags, fillin_";
+IMAGE_LABELS[55] = "ankor-SFL-realartmaine-straightletter";
+IMAGE_LABELS[56] = "aura-OHK-realartmaine-straightletter, piece";
+IMAGE_LABELS[57] = "auto-CTS,TNL-realartmaine-tags, character";
+IMAGE_LABELS[58] = "bosh, doves-SLT-realartmaine-throwie, fillin, tags";
+IMAGE_LABELS[59] = "catch-OHK,PTG,BNE-realartmaine-piece, antistyle";
+IMAGE_LABELS[60] = "catch, payze-PTG,OHK,BNE,IMS-realartmaine-straightletter, fillin";
+IMAGE_LABELS[61] = "catch, pyle-PTG,BNE,OHK-realartmaine-throwie, hollow, notmaine";
+IMAGE_LABELS[62] = "chew-realartmaine-throwie, hollow";
+IMAGE_LABELS[63] = "digitalnail-realartmaine-stencil";
+IMAGE_LABELS[64] = "digitalnail-realartmaine-stencil(1)";
+IMAGE_LABELS[65] = "wake, dean, link, auto, dove-LTB,CFM,SLT,5G,CTS,TNL,SDH,CRAFT-realartmaine-piece, antistyle, paintroller";
+IMAGE_LABELS[66] = "wake, rune, doves, same-SLT,LTB,TVT-realartmaine-throwie, piece, fillin, tags";
+IMAGE_LABELS[67] = "wd40-realartmaine-tags";
+IMAGE_LABELS[68] = "write-SFL-realartmaine-piece, straightletter";
+IMAGE_LABELS[69] = "yami, high8, wake, secret-5G,LTB,OHK-realartmaine-antistyle, tags, pieces";
+IMAGE_LABELS[70] = "feer, kite, enzyme, loupe, auto-DWT,DPW,TNL,CTS-realartmaine-tags, piece, straightletter, antistyle";
+IMAGE_LABELS[71] = "gervs-YME-realartmaine-piece";
+IMAGE_LABELS[72] = "grazi-DWT-realartmaine-antistyle, throwie, hollow";
+IMAGE_LABELS[73] = "grazi-DWT-realartmaine-straightletter";
+IMAGE_LABELS[74] = "grazi-DWT-realartmaine-throwie, hollow";
+IMAGE_LABELS[75] = "grazi, some1-DWT-realartmaine-tags, stencil";
+IMAGE_LABELS[76] = "heart, knave, pout, ojea3, doves, merlin-CTS,TNL,HEX,OY!,CTS,SK8-realartmaine-throwie, fillin, straightletter, tags";
+IMAGE_LABELS[77] = "hiphop, ducky-realartmaine-antistyle, character, portlandbee";
+IMAGE_LABELS[78] = "key-2K69-realartmaine-throwie, fillin";
+IMAGE_LABELS[79] = "solar-DNB-realartmaine-tags";
+IMAGE_LABELS[80] = "slug, pest, some1, vane, brik-PTG,SFL-realartmaine-stencil, tags";
+IMAGE_LABELS[81] = "some1-realartmaine-stencil";
+IMAGE_LABELS[82] = "some1-realartmaine-piece";
+IMAGE_LABELS[83] = "towel-FK-realartmaine-tags";
+IMAGE_LABELS[84] = "towel, sewer, salud, klerm, kindbud-FK,PTG,TNL,5G-realartmaine-tags, character";
+IMAGE_LABELS[85] = "wake-LTB-realartmaine-throwie, fillin";
+IMAGE_LABELS[86] = "27-TSZ,2GF-minnowfeed-paintroller";
+IMAGE_LABELS[87] = "jipso, alps, goal-PTG-paintroller, tags, throwie, straightletter, fillin, character";
+IMAGE_LABELS[88] = "ducky-realartmaine-antistyle, paintroller";
+IMAGE_LABELS[89] = "enya-5G-realartmaine-antistyle";
+IMAGE_LABELS[90] = "enzyme-DPW-realartmaine-throwie, fillin";
+IMAGE_LABELS[91] = "epser-UK,TMS-realartmaine-straightletter";
+IMAGE_LABELS[92] = "epser-UK,TMS-realartmaine-tag";
+IMAGE_LABELS[93] = "muska, piza-KYS-realartmaine-piece";
+IMAGE_LABELS[94] = "muska, piza-KYS-realartmaine-straightletter";
+IMAGE_LABELS[95] = "neptune, mobi-DNB,AWC,TSZ-realartmaine-tags, character, hollow";
+IMAGE_LABELS[96] = "notice-realartmaine-straightletter";
+IMAGE_LABELS[97] = "pigeon-realartmaine-character";
+IMAGE_LABELS[98] = "salud, senegra-PTG,OHK-realartmaine-tags";
+IMAGE_LABELS[99] = "same, calcium, ducky, yart-SLT,IMS,TVT,OHK-realartmaine-throwie, fillin, character, antistyle";
+IMAGE_LABELS[100] = "skipio, pyle-2GF,PTG,OHK,BNE-realartmaine-throwie, fillin";
+IMAGE_LABELS[101] = "soft, same-SLT,2K69-realartmaine-throwie, fillin";
+IMAGE_LABELS[102] = "some1-realartmaine-character, hollow";
+IMAGE_LABELS[103] = "suer, same-SLT,TVT,TMS-realartmaine-throwie, hollow, tags";
+IMAGE_LABELS[104] = "trak, hebrew-LTB,2K69-realartmaine-tags";
+IMAGE_LABELS[105] = "wake, ducky-LTB-realartmaine-throwie, hollow, character, antistyle";
+IMAGE_LABELS[106] = "mobi, grazi-DWT,TSZ-minnowfeed-straightletter, tags";
+IMAGE_LABELS[107] = "spots, wilt, 27-VC,2K69,HKC-minnowfeed-blackbook, antistyle";
+IMAGE_LABELS[108] = "hebrew-cts-ZPLK-straightletter";
+IMAGE_LABELS[109] = "fish, symbol, grazi, spots, loupe-TNL,CTS,DWT,2K69,VC-ZPLK-piece, throwie, fillin, antistyle, tags";
+IMAGE_LABELS[110] = "catch, soepo-PTG,BNE,OHK-throwie, fillin";
+IMAGE_LABELS[111] = "aira-ZPLK-piece";
+IMAGE_LABELS[112] = "aira-ZPLK-piece, character";
+IMAGE_LABELS[113] = "aidan, grazi, loupe-CTS,TNL,DWT-ZPLK-straightletter, piece, fillin";
+IMAGE_LABELS[114] = "sloan-PTG,BNE-realartmaine-moniker, tag, character";
+IMAGE_LABELS[115] = "tabz, sloan-2gf,ptg,bne-RealArtMaine-hand style";
+IMAGE_LABELS[116] = "songy-realartmaine-straightletter, hollow";
+IMAGE_LABELS[117] = "salud-PTG,OHK-realartmaine-tags, character";
+IMAGE_LABELS[118] = "learn-YME,CIRCLET-realartmaine-piece";
+IMAGE_LABELS[119] = "iowa-3FK-realartmaine-tags";
+IMAGE_LABELS[120] = "enya, osha, auto, lego, sloan-PTG,BNE,CTS,TNL,5G-realartmaine-tags";
+IMAGE_LABELS[121] = "port-IMS-realartmaine-piece";
+IMAGE_LABELS[122] = "thex-SLT-realartmaine-piece";
+IMAGE_LABELS[123] = "uglyboy-5G-realartmaine-throwie, antistyle";
+IMAGE_LABELS[124] = "27, learn-YME,SLT,CIRCLET,2GF,TSZ,2GF-minnowfeed-piece, stencil";
+IMAGE_LABELS[125] = "27, mobi, vazor, segway-TSZ,2GF,AWC,FTS-minnowfeed-piece, straightletter, stencil";
+IMAGE_LABELS[126] = "27, plato-HEX,TSZ,2GF-minnowfeed-tags";
+
+// ----- END AUTO-GENERATED LABELS -----
+
+// Helper: get label for numeric index (1-based). Returns empty string if missing.
+function getLabelForIndex(index) {
+  if (!index || index < 1) return '';
+  return IMAGE_LABELS[index] || '';
+}
 // remove exact-duplicate paths while preserving first occurrence order
-imagesList = Array.from(new Set(imagesList.map(s => s.trim())));
+
+// Build numeric mapping and metadata lookup from `IMAGE_LABELS`.
+// `IMAGE_LABELS` is 1-based; entries may be overridden by editing this file.
+// We set `orig` to the numeric path and only attempt numeric files as
+// candidates (no fallback to long original filenames).
+const metaList = (function() {
+  const list = [];
+  const total = (typeof IMAGE_LABELS !== 'undefined') ? Math.max(0, IMAGE_LABELS.length - 1) : 0;
+  for (let idx = 0; idx < total; idx++) {
+    const index = idx + 1;
+    const label = IMAGE_LABELS[index] || '';
+    const nameNoExt = label || String(index);
+    // try common extensions so files restored with different cases/extensions still load
+    const exts = ['.jpg', '.JPG', '.jpeg', '.JPEG', '.png', '.PNG', '.gif', '.GIF'];
+    const numericSrc = `/assets/images/${index}${exts[0]}`;
+    const basename = `${index}${ext}`;
+    const orig = numericSrc; // no original-filename fallback
+
+    const tokens = (label || '')
+      .replace(/[\W_]+/g, ' ')
+      .trim()
+      .toLowerCase()
+      .split(/\s+/)
+      .filter(Boolean);
+
+    // build candidates with common extensions (prefer lowercase .jpg first)
+    const candidates = exts.map(e => `/assets/images/${index}${e}`);
+
+    list.push({
+      index,
+      orig,
+      basename,
+      nameNoExt,
+      ext: exts[0],
+      numericSrc,
+      label,
+      candidates,
+      tokens
+    });
+  }
+  return list;
+})();
+
+// imagesList: the primary srcs we will attempt to load (numeric first)
+const imagesList = metaList.map(m => m.candidates[0]);
+
+// metaBySrc maps both the numeric path and the original path to the same meta
+const metaBySrc = {};
+metaList.forEach(m => {
+  // register all candidate paths so lookups and fallbacks work regardless of extension/case
+  if (Array.isArray(m.candidates)) {
+    m.candidates.forEach(c => { metaBySrc[c] = m; });
+  }
+  // also map canonical numericSrc and orig for compatibility
+  metaBySrc[m.numericSrc] = m;
+  metaBySrc[m.orig] = m;
+});
+
+// Safe helper: get meta for a src (numeric or original)
+function getMetaForSrc(src) {
+  if (!src) return null;
+  return metaBySrc[src] || null;
+}
+
+// Helper to get tokens for a given src; falls back to a light parse if unknown
+function tokensForSrc(src) {
+  const m = getMetaForSrc(src);
+  if (m) return m.tokens;
+  // fallback: strip path and extension and tokenize
+  const base = (src || '').replace(/^.*\/(assets\/images\/)?/i, '');
+  const d = base.lastIndexOf('.');
+  const name = d >= 0 ? base.slice(0, d) : base;
+  return (name.replace(/[\W_]+/g, ' ').trim().toLowerCase().split(/\s+/).filter(Boolean));
+}
 
 // <-- ADDITION: ensure DOM refs and load token exist before any function runs -->
 const gallery = document.getElementById("galleryContainer");
@@ -191,6 +284,11 @@ function normToken(s) {
 function buildMetaTokens(meta) {
   const tokens = new Set();
 
+  // if metadata includes precomputed tokens (from IMAGE_LABELS / metaList), include them
+  if (meta && Array.isArray(meta.tokens)) {
+    meta.tokens.forEach(t => { if (t) tokens.add(t); });
+  }
+
   // tags and styles are arrays already (from parseFilename)
   (meta.tags || []).forEach(t => {
     const parts = t.split(/[\s,;]+/).map(normToken).filter(Boolean);
@@ -219,6 +317,10 @@ function buildMetaTokens(meta) {
 
 // parse filename to metadata
 function parseFilename(filename) {
+  // If we have a runtime metadata map for numeric srcs, return it directly
+  if (typeof metaBySrc !== 'undefined' && metaBySrc[filename]) {
+    return metaBySrc[filename];
+  }
   const base = filename.split("/").pop().replace(/\.[^.]+$/, "");
   const rawParts = base.split("-").map(p => p.trim());
   const stylesPart = rawParts.pop() || "";
@@ -250,6 +352,21 @@ function parseFilename(filename) {
   };
 }
 
+// Ensure `imagesList` and `metaBySrc` are derived from the previously-built
+// `metaList`. `metaList` entries contain `numericSrc`, `orig`, `label`, and
+// computed `tokens`. We make the numeric src the default `meta.src` and
+// ensure `meta.candidates` includes both numeric and original paths.
+let imagesList = metaList.map(m => {
+  // default to numeric src as the primary path
+  m.src = m.numericSrc;
+  m.rawBase = m.rawBase || m.nameNoExt;
+  m.candidates = m.candidates || [m.numericSrc, m.orig];
+  // populate metaBySrc so parseFilename() and other lookups work
+  metaBySrc[m.numericSrc] = m;
+  metaBySrc[m.orig] = m;
+  return m.numericSrc;
+});
+
 // modal viewer
 function openModal(meta) {
   document.body.style.overflow = "hidden";
@@ -278,7 +395,9 @@ function openModal(meta) {
 
   const caption = document.createElement("div");
   caption.className = "caption";
-  caption.textContent = `"${meta.tags.join(", ")}" flicked by ${meta.photographer}`;
+  const labelText = (meta && meta.label) ? meta.label : (meta && meta.rawBase) ? meta.rawBase : '';
+  const byText = (meta && meta.photographer) ? ` flicked by ${meta.photographer}` : '';
+  caption.textContent = `${labelText}${byText}`;
   modal.appendChild(caption);
 
   // add close button
@@ -423,70 +542,85 @@ function loadImageIntoCard(meta, card, wrap, placeholder, expectedLoadId) {
     const rowHeight = parseInt(window.getComputedStyle(grid).getPropertyValue("grid-auto-rows") || "10");
     const rowGap = parseInt(window.getComputedStyle(grid).getPropertyValue("gap") || "10");
 
-    // attach handlers BEFORE setting src to avoid race where load fires before handler attached
-    img.addEventListener("load", () => {
+    // Try candidate paths sequentially (numeric first, then original filename)
+    const candidates = (meta && meta.candidates && meta.candidates.length) ? meta.candidates.slice() : [meta.src];
+
+    // attach click handler to wrap immediately (not waiting for image load)
+    const onWrapClick = (e) => { e.stopPropagation(); openModal(meta); };
+    wrap.addEventListener("click", onWrapClick);
+
+    let attemptIndex = 0;
+    function tryNext() {
       if (expectedLoadId !== currentLoadId) {
         if (card.parentNode === gallery) gallery.removeChild(card);
         resolve(false);
         return;
       }
-
-      const finalH = getRenderedImageHeight(img, wrap.clientWidth) || parseInt(wrap.style.height) || 150;
-      wrap.style.height = `${finalH}px`;
-
-      img.classList.remove("hidden");
-      img.classList.add("fade-in");
-
-      // clear placeholder box contents (remove spinner) but keep the box
-      if (placeholder && placeholder.parentNode === wrap) {
-        placeholder.innerHTML = "";
-      }
-      wrap.appendChild(img);
-
-      requestAnimationFrame(() => {
-        const rowSpan = Math.max(1, Math.ceil((finalH + rowGap) / (rowHeight + rowGap)));
-        card.style.gridRowEnd = `span ${rowSpan}`;
-        wrap.classList.add("loaded");
-        // after image is visible, attach click listener to the actual DOM element
+      if (attemptIndex >= candidates.length) {
+        // all attempts failed: show error inside placeholder
+        try {
+          const filename = (meta && meta.src) ? meta.src.split("/").pop() : "unknown";
+          const errEl = document.createElement("div");
+          errEl.className = "loading-error";
+          errEl.textContent = `Failed: ${filename}`;
+          if (placeholder && placeholder.parentNode === wrap) {
+            placeholder.innerHTML = "";
+            placeholder.appendChild(errEl);
+          } else {
+            wrap.appendChild(errEl);
+          }
+        } catch (e) {
+          if (placeholder && placeholder.parentNode === wrap) {
+            placeholder.textContent = "Failed to load";
+          }
+        }
         resolve(true);
-      });
-    });
-
-    img.addEventListener("error", () => {
-      if (expectedLoadId !== currentLoadId) {
-        if (card.parentNode === gallery) gallery.removeChild(card);
-        resolve(false);
         return;
       }
-      // replace placeholder contents with error text
-      try {
-        const filename = (meta && meta.src) ? meta.src.split("/").pop() : "unknown";
-        const errEl = document.createElement("div");
-        errEl.className = "loading-error";
-        errEl.textContent = `Failed: ${filename}`;
+
+      const candidate = candidates[attemptIndex++];
+      // replace handlers by assigning onload/onerror (avoids stacking handlers)
+      img.onload = () => {
+        if (expectedLoadId !== currentLoadId) {
+          if (card.parentNode === gallery) gallery.removeChild(card);
+          resolve(false);
+          return;
+        }
+
+        // successful: update meta.src to the working candidate so modals/open use it
+        meta.src = candidate;
+
+        const finalH = getRenderedImageHeight(img, wrap.clientWidth) || parseInt(wrap.style.height) || 150;
+        wrap.style.height = `${finalH}px`;
+
+        img.classList.remove("hidden");
+        img.classList.add("fade-in");
+
+        // clear placeholder box contents (remove spinner) but keep the box
         if (placeholder && placeholder.parentNode === wrap) {
           placeholder.innerHTML = "";
-          placeholder.appendChild(errEl);
-        } else {
-          wrap.appendChild(errEl);
         }
-      } catch (e) {
-        if (placeholder && placeholder.parentNode === wrap) {
-          placeholder.textContent = "Failed to load";
-        }
-      }
-      // ensure wrap height remains reasonable (keep default set earlier)
-      resolve(true);
-    });
+        wrap.appendChild(img);
 
-    // only set src after handlers attached
-    // attach click handler to wrap immediately (not waiting for image load)
-    wrap.addEventListener("click", (e) => {
-      e.stopPropagation();
-      openModal(meta);
-    });
+        requestAnimationFrame(() => {
+          const rowSpan = Math.max(1, Math.ceil((finalH + rowGap) / (rowHeight + rowGap)));
+          card.style.gridRowEnd = `span ${rowSpan}`;
+          wrap.classList.add("loaded");
+          resolve(true);
+        });
+      };
 
-    img.src = meta.src;
+      img.onerror = () => {
+        // try next candidate
+        tryNext();
+      };
+
+      // start loading this candidate
+      img.src = candidate;
+    }
+
+    // kick off attempts
+    tryNext();
 
   });
 }
