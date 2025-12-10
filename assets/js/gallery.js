@@ -170,7 +170,7 @@ const metaList = (function() {
     // try common extensions so files restored with different cases/extensions still load
     const exts = ['.jpg', '.JPG', '.jpeg', '.JPEG', '.png', '.PNG', '.gif', '.GIF'];
     const numericSrc = `/assets/images/${index}${exts[0]}`;
-    const basename = `${index}${ext}`;
+    const basename = `${index}${exts[0]}`;
     const orig = numericSrc; // no original-filename fallback
 
     const tokens = (label || '')
@@ -197,9 +197,6 @@ const metaList = (function() {
   }
   return list;
 })();
-
-// imagesList: the primary srcs we will attempt to load (numeric first)
-const imagesList = metaList.map(m => m.candidates[0]);
 
 // metaBySrc maps both the numeric path and the original path to the same meta
 const metaBySrc = {};
@@ -352,18 +349,14 @@ function parseFilename(filename) {
   };
 }
 
-// Ensure `imagesList` and `metaBySrc` are derived from the previously-built
-// `metaList`. `metaList` entries contain `numericSrc`, `orig`, `label`, and
-// computed `tokens`. We make the numeric src the default `meta.src` and
-// ensure `meta.candidates` includes both numeric and original paths.
-let imagesList = metaList.map(m => {
+// Ensure `imagesList` is derived from the previously-built `metaList`.
+// `metaList` entries contain `numericSrc`, `orig`, `label`, and computed `tokens`.
+// We make the numeric src the default `meta.src`.
+const imagesList = metaList.map(m => {
   // default to numeric src as the primary path
   m.src = m.numericSrc;
   m.rawBase = m.rawBase || m.nameNoExt;
-  m.candidates = m.candidates || [m.numericSrc, m.orig];
-  // populate metaBySrc so parseFilename() and other lookups work
-  metaBySrc[m.numericSrc] = m;
-  metaBySrc[m.orig] = m;
+  m.candidates = m.candidates || m.candidates;  // already set in metaList
   return m.numericSrc;
 });
 
