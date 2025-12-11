@@ -438,8 +438,71 @@ function openModal(meta) {
   caption.textContent = captionText || (meta && meta.rawBase) || '';
   modal.appendChild(caption);
 
+  // Add left and right navigation arrows
+  const leftArrow = document.createElement("button");
+  leftArrow.className = "modal-arrow modal-arrow-left";
+  leftArrow.textContent = "‹";
+  leftArrow.setAttribute("aria-label", "Previous image");
+  
+  const rightArrow = document.createElement("button");
+  rightArrow.className = "modal-arrow modal-arrow-right";
+  rightArrow.textContent = "›";
+  rightArrow.setAttribute("aria-label", "Next image");
+  
+  modal.appendChild(leftArrow);
+  modal.appendChild(rightArrow);
+
   backdrop.appendChild(modal);
   document.body.appendChild(backdrop);
+  
+  // Find current image index for navigation
+  const currentIndex = imagesList.indexOf(meta.numericSrc);
+  
+  // Navigation function
+  const navigateTo = (newIndex) => {
+    // Loop: wrap around if at boundaries
+    const loopedIndex = ((newIndex % imagesList.length) + imagesList.length) % imagesList.length;
+    const newMeta = parseFilename(imagesList[loopedIndex]);
+    
+    // Close current modal and open the new one
+    if (backdrop.parentNode) {
+      document.body.removeChild(backdrop);
+      document.body.style.overflow = "";
+    }
+    
+    openModal(newMeta);
+  };
+  
+  // Arrow button click handlers
+  leftArrow.addEventListener("click", (e) => {
+    e.stopPropagation();
+    navigateTo(currentIndex - 1);
+  });
+  
+  rightArrow.addEventListener("click", (e) => {
+    e.stopPropagation();
+    navigateTo(currentIndex + 1);
+  });
+  
+  // Keyboard navigation (left/right arrow keys)
+  const handleKeyboard = (e) => {
+    if (e.key === "ArrowLeft") {
+      e.preventDefault();
+      navigateTo(currentIndex - 1);
+    } else if (e.key === "ArrowRight") {
+      e.preventDefault();
+      navigateTo(currentIndex + 1);
+    } else if (e.key === "Escape") {
+      e.preventDefault();
+      if (backdrop.parentNode) {
+        document.body.removeChild(backdrop);
+        document.body.style.overflow = "";
+      }
+      document.removeEventListener("keydown", handleKeyboard);
+    }
+  };
+  
+  document.addEventListener("keydown", handleKeyboard);
 }
 
 /* Replace the existing loadImagesSequentially + loadImageWithPlaceholder logic

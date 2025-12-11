@@ -266,6 +266,39 @@ body.dark-mode .modal {
   color: inherit;
 }
 
+/* Modal navigation arrows */
+.modal-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0, 0, 0, 0.5);
+  color: white;
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  font-size: 24px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease;
+  z-index: 100;
+}
+
+.modal-arrow:hover { background: rgba(0, 0, 0, 0.8); }
+
+.modal-arrow-left { left: 12px; }
+.modal-arrow-right { right: 12px; }
+
+body.dark-mode .modal-arrow {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+body.dark-mode .modal-arrow:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
 .modal-imgwrap {
   padding: 0;
   display: flex;
