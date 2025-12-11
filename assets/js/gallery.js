@@ -232,6 +232,8 @@ const gallery = document.getElementById("galleryContainer");
 const searchInput = document.getElementById("searchInput");
 // load-run token used to cancel obsolete loads
 let currentLoadId = 0;
+// the list currently displayed in the gallery (changes with search/filter)
+let currentDisplayedList = [];
 // <-- end addition -->
 
 const DEFAULT_ASPECT = 0.66;
@@ -449,8 +451,17 @@ function openModal(meta) {
   backdrop.appendChild(modal);
   document.body.appendChild(backdrop);
   
-  // Find current image index for navigation
-  const currentIndex = imagesList.indexOf(meta.numericSrc);
+  // Find current image index for navigation within the currently displayed list
+  // Fallback to global imagesList if for some reason currentDisplayedList is empty
+  const activeList = (Array.isArray(currentDisplayedList) && currentDisplayedList.length > 0) ? currentDisplayedList : imagesList;
+  let currentIndex = activeList.indexOf(meta.numericSrc);
+  if (currentIndex < 0) {
+    // try matching by numeric index fallback (meta.numericSrc might differ in extension)
+    currentIndex = activeList.findIndex(s => {
+      try { return s && s.replace(/\.[^.]+$/, '') === (meta.numericSrc || '').replace(/\.[^.]+$/, ''); }
+      catch (e) { return false; }
+    });
+  }
   
   // Highlight the current card in the background gallery
   const highlightCard = () => {
@@ -480,9 +491,12 @@ function openModal(meta) {
   
   // Navigation function
   const navigateTo = (newIndex) => {
-    const loopedIndex = ((newIndex % imagesList.length) + imagesList.length) % imagesList.length;
-    const newMeta = parseFilename(imagesList[loopedIndex]);
-    
+    const listForNav = (Array.isArray(currentDisplayedList) && currentDisplayedList.length > 0) ? currentDisplayedList : imagesList;
+    if (!Array.isArray(listForNav) || listForNav.length === 0) return;
+    const loopedIndex = ((newIndex % listForNav.length) + listForNav.length) % listForNav.length;
+    const src = listForNav[loopedIndex];
+    const newMeta = parseFilename(src);
+
     // Close current modal and open the new one (prevents stacking)
     closeModal();
     openModal(newMeta);
@@ -525,6 +539,8 @@ function openModal(meta) {
 // load images one-by-one with placeholder
 async function loadImagesSequentially(list) {
   if (!gallery) return;
+  // remember which list is currently being shown (used by modal navigation)
+  currentDisplayedList = Array.isArray(list) ? list.slice() : [];
   const myLoadId = ++currentLoadId;
   gallery.innerHTML = "";
 
