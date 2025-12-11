@@ -445,6 +445,15 @@ function openModal(meta) {
   // image can be reused for both directions
   leftImg.style.transform = "scaleX(-1)";
   leftImg.src = '/assets/GUI/arrow.png';
+  // if the image fails to load, fall back to a text arrow
+  leftImg.onerror = () => {
+    try { leftImg.remove(); } catch (e) {}
+    leftArrow.textContent = '‹';
+  };
+  leftImg.onload = () => {
+    // ensure text content is cleared if previously set
+    if (leftArrow.textContent) leftArrow.textContent = '';
+  };
   leftArrow.appendChild(leftImg);
 
   const rightArrow = document.createElement("button");
@@ -460,6 +469,13 @@ function openModal(meta) {
   // right arrow uses the same right-facing image without flip
   rightImg.style.transform = "none";
   rightImg.src = '/assets/GUI/arrow.png';
+  rightImg.onerror = () => {
+    try { rightImg.remove(); } catch (e) {}
+    rightArrow.textContent = '›';
+  };
+  rightImg.onload = () => {
+    if (rightArrow.textContent) rightArrow.textContent = '';
+  };
   rightArrow.appendChild(rightImg);
 
   // Update arrow icons according to dark-mode (white for dark, black for light)
