@@ -427,18 +427,50 @@ function openModal(meta) {
   
   caption.textContent = captionText || (meta && meta.rawBase) || '';
   modal.appendChild(caption);
+  // Add left and right navigation arrows using user's PNG icons
+  // declare observer variable in this scope so closeModal can disconnect it
+  let bodyClassObserver = null;
 
-  // Add left and right navigation arrows
   const leftArrow = document.createElement("button");
   leftArrow.className = "modal-arrow modal-arrow-left";
-  leftArrow.textContent = "‹";
   leftArrow.setAttribute("aria-label", "Previous image");
-  
+
+  const leftImg = document.createElement("img");
+  leftImg.alt = "Previous";
+  leftImg.style.width = "28px";
+  leftImg.style.height = "28px";
+  leftImg.style.objectFit = "contain";
+  leftImg.style.pointerEvents = "none";
+  leftArrow.appendChild(leftImg);
+
   const rightArrow = document.createElement("button");
   rightArrow.className = "modal-arrow modal-arrow-right";
-  rightArrow.textContent = "›";
   rightArrow.setAttribute("aria-label", "Next image");
-  
+
+  const rightImg = document.createElement("img");
+  rightImg.alt = "Next";
+  rightImg.style.width = "28px";
+  rightImg.style.height = "28px";
+  rightImg.style.objectFit = "contain";
+  rightImg.style.pointerEvents = "none";
+  rightArrow.appendChild(rightImg);
+
+  // Update arrow icons according to dark-mode (white for dark, black for light)
+  function updateArrowIcons() {
+    const isDark = document.body.classList.contains('dark-mode');
+    leftImg.src = isDark ? '/assets/GUI/arrowleftW.png' : '/assets/GUI/arrowleftB.png';
+    rightImg.src = isDark ? '/assets/GUI/arrowrightW.png' : '/assets/GUI/arrowrightB.png';
+  }
+  updateArrowIcons();
+
+  // Watch for class changes on body so icons update when mode toggles
+  bodyClassObserver = new MutationObserver((mutations) => {
+    for (const m of mutations) {
+      if (m.attributeName === 'class') updateArrowIcons();
+    }
+  });
+  bodyClassObserver.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+
   modal.appendChild(leftArrow);
   modal.appendChild(rightArrow);
 
