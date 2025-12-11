@@ -44,7 +44,7 @@ nav a::after { content: ''; display:block; height:2px; width:0; background:#fff;
 nav a:hover::after { width:100%; }
 
 /* Settings dropdown (gear) - gear is at right, nav stays centered */
-.settings-dropdown { position: absolute; right: 18px; top: 50%; transform: translateY(-50%); pointer-events: auto; }
+.settings-dropdown { position: absolute; right: 18px; top: 50%; transform: translateY(-50%); pointer-events: auto; z-index: 50000; }
 .gear-box { display:inline-block; padding:3px; background:black; border:1px solid #fff; border-radius:6px; }
 .gear-icon { width:30px; height:30px; display:block; cursor:pointer; transition:transform .28s ease; }
 .gear-icon:hover { transform: rotate(18deg); } /* only the gear rotates */
@@ -60,7 +60,9 @@ nav a:hover::after { width:100%; }
   background: #222;
   border-radius: 6px;
   box-shadow: 0 8px 22px rgba(0,0,0,0.35);
-  z-index: 60;
+  /* Make dropdown appear above hovered gallery images (z ~40)
+     but keep it below modal arrows (z:100000). */
+  z-index: 50010;
   padding: 8px;
   overflow: auto;
   flex-direction: column;
