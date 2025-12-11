@@ -447,11 +447,15 @@ function openModal(meta) {
   leftImg.src = '/assets/GUI/arrow.png';
   // if the image fails to load, fall back to a text arrow
   leftImg.onerror = () => {
-    try { leftImg.remove(); } catch (e) {}
-    leftArrow.textContent = '‹';
+    // If the external file fails, switch to an embedded white right-facing SVG
+    // (we flip it with scaleX for the left arrow). This avoids broken images
+    // and keeps the same invert/flip behavior for dark mode.
+    try { leftImg.onerror = null; } catch (e) {}
+    const svg = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><path d='M24 12 L40 32 L24 52' fill='none' stroke='%23fff' stroke-width='6' stroke-linecap='round' stroke-linejoin='round'/></svg>";
+    leftImg.src = svg;
+    if (leftArrow.textContent) leftArrow.textContent = '';
   };
   leftImg.onload = () => {
-    // ensure text content is cleared if previously set
     if (leftArrow.textContent) leftArrow.textContent = '';
   };
   leftArrow.appendChild(leftImg);
@@ -470,8 +474,10 @@ function openModal(meta) {
   rightImg.style.transform = "none";
   rightImg.src = '/assets/GUI/arrow.png';
   rightImg.onerror = () => {
-    try { rightImg.remove(); } catch (e) {}
-    rightArrow.textContent = '›';
+    try { rightImg.onerror = null; } catch (e) {}
+    const svg = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><path d='M24 12 L40 32 L24 52' fill='none' stroke='%23fff' stroke-width='6' stroke-linecap='round' stroke-linejoin='round'/></svg>";
+    rightImg.src = svg;
+    if (rightArrow.textContent) rightArrow.textContent = '';
   };
   rightImg.onload = () => {
     if (rightArrow.textContent) rightArrow.textContent = '';
