@@ -362,13 +362,17 @@ const imagesList = metaList.map(m => {
 
 // modal viewer
 function openModal(meta) {
-  document.body.style.overflow = "hidden";
+  // Store body scroll position before opening modal
+  const scrollY = window.scrollY;
+  const scrollX = window.scrollX;
+  
   const backdrop = document.createElement("div");
   backdrop.className = "modal-backdrop";
+  
+  // Only close if clicking on backdrop, not on modal content
   backdrop.addEventListener("click", (e) => {
     if (e.target === backdrop) {
-      document.body.removeChild(backdrop);
-      document.body.style.overflow = "";
+      closeModal();
     }
   });
 
@@ -390,35 +394,20 @@ function openModal(meta) {
   caption.className = "caption";
   
   // Extract tags and photographer from the label.
-  // Format: tag(s)-[crew(s)]-photographer-style(s)
-  // - If 3 dashes: tag(s)-crew(s)-photographer-style(s)
-  // - If 2 dashes: tag(s)-photographer-style(s)
-  // Display: "tag(s) flicked by photographer"
   let tagText = '';
   let photographerText = '';
   
   if (meta && meta.label) {
-    // Split by dash to separate components
     const dashParts = meta.label.split('-');
-    
-    // First part (before first dash) is always the tags
     if (dashParts.length > 0) {
       tagText = dashParts[0].trim();
     }
-    
-    // Determine if there's a crew by counting dashes
-    // 3+ dashes means: tag-crew-photographer-styles (photographer is index 2)
-    // 2 dashes means: tag-photographer-styles (photographer is index 1)
     let photographerIndex = -1;
     if (dashParts.length >= 4) {
-      // 3+ dashes: photographer is at index 2 (after crew)
       photographerIndex = 2;
     } else if (dashParts.length >= 3) {
-      // 2 dashes: photographer is at index 1
       photographerIndex = 1;
     }
-    
-    // Extract photographer (first word/token if it contains commas/spaces)
     if (photographerIndex >= 0 && dashParts[photographerIndex]) {
       const photoStr = dashParts[photographerIndex].trim();
       const photoTokens = photoStr.split(/[\s,]+/);
@@ -426,7 +415,6 @@ function openModal(meta) {
     }
   }
   
-  // Build caption: "tag(s) flicked by photographer"
   let captionText = '';
   if (tagText) {
     captionText = tagText;
@@ -458,16 +446,40 @@ function openModal(meta) {
   // Find current image index for navigation
   const currentIndex = imagesList.indexOf(meta.numericSrc);
   
+  // Highlight the current card in the background gallery
+  const highlightCard = () => {
+    const cards = document.querySelectorAll(".card");
+    cards.forEach(card => card.classList.remove("highlighted"));
+    if (cards[currentIndex]) {
+      cards[currentIndex].classList.add("highlighted");
+      // Scroll to keep the card visible
+      cards[currentIndex].scrollIntoView({ behavior: "auto", block: "nearest" });
+    }
+  };
+  highlightCard();
+  
+  // Close modal function
+  const closeModal = () => {
+    // Remove highlight from all cards
+    const cards = document.querySelectorAll(".card");
+    cards.forEach(card => card.classList.remove("highlighted"));
+    
+    if (backdrop.parentNode) {
+      document.body.removeChild(backdrop);
+    }
+    // Restore scroll position
+    window.scrollTo(scrollX, scrollY);
+    document.removeEventListener("keydown", handleKeyboard);
+  };
+  
   // Navigation function
   const navigateTo = (newIndex) => {
-    // Loop: wrap around if at boundaries
     const loopedIndex = ((newIndex % imagesList.length) + imagesList.length) % imagesList.length;
     const newMeta = parseFilename(imagesList[loopedIndex]);
     
     // Close current modal and open the new one
     if (backdrop.parentNode) {
       document.body.removeChild(backdrop);
-      document.body.style.overflow = "";
     }
     
     openModal(newMeta);
@@ -494,11 +506,7 @@ function openModal(meta) {
       navigateTo(currentIndex + 1);
     } else if (e.key === "Escape") {
       e.preventDefault();
-      if (backdrop.parentNode) {
-        document.body.removeChild(backdrop);
-        document.body.style.overflow = "";
-      }
-      document.removeEventListener("keydown", handleKeyboard);
+      closeModal();
     }
   };
   

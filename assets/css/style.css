@@ -230,9 +230,10 @@ footer hr { border:none; border-top:1px solid #aaa; margin:10px 0; }
   display: flex;
   justify-content: center;
   align-items: center;
-  background: rgba(0, 0, 0, 0.65);
+  background: rgba(0, 0, 0, 0.4);
   z-index: 99999;
   padding: 8px;
+  overflow: hidden; /* prevent scrolling while backdrop exists */
 }
 
 /* Modal / Spotlight — constrained to viewport with internal scrolling */
@@ -259,6 +260,16 @@ body.dark-mode .modal {
   color: #eee;
 }
 
+/* Highlighted card in background gallery */
+.card.highlighted {
+  outline: 3px solid #4a90e2;
+  outline-offset: 2px;
+}
+
+body.dark-mode .card.highlighted {
+  outline-color: #6ba3ff;
+}
+
 .caption {
   padding: 8px 12px;
   font-size: 0.95rem;
@@ -268,35 +279,50 @@ body.dark-mode .modal {
 
 /* Modal navigation arrows */
 .modal-arrow {
-  position: absolute;
+  position: fixed;
   top: 50%;
   transform: translateY(-50%);
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.6);
   color: white;
   border: none;
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
-  font-size: 24px;
+  font-size: 26px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background-color 0.2s ease;
-  z-index: 100;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+  z-index: 100000;
+  line-height: 1;
+  padding: 0;
 }
 
-.modal-arrow:hover { background: rgba(0, 0, 0, 0.8); }
+.modal-arrow:hover { 
+  background: rgba(0, 0, 0, 0.85);
+  transform: translateY(-50%) scale(1.1);
+}
 
-.modal-arrow-left { left: 12px; }
-.modal-arrow-right { right: 12px; }
+.modal-arrow-left { left: 20px; }
+.modal-arrow-right { right: 20px; }
 
 body.dark-mode .modal-arrow {
-  background: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.4);
 }
 
 body.dark-mode .modal-arrow:hover {
-  background: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.6);
+}
+
+@media (max-width: 600px) {
+  .modal-arrow {
+    width: 40px;
+    height: 40px;
+    font-size: 22px;
+  }
+  .modal-arrow-left { left: 12px; }
+  .modal-arrow-right { right: 12px; }
 }
 
 .modal-imgwrap {
