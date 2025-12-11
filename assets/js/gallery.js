@@ -440,6 +440,12 @@ function openModal(meta) {
   modal.appendChild(leftArrow);
   modal.appendChild(rightArrow);
 
+  // Check if a modal already exists and remove it before adding the new one
+  const existingBackdrop = document.querySelector(".modal-backdrop");
+  if (existingBackdrop && existingBackdrop.parentNode) {
+    document.body.removeChild(existingBackdrop);
+  }
+
   backdrop.appendChild(modal);
   document.body.appendChild(backdrop);
   
@@ -477,11 +483,8 @@ function openModal(meta) {
     const loopedIndex = ((newIndex % imagesList.length) + imagesList.length) % imagesList.length;
     const newMeta = parseFilename(imagesList[loopedIndex]);
     
-    // Close current modal and open the new one
-    if (backdrop.parentNode) {
-      document.body.removeChild(backdrop);
-    }
-    
+    // Close current modal and open the new one (prevents stacking)
+    closeModal();
     openModal(newMeta);
   };
   

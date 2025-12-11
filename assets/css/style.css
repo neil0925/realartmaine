@@ -277,7 +277,7 @@ body.dark-mode .card.highlighted {
   color: inherit;
 }
 
-/* Modal navigation arrows */
+/* Modal navigation arrows - positioned by screen size, not image */
 .modal-arrow {
   position: fixed;
   top: 50%;
@@ -304,8 +304,8 @@ body.dark-mode .card.highlighted {
   transform: translateY(-50%) scale(1.1);
 }
 
-.modal-arrow-left { left: 20px; }
-.modal-arrow-right { right: 20px; }
+.modal-arrow-left { left: 24px; }
+.modal-arrow-right { right: 24px; }
 
 body.dark-mode .modal-arrow {
   background: rgba(255, 255, 255, 0.4);
@@ -315,6 +315,18 @@ body.dark-mode .modal-arrow:hover {
   background: rgba(255, 255, 255, 0.6);
 }
 
+/* Tablet and smaller screens */
+@media (max-width: 900px) {
+  .modal-arrow {
+    width: 42px;
+    height: 42px;
+    font-size: 24px;
+  }
+  .modal-arrow-left { left: 16px; }
+  .modal-arrow-right { right: 16px; }
+}
+
+/* Mobile screens */
 @media (max-width: 600px) {
   .modal-arrow {
     width: 40px;
