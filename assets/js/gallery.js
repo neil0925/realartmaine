@@ -458,8 +458,9 @@ function openModal(meta) {
   // Update arrow icons according to dark-mode (white for dark, black for light)
   function updateArrowIcons() {
     const isDark = document.body.classList.contains('dark-mode');
-    leftImg.src = isDark ? '/assets/GUI/arrowleftW.png' : '/assets/GUI/arrowleftB.png';
-    rightImg.src = isDark ? '/assets/GUI/arrowrightW.png' : '/assets/GUI/arrowrightB.png';
+    // Use black arrows (B) in dark mode, white arrows (W) in light mode
+    leftImg.src = isDark ? '/assets/GUI/arrowleftB.png' : '/assets/GUI/arrowleftW.png';
+    rightImg.src = isDark ? '/assets/GUI/arrowrightB.png' : '/assets/GUI/arrowrightW.png';
   }
   updateArrowIcons();
 
