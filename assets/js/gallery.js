@@ -481,6 +481,9 @@ function openModal(meta) {
     const cards = document.querySelectorAll(".card");
     cards.forEach(card => card.classList.remove("highlighted"));
     
+    // disconnect the observer watching body class changes (if present)
+    try { if (typeof bodyClassObserver !== 'undefined' && bodyClassObserver && bodyClassObserver.disconnect) bodyClassObserver.disconnect(); } catch (e) {}
+
     if (backdrop.parentNode) {
       document.body.removeChild(backdrop);
     }
@@ -732,8 +735,53 @@ function loadImageIntoCard(meta, card, wrap, placeholder, expectedLoadId) {
         tryNext();
       };
 
-      // start loading this candidate
-      img.src = candidate;
+      // start loading this candidate via fetch to avoid <img> 404 console errors
+      // Use fetch to test whether the resource exists; if it does, create a blob URL
+      // and set it as the image source. This prevents the browser from logging
+      // "Failed to load resource" for missing images initiated by <img>.
+      fetch(candidate, { method: 'GET' }).then(resp => {
+        if (!resp.ok) throw new Error('not-ok');
+        return resp.blob();
+      }).then(blob => {
+        if (expectedLoadId !== currentLoadId) {
+          resolve(false);
+          return;
+        }
+        const blobUrl = URL.createObjectURL(blob);
+        img.src = blobUrl;
+        // decode ensures the image is fully available before we measure it
+        img.decode().then(() => {
+          // successful: update meta.src to the working candidate so modals/open use it
+          meta.src = candidate;
+
+          const finalH = getRenderedImageHeight(img, wrap.clientWidth) || parseInt(wrap.style.height) || 150;
+          wrap.style.height = `${finalH}px`;
+
+          img.classList.remove("hidden");
+          img.classList.add("fade-in");
+
+          // clear placeholder box contents (remove spinner) but keep the box
+          if (placeholder && placeholder.parentNode === wrap) {
+            placeholder.innerHTML = "";
+          }
+          wrap.appendChild(img);
+
+          requestAnimationFrame(() => {
+            const rowSpan = Math.max(1, Math.ceil((finalH + rowGap) / (rowHeight + rowGap)));
+            card.style.gridRowEnd = `span ${rowSpan}`;
+            wrap.classList.add("loaded");
+            try { URL.revokeObjectURL(blobUrl); } catch (e) {}
+            resolve(true);
+          });
+        }).catch(() => {
+          // decoding failed; try next candidate
+          try { URL.revokeObjectURL(blobUrl); } catch (e) {}
+          tryNext();
+        });
+      }).catch(() => {
+        // fetch failed or returned non-OK — try next candidate
+        tryNext();
+      });
     }
 
     // kick off attempts
