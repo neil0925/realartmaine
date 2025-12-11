@@ -107,7 +107,7 @@ footer hr { border:none; border-top:1px solid #aaa; margin:10px 0; }
 /* Masonry / puzzle-style gallery */
 .gallery {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); /* changed from 250px -> 180px */
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); /* changed to auto-fill so columns don't stretch */
   grid-auto-rows: 10px; /* base row height (JS uses this) */
   gap: 10px;
   padding: 20px;
