@@ -460,6 +460,17 @@ function openModal(meta) {
 
   const imgwrap = document.createElement("div");
   imgwrap.className = "modal-imgwrap";
+  // Reserve a reasonable area for the modal image immediately so the
+  // caption can match its width and the spinner sits in the correct place.
+  try {
+    const winW = (window && window.innerWidth) ? window.innerWidth : (document.documentElement.clientWidth || 800);
+    const estWidth = Math.max(200, Math.min(840, Math.max(200, winW - 48)));
+    const estHeight = Math.max(120, Math.round(estWidth * DEFAULT_ASPECT));
+    imgwrap.style.width = estWidth + 'px';
+    imgwrap.style.height = estHeight + 'px';
+  } catch (e) {
+    // ignore sizing errors
+  }
 
   const img = document.createElement("img");
   img.alt = meta.rawBase;
@@ -510,6 +521,11 @@ function openModal(meta) {
               // decoding failed; still reveal so browser can show fallback
             }
             try { URL.revokeObjectURL(blobUrl); } catch (e) {}
+            try {
+              const finalH = getRenderedImageHeight(img, imgwrap.clientWidth) || imgwrap.clientHeight || null;
+              if (finalH) imgwrap.style.height = finalH + 'px';
+              if (caption) caption.style.width = (imgwrap.clientWidth ? (imgwrap.clientWidth + 'px') : caption.style.width);
+            } catch (e) {}
             revealModalContent();
             return;
           }
@@ -539,6 +555,11 @@ function openModal(meta) {
             // decoding failed; still reveal so browser can show fallback
           }
           try { URL.revokeObjectURL(blobUrl); } catch (e) {}
+          try {
+            const finalH = getRenderedImageHeight(img, imgwrap.clientWidth) || imgwrap.clientHeight || null;
+            if (finalH) imgwrap.style.height = finalH + 'px';
+            if (caption) caption.style.width = (imgwrap.clientWidth ? (imgwrap.clientWidth + 'px') : caption.style.width);
+          } catch (e) {}
           revealModalContent();
           return;
         }
