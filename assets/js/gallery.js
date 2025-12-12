@@ -245,6 +245,9 @@ let currentDisplayedList = [];
 
 const DEFAULT_ASPECT = 0.66;
 
+// Cache name used for storing fetched gallery image responses (persistent)
+const GALLERY_CACHE = 'realart-gallery-v1';
+
 
 
 const TOY_BLACKLIST = [
@@ -829,53 +832,98 @@ function loadImageIntoCard(meta, card, wrap, placeholder, expectedLoadId) {
         tryNext();
       };
 
-      // start loading this candidate via fetch to avoid <img> 404 console errors
-      // Use fetch to test whether the resource exists; if it does, create a blob URL
-      // and set it as the image source. This prevents the browser from logging
-      // "Failed to load resource" for missing images initiated by <img>.
-      fetch(candidate, { method: 'GET' }).then(resp => {
-        if (!resp.ok) throw new Error('not-ok');
-        return resp.blob();
-      }).then(blob => {
-        if (expectedLoadId !== currentLoadId) {
-          resolve(false);
-          return;
-        }
-        const blobUrl = URL.createObjectURL(blob);
-        img.src = blobUrl;
-        // decode ensures the image is fully available before we measure it
-        img.decode().then(() => {
-          // successful: update meta.src to the working candidate so modals/open use it
-          meta.src = candidate;
+      // start loading this candidate using Cache Storage when available to
+      // provide a persistent client-side cache across sessions. We attempt
+      // to read from the cache first; if not found, fetch from network and
+      // put a clone into the cache for future loads. This still avoids
+      // creating <img> requests that generate console 404 noise.
+      (async () => {
+        try {
+          if (expectedLoadId !== currentLoadId) return resolve(false);
 
-          const finalH = getRenderedImageHeight(img, wrap.clientWidth) || parseInt(wrap.style.height) || 150;
-          wrap.style.height = `${finalH}px`;
-
-          img.classList.remove("hidden");
-          img.classList.add("fade-in");
-
-          // clear placeholder box contents (remove spinner) but keep the box
-          if (placeholder && placeholder.parentNode === wrap) {
-            placeholder.innerHTML = "";
+          // Try to serve from Cache Storage first
+          let cachedResp = null;
+          if (typeof caches !== 'undefined' && caches.open) {
+            try {
+              const cache = await caches.open(GALLERY_CACHE);
+              cachedResp = await cache.match(candidate);
+            } catch (e) {
+              // Cache operations can fail in some environments (private mode)
+              cachedResp = null;
+            }
           }
-          wrap.appendChild(img);
 
-          requestAnimationFrame(() => {
-            const rowSpan = Math.max(1, Math.ceil((finalH + rowGap) / (rowHeight + rowGap)));
-            card.style.gridRowEnd = `span ${rowSpan}`;
-            wrap.classList.add("loaded");
+          if (cachedResp && cachedResp.ok) {
+            const blob = await cachedResp.blob();
+            if (expectedLoadId !== currentLoadId) return resolve(false);
+            const blobUrl = URL.createObjectURL(blob);
+            img.src = blobUrl;
+            img.decode().then(() => {
+              meta.src = candidate;
+              const finalH = getRenderedImageHeight(img, wrap.clientWidth) || parseInt(wrap.style.height) || 150;
+              wrap.style.height = `${finalH}px`;
+              img.classList.remove("hidden");
+              img.classList.add("fade-in");
+              if (placeholder && placeholder.parentNode === wrap) placeholder.innerHTML = "";
+              wrap.appendChild(img);
+              requestAnimationFrame(() => {
+                const rowSpan = Math.max(1, Math.ceil((finalH + rowGap) / (rowHeight + rowGap)));
+                card.style.gridRowEnd = `span ${rowSpan}`;
+                wrap.classList.add("loaded");
+                try { URL.revokeObjectURL(blobUrl); } catch (e) {}
+                resolve(true);
+              });
+            }).catch(() => {
+              try { URL.revokeObjectURL(blobUrl); } catch (e) {}
+              tryNext();
+            });
+            return;
+          }
+
+          // Not cached: fetch from network and cache the response if possible
+          const resp = await fetch(candidate, { method: 'GET' });
+          if (!resp || !resp.ok) {
+            // network miss -> try next candidate
+            tryNext();
+            return;
+          }
+
+          // attempt to cache a clone (ignore cache errors)
+          try {
+            if (typeof caches !== 'undefined' && caches.open) {
+              const cache = await caches.open(GALLERY_CACHE);
+              try { await cache.put(candidate, resp.clone()); } catch (e) { /* ignore cache put failures */ }
+            }
+          } catch (e) { /* ignore cache open failures */ }
+
+          const blob = await resp.blob();
+          if (expectedLoadId !== currentLoadId) return resolve(false);
+          const blobUrl = URL.createObjectURL(blob);
+          img.src = blobUrl;
+          img.decode().then(() => {
+            meta.src = candidate;
+            const finalH = getRenderedImageHeight(img, wrap.clientWidth) || parseInt(wrap.style.height) || 150;
+            wrap.style.height = `${finalH}px`;
+            img.classList.remove("hidden");
+            img.classList.add("fade-in");
+            if (placeholder && placeholder.parentNode === wrap) placeholder.innerHTML = "";
+            wrap.appendChild(img);
+            requestAnimationFrame(() => {
+              const rowSpan = Math.max(1, Math.ceil((finalH + rowGap) / (rowHeight + rowGap)));
+              card.style.gridRowEnd = `span ${rowSpan}`;
+              wrap.classList.add("loaded");
+              try { URL.revokeObjectURL(blobUrl); } catch (e) {}
+              resolve(true);
+            });
+          }).catch(() => {
             try { URL.revokeObjectURL(blobUrl); } catch (e) {}
-            resolve(true);
+            tryNext();
           });
-        }).catch(() => {
-          // decoding failed; try next candidate
-          try { URL.revokeObjectURL(blobUrl); } catch (e) {}
+        } catch (e) {
+          // on any unexpected error, fall back to trying the next candidate
           tryNext();
-        });
-      }).catch(() => {
-        // fetch failed or returned non-OK — try next candidate
-        tryNext();
-      });
+        }
+      })();
     }
 
     // kick off attempts
