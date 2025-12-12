@@ -149,7 +149,9 @@ IMAGE_LABELS[126] = "27, plato-HEX,TSZ,2GF-minnowfeed-tags";
 IMAGE_LABELS[127] = "lastsupper, bd, mobi, gask-VC,TSZ,PTG-realartmaine-tags";
 IMAGE_LABELS[128] = "iowa-3FK-realartmaine-tags";
 IMAGE_LABELS[129] = "house-TNL-realartmaine-tags";
-
+IMAGE_LABELS[130] = "ducky-realartmaine-character, antistyle, portlandbee";
+IMAGE_LABELS[131] = "ducky-realartmaine-character, antistyle, portlandbee";
+IMAGE_LABELS[132] = "ducky-realartmaine-antistyle, paintroller";
 // ----- END AUTO-GENERATED LABELS -----
 
 // Helper: get label for numeric index (1-based). Returns empty string if missing.
