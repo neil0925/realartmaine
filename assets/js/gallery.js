@@ -266,7 +266,12 @@ function showToyBlockedMessage() {
 // Leave empty ('') to keep plain "Ad placeholder" boxes.
 const ADS_CONFIG = {
   publisherId: 'ca-pub-6627789827798682', // <-- set to your publisher id
-  adInterval: 25   // insert ad every 25 images
+  adInterval: 25,  // insert ad every 25 images
+  // Enable real AdSense loading. Keep `false` when running under a strict
+  // Content-Security-Policy that disallows eval/new Function (common with
+  // some hosting providers). When `false` the script will show a local
+  // placeholder instead of attempting to load Google's script.
+  enableAds: false
 };
 
 // helper to ensure the AdSense loader script is present (only if publisherId provided)
@@ -982,7 +987,13 @@ function maybeInsertAdAfter(card, index, gallery) {
   ad.className = 'ad-card';
   ad.style.gridRowEnd = `span ${adRowSpan}`;
 
-  if (ADS_CONFIG.publisherId) {
+  // Only attempt to load AdSense when publisherId is provided AND enableAds
+  // is explicitly enabled. Many Ad providers (including Google's loader)
+  // use constructs blocked by strict CSPs (eval/new Function). When CSP
+  // disallows eval, appending the remote script can trigger console errors
+  // even if it ultimately fails — guard against that by defaulting
+  // `enableAds` to false in development or strict environments.
+  if (ADS_CONFIG.publisherId && ADS_CONFIG.enableAds) {
     // ensure loader present then build real AdSense container
     ensureAdsLoader(ADS_CONFIG.publisherId);
 
@@ -1009,7 +1020,7 @@ function maybeInsertAdAfter(card, index, gallery) {
       ad.appendChild(label);
     }
   } else {
-    // no publisher id: keep the same visible placeholder as before
+    // no enabled ads: keep the same visible placeholder as before
     const label = document.createElement('div');
     label.className = 'ad-fallback-label';
     label.textContent = 'Ad placeholder';
