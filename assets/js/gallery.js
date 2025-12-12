@@ -437,8 +437,8 @@ function openModal(meta) {
 
   const leftImg = document.createElement("img");
   leftImg.alt = "Previous";
-  leftImg.style.width = "28px";
-  leftImg.style.height = "28px";
+  leftImg.style.width = "36px";
+  leftImg.style.height = "36px";
   leftImg.style.objectFit = "contain";
   leftImg.style.pointerEvents = "none";
   // left arrow should be flipped horizontally so a single right-facing
@@ -466,8 +466,8 @@ function openModal(meta) {
 
   const rightImg = document.createElement("img");
   rightImg.alt = "Next";
-  rightImg.style.width = "28px";
-  rightImg.style.height = "28px";
+  rightImg.style.width = "36px";
+  rightImg.style.height = "36px";
   rightImg.style.objectFit = "contain";
   rightImg.style.pointerEvents = "none";
   // right arrow uses the same right-facing image without flip
@@ -488,9 +488,9 @@ function openModal(meta) {
   // Update arrow icons according to dark-mode (white for dark, black for light)
   function updateArrowIcons() {
     const isDark = document.body.classList.contains('dark-mode');
-    // Single source image: invert colors for dark mode so a white arrow becomes black.
-    // filter: invert(1) will swap white->black and transparent stays transparent.
-    const filter = isDark ? 'invert(1)' : 'none';
+    // Per user request: in dark mode use original image (no invert).
+    // In light mode invert colors so the white arrow becomes dark.
+    const filter = isDark ? 'none' : 'invert(1)';
     leftImg.style.filter = filter;
     rightImg.style.filter = filter;
   }

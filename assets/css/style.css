@@ -44,7 +44,7 @@ nav a::after { content: ''; display:block; height:2px; width:0; background:#fff;
 nav a:hover::after { width:100%; }
 
 /* Settings dropdown (gear) - gear is at right, nav stays centered */
-.settings-dropdown { position: absolute; right: 18px; top: 50%; transform: translateY(-50%); pointer-events: auto; z-index: 50000; }
+.settings-dropdown { position: absolute; right: 18px; top: 50%; transform: translateY(-50%); pointer-events: auto; z-index: 5000000; }
 .gear-box { display:inline-block; padding:3px; background:black; border:1px solid #fff; border-radius:6px; }
 .gear-icon { width:30px; height:30px; display:block; cursor:pointer; transition:transform .28s ease; }
 .gear-icon:hover { transform: rotate(18deg); } /* only the gear rotates */
@@ -284,7 +284,7 @@ body.dark-mode .card.highlighted {
   position: fixed;
   top: 50%;
   transform: translateY(-50%);
-  background: rgba(0, 0, 0, 0.6);
+  background: transparent; /* invisible circle but still clickable */
   color: white;
   border: none;
   width: 44px;
@@ -302,19 +302,28 @@ body.dark-mode .card.highlighted {
 }
 
 .modal-arrow:hover { 
-  background: rgba(0, 0, 0, 0.85);
-  transform: translateY(-50%) scale(1.1);
+  /* keep hover scale feedback but no visible background */
+  transform: translateY(-50%) scale(1.08);
 }
 
 .modal-arrow-left { left: 24px; }
 .modal-arrow-right { right: 24px; }
 
 body.dark-mode .modal-arrow {
-  background: rgba(255, 255, 255, 0.4);
+  background: transparent;
 }
 
 body.dark-mode .modal-arrow:hover {
-  background: rgba(255, 255, 255, 0.6);
+  background: transparent;
+}
+
+/* Ensure arrow image inside the button is sized and centered */
+.modal-arrow img {
+  display: block;
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+  pointer-events: none; /* clicks go to the button */
 }
 
 /* Tablet and smaller screens */
