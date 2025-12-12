@@ -464,10 +464,32 @@ function openModal(meta) {
   const img = document.createElement("img");
   img.alt = meta.rawBase;
   img.className = "modal-image";
+  // Hide the image initially; show a spinner until the image is fully decoded
+  img.style.visibility = 'hidden';
+  img.style.display = 'none';
+
+  // spinner shown inside the modal while loading
+  const modalSpinner = document.createElement('div');
+  modalSpinner.className = 'spinner modal-spinner';
+  // ensure spinner is visible (spinner class is hidden by default in some contexts)
+  modalSpinner.style.display = 'block';
+
+  // track whether modal content has been revealed
+  let modalLoaded = false;
+
+  function revealModalContent() {
+    modalLoaded = true;
+    try { if (modalSpinner && modalSpinner.parentNode) modalSpinner.parentNode.removeChild(modalSpinner); } catch (e) {}
+    try { img.style.visibility = 'visible'; img.style.display = 'block'; } catch (e) {}
+    try { if (caption) caption.style.visibility = 'visible'; } catch (e) {}
+    try { if (leftArrow) leftArrow.style.visibility = 'visible'; } catch (e) {}
+    try { if (rightArrow) rightArrow.style.visibility = 'visible'; } catch (e) {}
+  }
 
   // Load modal image from Cache Storage when possible, falling back to
   // network. This mirrors the gallery caching strategy so opening the
-  // spotlight uses locally cached images when available.
+  // spotlight uses locally cached images when available. Reveal modal
+  // content only after the image has been set and (preferably) decoded.
   (async () => {
     try {
       const candidate = meta && meta.src ? meta.src : null;
@@ -485,9 +507,10 @@ function openModal(meta) {
             try {
               await img.decode();
             } catch (e) {
-              // decoding failed; still proceed so browser can show fallback
+              // decoding failed; still reveal so browser can show fallback
             }
             try { URL.revokeObjectURL(blobUrl); } catch (e) {}
+            revealModalContent();
             return;
           }
         } catch (e) {
@@ -513,9 +536,10 @@ function openModal(meta) {
           try {
             await img.decode();
           } catch (e) {
-            // decoding failed; continue
+            // decoding failed; still reveal so browser can show fallback
           }
           try { URL.revokeObjectURL(blobUrl); } catch (e) {}
+          revealModalContent();
           return;
         }
       } catch (e) {
@@ -525,8 +549,11 @@ function openModal(meta) {
       // swallow any unexpected errors to avoid breaking modal
       console.warn('modal image load error', e);
     }
+    // Ensure modal UI is visible even if image failed to load (so user can navigate/close)
+    try { revealModalContent(); } catch (e) {}
   })();
-
+  // append spinner then image (image remains hidden until reveal)
+  imgwrap.appendChild(modalSpinner);
   imgwrap.appendChild(img);
   modal.appendChild(imgwrap);
 
@@ -564,6 +591,8 @@ function openModal(meta) {
   }
   
   caption.textContent = captionText || (meta && meta.rawBase) || '';
+  // hide caption until modal image is ready
+  caption.style.visibility = 'hidden';
   modal.appendChild(caption);
   // Add left and right navigation arrows using user's PNG icons
   // declare observer variable in this scope so closeModal can disconnect it
@@ -572,6 +601,8 @@ function openModal(meta) {
   const leftArrow = document.createElement("button");
   leftArrow.className = "modal-arrow modal-arrow-left";
   leftArrow.setAttribute("aria-label", "Previous image");
+  // hide until image has loaded
+  leftArrow.style.visibility = modalLoaded ? 'visible' : 'hidden';
 
   const leftImg = document.createElement("img");
   leftImg.alt = "Previous";
@@ -601,6 +632,8 @@ function openModal(meta) {
   const rightArrow = document.createElement("button");
   rightArrow.className = "modal-arrow modal-arrow-right";
   rightArrow.setAttribute("aria-label", "Next image");
+  // hide until image has loaded
+  rightArrow.style.visibility = modalLoaded ? 'visible' : 'hidden';
 
   const rightImg = document.createElement("img");
   rightImg.alt = "Next";
