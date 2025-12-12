@@ -153,7 +153,7 @@ IMAGE_LABELS[130] = "ducky-realartmaine-character, antistyle, portlandbee";
 IMAGE_LABELS[131] = "ducky-realartmaine-character, antistyle, portlandbee";
 IMAGE_LABELS[132] = "ducky-realartmaine-antistyle, paintroller";
 IMAGE_LABELS[133] = "able-cravecreative9-toy, piece";
-IMAGE_LABELS[132] = "solar-DNB-realartmaine-tags, tag, handstyle";
+IMAGE_LABELS[134] = "solar-DNB-realartmaine-tags, tag, handstyle";
 // ----- END AUTO-GENERATED LABELS -----
 
 // Helper: get label for numeric index (1-based). Returns empty string if missing.
