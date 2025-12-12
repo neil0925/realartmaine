@@ -244,11 +244,10 @@ let currentDisplayedList = [];
 const DEFAULT_ASPECT = 0.66;
 
 
-// Slang blacklist: non-literal toy-related slang (used to label inexperienced
-// or poser writers). Edit this list if you want different terms.
+
 const TOY_BLACKLIST = [
-  'toy', 'toys', 'toywriter', 'toyass', 'new', 'newbie', 'newb', 'noob', 'noobs',
-  'poser', 'posers', 'fake', 'feeder', 'trash', 'soft'
+  "arise", "cutie", "love", "lovey", "4kt", "fourkt", "sajak", "sajack", "freeze",
+  "ames", "ame", "chad", "token", "sour", "saint", "ecko", "echo"
 ].map(s => s.toLowerCase());
 
 function showToyBlockedMessage() {
