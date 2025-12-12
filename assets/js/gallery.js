@@ -160,6 +160,11 @@ IMAGE_LABELS[137] = "trash, aura, gues-OHK, NGL, GSF-ericwhite-throwie, fillin";
 IMAGE_LABELS[138] = "tears-HEX-ericwhite-throwie, fillin";
 IMAGE_LABELS[139] = "shine-ericwhite-throwie, hollow";
 IMAGE_LABELS[140] = "shine-ericwhite-throwie, fillin";
+IMAGE_LABELS[141] = "argo-ericwhite-antistyle, throwie, fillin";
+IMAGE_LABELS[142] = "muska-ericwhite-KYS-throwie, fillin";
+IMAGE_LABELS[143] = "piza-ericwhite-KYS-throwie, fillin";
+IMAGE_LABELS[144] = "catch-ericwhite-OHK,PTG,BNE-straightletter";
+IMAGE_LABELS[145] = "st-ericwhite-throwie, fillin";
 // ----- END AUTO-GENERATED LABELS -----
 
 // Helper: get label for numeric index (1-based). Returns empty string if missing.
