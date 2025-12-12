@@ -160,14 +160,11 @@ IMAGE_LABELS[137] = "trash, aura, gues-OHK, NGL, GSF-ericwhite-throwie, fillin";
 IMAGE_LABELS[138] = "tears-HEX-ericwhite-throwie, fillin";
 IMAGE_LABELS[139] = "shine-ericwhite-throwie, hollow";
 IMAGE_LABELS[140] = "shine-ericwhite-throwie, fillin";
-<<<<<<< HEAD
-=======
 IMAGE_LABELS[141] = "argo-ericwhite-antistyle, throwie, fillin";
 IMAGE_LABELS[142] = "muska-ericwhite-KYS-throwie, fillin";
 IMAGE_LABELS[143] = "piza-ericwhite-KYS-throwie, fillin";
-IMAGE_LABELS[144] = "catch-OHK,PTG,BNE-ericwhite-straightletter";
+IMAGE_LABELS[144] = "catch-ericwhite-OHK,PTG,BNE-straightletter";
 IMAGE_LABELS[145] = "st-ericwhite-throwie, fillin";
->>>>>>> cf87851bd44a9c1fc04f43e7fb5f579914ff891e
 // ----- END AUTO-GENERATED LABELS -----
 
 // Helper: get label for numeric index (1-based). Returns empty string if missing.
@@ -472,27 +469,7 @@ function openModal(meta) {
   const img = document.createElement("img");
   img.alt = meta.rawBase;
   img.className = "modal-image";
-  // Hide the image initially; show a spinner until the image is fully decoded
-  img.style.visibility = 'hidden';
-  img.style.display = 'none';
-
-  // spinner shown inside the modal while loading
-  const modalSpinner = document.createElement('div');
-  modalSpinner.className = 'spinner modal-spinner';
-  // ensure spinner is visible (spinner class is hidden by default in some contexts)
-  modalSpinner.style.display = 'block';
-
-  // track whether modal content has been revealed
-  let modalLoaded = false;
-
-  function revealModalContent() {
-    modalLoaded = true;
-    try { if (modalSpinner && modalSpinner.parentNode) modalSpinner.parentNode.removeChild(modalSpinner); } catch (e) {}
-    try { img.style.visibility = 'visible'; img.style.display = 'block'; } catch (e) {}
-    try { if (caption) caption.style.visibility = 'visible'; } catch (e) {}
-    try { if (leftArrow) leftArrow.style.visibility = 'visible'; } catch (e) {}
-    try { if (rightArrow) rightArrow.style.visibility = 'visible'; } catch (e) {}
-  }
+  // image element for modal (appended directly)
 
   // Load modal image from Cache Storage when possible, falling back to
   // network. This mirrors the gallery caching strategy so opening the
@@ -518,7 +495,7 @@ function openModal(meta) {
               // decoding failed; still reveal so browser can show fallback
             }
             try { URL.revokeObjectURL(blobUrl); } catch (e) {}
-            revealModalContent();
+            return;
             return;
           }
         } catch (e) {
@@ -547,7 +524,7 @@ function openModal(meta) {
             // decoding failed; still reveal so browser can show fallback
           }
           try { URL.revokeObjectURL(blobUrl); } catch (e) {}
-          revealModalContent();
+          return;
           return;
         }
       } catch (e) {
@@ -557,8 +534,8 @@ function openModal(meta) {
       // swallow any unexpected errors to avoid breaking modal
       console.warn('modal image load error', e);
     }
-    // Ensure modal UI is visible even if image failed to load (so user can navigate/close)
-    try { revealModalContent(); } catch (e) {}
+    // no-op fallback: if loading fails we simply let the modal remain so
+    // users can still close or navigate. (Previous reveal logic removed.)
   })();
   // append spinner then image (image remains hidden until reveal)
   imgwrap.appendChild(modalSpinner);
