@@ -888,17 +888,19 @@ function filterGallery(q) {
     return;
   }
 
-  // If the query matches any toy blacklist term (substring match), short-circuit
-  // and show the polite blocked message.
+  // Split the query into tokens (space/comma/semicolon separated) so we can
+  // perform strict token-level checks rather than substring matches.
+  const queryTokens = q.split(/[\s,;]+/).map(s => s.trim().toLowerCase()).filter(Boolean);
+
+  // If any token exactly matches a toy blacklist term, short-circuit and show
+  // the polite blocked message. This avoids false positives caused by
+  // substring matches (e.g. 'game' containing 'ame').
   for (const t of TOY_BLACKLIST) {
-    if (q.indexOf(t) !== -1) {
+    if (queryTokens.includes(t)) {
       showToyBlockedMessage();
       return;
     }
   }
-
-  // split the query into tokens (space/comma/semicolon separated). Search matches if ANY token is present in the image tokens.
-  const queryTokens = q.split(/[\s,;]+/).map(s => s.trim().toLowerCase()).filter(Boolean);
 
   const filtered = imagesList.filter(src => {
     const meta = parseFilename(src);
