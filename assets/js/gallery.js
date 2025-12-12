@@ -255,6 +255,30 @@ const TOY_BLACKLIST = [
   "ames", "ame", "chad", "token", "sour", "saint", "ecko", "echo"
 ].map(s => s.toLowerCase());
 
+// Synonym groups: each sub-array contains equivalent terms that should be
+// considered interchangeable for search purposes. Add or edit groups here.
+const SYNONYM_GROUPS = [
+  ['throwie', 'bubble letter', 'throw', 'bubbleletter', 'throw up', 'throwups', 'throwup', 'throw ups'],
+  ['antistyle', 'anti style', 'anti', 'hipster graffiti', 'hipster graff', 'hipstergraff'],
+  ['catch', 'cache']
+];
+
+function buildSynonymMap(groups) {
+  const map = {};
+  if (!Array.isArray(groups)) return map;
+  groups.forEach(group => {
+    // normalize each term
+    const normalized = group.map(g => (g || '').toString().trim().toLowerCase()).filter(Boolean);
+    normalized.forEach((term) => {
+      // map each term to the other terms in the group (excluding itself)
+      map[term] = normalized.filter(t => t !== term);
+    });
+  });
+  return map;
+}
+
+const SYNONYM_MAP = buildSynonymMap(SYNONYM_GROUPS);
+
 function showToyBlockedMessage() {
   if (!gallery) return;
   gallery.innerHTML = '';
@@ -342,6 +366,21 @@ function buildMetaTokens(meta) {
 
   // also include rawBase words (helpful for some filenames)
   (meta.rawBase || "").split(/[\s,;,_-]+/).map(normToken).filter(Boolean).forEach(p => tokens.add(p));
+
+  // Expand tokens with configured synonyms so metadata implicitly
+  // contains equivalent search terms. For example, if a meta token is
+  // "throwie" and SYNONYM_MAP maps "throwie" -> ["bubble", "throw"],
+  // those synonyms will be added to the token set.
+  try {
+    const current = Array.from(tokens);
+    current.forEach(t => {
+      if (t && SYNONYM_MAP && SYNONYM_MAP[t] && SYNONYM_MAP[t].length) {
+        SYNONYM_MAP[t].forEach(s => tokens.add(s));
+      }
+    });
+  } catch (e) {
+    // defensive: if synonyms are missing or malfunctioning, silently continue
+  }
 
   return tokens;
 }
@@ -1006,11 +1045,24 @@ function filterGallery(q) {
   // perform strict token-level checks rather than substring matches.
   const queryTokens = q.split(/[\s,;]+/).map(s => s.trim().toLowerCase()).filter(Boolean);
 
-  // If any token exactly matches a toy blacklist term, short-circuit and show
-  // the polite blocked message. This avoids false positives caused by
-  // substring matches (e.g. 'game' containing 'ame').
+  // Build an expanded token set that includes configured synonyms so a search
+  // for one term will also match equivalent terms in metadata (e.g. "cache"
+  // will match items tagged "catch").
+  const expandedQueryTokens = new Set(queryTokens);
+  try {
+    queryTokens.forEach(t => {
+      if (t && SYNONYM_MAP && SYNONYM_MAP[t] && SYNONYM_MAP[t].length) {
+        SYNONYM_MAP[t].forEach(s => expandedQueryTokens.add(s));
+      }
+    });
+  } catch (e) {
+    // ignore synonym expansion errors
+  }
+
+  // If any token (original or expanded) exactly matches a toy blacklist term,
+  // short-circuit and show the polite blocked message.
   for (const t of TOY_BLACKLIST) {
-    if (queryTokens.includes(t)) {
+    if (queryTokens.includes(t) || expandedQueryTokens.has(t)) {
       showToyBlockedMessage();
       return;
     }
@@ -1020,8 +1072,10 @@ function filterGallery(q) {
     const meta = parseFilename(src);
     const metaTokens = buildMetaTokens(meta); // set of normalized tokens
 
-    // require that at least one query token equals one of the meta tokens (strict token match)
-    return queryTokens.some(qt => metaTokens.has(qt));
+    // require that at least one expanded query token equals one of the meta tokens
+    // (strict token match). expandedQueryTokens includes synonyms so searches
+    // for related words will match the same images.
+    return Array.from(expandedQueryTokens).some(qt => metaTokens.has(qt));
   });
 
   loadImagesSequentially(filtered);
