@@ -905,8 +905,8 @@ function loadImageIntoCard(meta, card, wrap, placeholder, expectedLoadId) {
           errEl.className = "loading-error";
           errEl.textContent = `Failed: ${filename}`;
           if (placeholder && placeholder.parentNode === wrap) {
-            placeholder.innerHTML = "";
-            placeholder.appendChild(errEl);
+            try { placeholder.remove(); } catch (e) { try { placeholder.parentNode && placeholder.parentNode.removeChild(placeholder); } catch (e) {} }
+            wrap.appendChild(errEl);
           } else {
             wrap.appendChild(errEl);
           }
@@ -934,12 +934,12 @@ function loadImageIntoCard(meta, card, wrap, placeholder, expectedLoadId) {
         const finalH = getRenderedImageHeight(img, wrap.clientWidth) || parseInt(wrap.style.height) || 150;
         wrap.style.height = `${finalH}px`;
 
-        img.classList.remove("hidden");
-        img.classList.add("fade-in");
+              img.classList.remove("hidden");
+              img.classList.add("fade-in");
 
-        // clear placeholder box contents (remove spinner) but keep the box
+        // remove the placeholder element so it doesn't overlay/capture clicks
         if (placeholder && placeholder.parentNode === wrap) {
-          placeholder.innerHTML = "";
+          try { placeholder.remove(); } catch (e) { try { placeholder.parentNode && placeholder.parentNode.removeChild(placeholder); } catch (e) {} }
         }
         wrap.appendChild(img);
 
@@ -988,7 +988,9 @@ function loadImageIntoCard(meta, card, wrap, placeholder, expectedLoadId) {
               wrap.style.height = `${finalH}px`;
               img.classList.remove("hidden");
               img.classList.add("fade-in");
-              if (placeholder && placeholder.parentNode === wrap) placeholder.innerHTML = "";
+              if (placeholder && placeholder.parentNode === wrap) {
+                try { placeholder.remove(); } catch (e) { try { placeholder.parentNode && placeholder.parentNode.removeChild(placeholder); } catch (e) {} }
+              }
               wrap.appendChild(img);
               requestAnimationFrame(() => {
                 const rowSpan = Math.max(1, Math.ceil((finalH + rowGap) / (rowHeight + rowGap)));
@@ -1030,7 +1032,9 @@ function loadImageIntoCard(meta, card, wrap, placeholder, expectedLoadId) {
             wrap.style.height = `${finalH}px`;
             img.classList.remove("hidden");
             img.classList.add("fade-in");
-            if (placeholder && placeholder.parentNode === wrap) placeholder.innerHTML = "";
+            if (placeholder && placeholder.parentNode === wrap) {
+              try { placeholder.remove(); } catch (e) { try { placeholder.parentNode && placeholder.parentNode.removeChild(placeholder); } catch (e) {} }
+            }
             wrap.appendChild(img);
             requestAnimationFrame(() => {
               const rowSpan = Math.max(1, Math.ceil((finalH + rowGap) / (rowHeight + rowGap)));
