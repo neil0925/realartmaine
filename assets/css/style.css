@@ -398,7 +398,8 @@ body.dark-mode .modal-arrow:hover {
   align-items: center;
   justify-content: center;
   width: 100%;
-  min-height: 320px; /* larger so it takes up more visual space */
+  /* take up most of the viewport so the message is centered on the page */
+  min-height: calc(100vh - 160px);
   padding: 28px 16px;
   font-size: 1.4rem; /* larger, more prominent text */
   font-weight: 700;
@@ -406,7 +407,7 @@ body.dark-mode .modal-arrow:hover {
   color: #000; /* default for light mode */
   text-align: center;
   border-radius: 6px;
-  margin: 12px 0; /* give breathing room above/below */
+  margin: 80px 0; /* push message into vertical center area */
   box-sizing: border-box;
 }
 
