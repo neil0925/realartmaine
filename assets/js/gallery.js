@@ -417,9 +417,70 @@ function openModal(meta) {
   imgwrap.className = "modal-imgwrap";
 
   const img = document.createElement("img");
-  img.src = meta.src;
   img.alt = meta.rawBase;
   img.className = "modal-image";
+
+  // Load modal image from Cache Storage when possible, falling back to
+  // network. This mirrors the gallery caching strategy so opening the
+  // spotlight uses locally cached images when available.
+  (async () => {
+    try {
+      const candidate = meta && meta.src ? meta.src : null;
+      if (!candidate) return;
+
+      // try cache first
+      if (typeof caches !== 'undefined' && caches.open) {
+        try {
+          const cache = await caches.open(GALLERY_CACHE);
+          const cached = await cache.match(candidate);
+          if (cached && cached.ok) {
+            const blob = await cached.blob();
+            const blobUrl = URL.createObjectURL(blob);
+            img.src = blobUrl;
+            try {
+              await img.decode();
+            } catch (e) {
+              // decoding failed; still proceed so browser can show fallback
+            }
+            try { URL.revokeObjectURL(blobUrl); } catch (e) {}
+            return;
+          }
+        } catch (e) {
+          // ignore cache errors and fall through to network fetch
+        }
+      }
+
+      // not cached: fetch from network and cache if possible
+      try {
+        const resp = await fetch(candidate, { method: 'GET' });
+        if (resp && resp.ok) {
+          // attempt to cache a clone (ignore failures)
+          try {
+            if (typeof caches !== 'undefined' && caches.open) {
+              const cache = await caches.open(GALLERY_CACHE);
+              try { await cache.put(candidate, resp.clone()); } catch (e) {}
+            }
+          } catch (e) {}
+
+          const blob = await resp.blob();
+          const blobUrl = URL.createObjectURL(blob);
+          img.src = blobUrl;
+          try {
+            await img.decode();
+          } catch (e) {
+            // decoding failed; continue
+          }
+          try { URL.revokeObjectURL(blobUrl); } catch (e) {}
+          return;
+        }
+      } catch (e) {
+        // network failed; leave img.src unset so browser shows alt text
+      }
+    } catch (e) {
+      // swallow any unexpected errors to avoid breaking modal
+      console.warn('modal image load error', e);
+    }
+  })();
 
   imgwrap.appendChild(img);
   modal.appendChild(imgwrap);
