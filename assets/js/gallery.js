@@ -261,7 +261,7 @@ function showToyBlockedMessage() {
   gallery.appendChild(msgWrap);
   currentDisplayedList = [];
 }
-
+//what
 // Ad configuration: set publisherId to 'ca-pub-XXXXXXXXXXXX' to enable real AdSense.
 // Leave empty ('') to keep plain "Ad placeholder" boxes.
 const ADS_CONFIG = {
