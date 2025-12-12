@@ -400,11 +400,22 @@ body.dark-mode .modal-arrow:hover {
   /* place at the top of the gallery and center horizontally */
   margin: 8px 0 18px 0;
   text-align: center;
-  font-size: 4.2rem; /* ~3x larger as requested */
+  /* span the full gallery grid so the banner uses available width */
+  grid-column: 1 / -1;
+  justify-self: center;
+  /* Responsive large text but clamp so small screens remain usable */
+  font-size: clamp(2.2rem, 5vw, 4.2rem);
   font-weight: 800;
   background: transparent;
   color: #000; /* default for light mode */
   border-radius: 0;
+  /* ensure normal wrapping behavior (avoid one-word-per-line) */
+  white-space: normal;
+  word-break: normal;
+  overflow-wrap: break-word;
+  box-sizing: border-box;
+  padding-left: 16px;
+  padding-right: 16px;
 }
 
 body.dark-mode .toy-blocked {
