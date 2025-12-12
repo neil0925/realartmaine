@@ -160,11 +160,6 @@ IMAGE_LABELS[137] = "trash, aura, gues-OHK, NGL, GSF-ericwhite-throwie, fillin";
 IMAGE_LABELS[138] = "tears-HEX-ericwhite-throwie, fillin";
 IMAGE_LABELS[139] = "shine-ericwhite-throwie, hollow";
 IMAGE_LABELS[140] = "shine-ericwhite-throwie, fillin";
-IMAGE_LABELS[141] = "argo-ericwhite-antistyle, throwie, fillin";
-IMAGE_LABELS[142] = "muska-ericwhite-KYS-throwie, fillin";
-IMAGE_LABELS[143] = "piza-ericwhite-KYS-throwie, fillin";
-IMAGE_LABELS[144] = "catch-ericwhite-OHK,PTG,BNE-straightletter";
-IMAGE_LABELS[145] = "st-ericwhite-throwie, fillin";
 // ----- END AUTO-GENERATED LABELS -----
 
 // Helper: get label for numeric index (1-based). Returns empty string if missing.
@@ -465,17 +460,6 @@ function openModal(meta) {
 
   const imgwrap = document.createElement("div");
   imgwrap.className = "modal-imgwrap";
-  // Reserve a reasonable area for the modal image immediately so the
-  // caption can match its width and the spinner sits in the correct place.
-  try {
-    const winW = (window && window.innerWidth) ? window.innerWidth : (document.documentElement.clientWidth || 800);
-    const estWidth = Math.max(200, Math.min(840, Math.max(200, winW - 48)));
-    const estHeight = Math.max(120, Math.round(estWidth * DEFAULT_ASPECT));
-    imgwrap.style.width = estWidth + 'px';
-    imgwrap.style.height = estHeight + 'px';
-  } catch (e) {
-    // ignore sizing errors
-  }
 
   const img = document.createElement("img");
   img.alt = meta.rawBase;
@@ -526,11 +510,6 @@ function openModal(meta) {
               // decoding failed; still reveal so browser can show fallback
             }
             try { URL.revokeObjectURL(blobUrl); } catch (e) {}
-            try {
-              const finalH = getRenderedImageHeight(img, imgwrap.clientWidth) || imgwrap.clientHeight || null;
-              if (finalH) imgwrap.style.height = finalH + 'px';
-              if (caption) caption.style.width = (imgwrap.clientWidth ? (imgwrap.clientWidth + 'px') : caption.style.width);
-            } catch (e) {}
             revealModalContent();
             return;
           }
@@ -560,11 +539,6 @@ function openModal(meta) {
             // decoding failed; still reveal so browser can show fallback
           }
           try { URL.revokeObjectURL(blobUrl); } catch (e) {}
-          try {
-            const finalH = getRenderedImageHeight(img, imgwrap.clientWidth) || imgwrap.clientHeight || null;
-            if (finalH) imgwrap.style.height = finalH + 'px';
-            if (caption) caption.style.width = (imgwrap.clientWidth ? (imgwrap.clientWidth + 'px') : caption.style.width);
-          } catch (e) {}
           revealModalContent();
           return;
         }
