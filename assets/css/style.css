@@ -225,6 +225,12 @@ footer hr { border:none; border-top:1px solid #aaa; margin:10px 0; }
 /* show spinner only when placeholder is active (single spinner at a time) */
 .placeholder-box.active .spinner { display: block; }
 
+/* In dark mode invert spinner so it remains visible against dark backgrounds */
+body.dark-mode .spinner {
+  border: 3px solid rgba(255,255,255,0.12);
+  border-top-color: rgba(255,255,255,0.72);
+}
+
 /* ensure modal/backdrop overlays everything */
 .modal-backdrop {
   position: fixed;
