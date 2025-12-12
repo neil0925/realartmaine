@@ -394,21 +394,17 @@ body.dark-mode .modal-arrow:hover {
 
 /* Blocked 'toy' message shown in gallery area when toy slang is searched */
 .toy-blocked {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: block; /* act like a banner, not an image box */
   width: 100%;
-  /* take up most of the viewport so the message is centered on the page */
-  min-height: calc(100vh - 160px);
-  padding: 28px 16px;
-  font-size: 1.4rem; /* larger, more prominent text */
-  font-weight: 700;
+  padding: 12px 8px;
+  /* place at the top of the gallery and center horizontally */
+  margin: 8px 0 18px 0;
+  text-align: center;
+  font-size: 4.2rem; /* ~3x larger as requested */
+  font-weight: 800;
   background: transparent;
   color: #000; /* default for light mode */
-  text-align: center;
-  border-radius: 6px;
-  margin: 80px 0; /* push message into vertical center area */
-  box-sizing: border-box;
+  border-radius: 0;
 }
 
 body.dark-mode .toy-blocked {
