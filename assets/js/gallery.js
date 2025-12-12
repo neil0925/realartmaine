@@ -241,6 +241,28 @@ let currentDisplayedList = [];
 
 const DEFAULT_ASPECT = 0.66;
 
+// Toy blacklist: if the user's search query contains any of these tokens
+// we show a friendly blocked message instead of search results.
+const TOY_BLACKLIST = [
+  'toy', 'toys', 'doll', 'dolls', 'plush', 'plushie', 'figure', 'figures',
+  'lego', 'legos', 'funko', 'action', 'action-figure', 'actionfigure',
+  'hotwheels', 'hot-wheels', 'hot wheels', 'model', 'model-car', 'modelcar',
+  'rc', 'remote', 'remote-control', 'nerf'
+].map(s => s.toLowerCase());
+
+function showToyBlockedMessage() {
+  if (!gallery) return;
+  // clear gallery
+  gallery.innerHTML = '';
+  // create a full-width friendly message element
+  const msg = document.createElement('div');
+  msg.className = 'loading-error';
+  msg.textContent = "Sorry we don't let toys on our site";
+  gallery.appendChild(msg);
+  // ensure current displayed list is empty to avoid background loads
+  currentDisplayedList = [];
+}
+
 // Ad configuration: set publisherId to 'ca-pub-XXXXXXXXXXXX' to enable real AdSense.
 // Leave empty ('') to keep plain "Ad placeholder" boxes.
 const ADS_CONFIG = {
@@ -865,6 +887,15 @@ function filterGallery(q) {
   if (!q) {
     loadImagesSequentially(imagesList);
     return;
+  }
+
+  // If the query matches any toy blacklist term (substring match), short-circuit
+  // and show the polite blocked message.
+  for (const t of TOY_BLACKLIST) {
+    if (q.indexOf(t) !== -1) {
+      showToyBlockedMessage();
+      return;
+    }
   }
 
   // split the query into tokens (space/comma/semicolon separated). Search matches if ANY token is present in the image tokens.
