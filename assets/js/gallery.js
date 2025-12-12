@@ -163,7 +163,7 @@ IMAGE_LABELS[140] = "shine-ericwhite-throwie, fillin";
 IMAGE_LABELS[141] = "argo-ericwhite-antistyle, throwie, fillin";
 IMAGE_LABELS[142] = "muska-ericwhite-KYS-throwie, fillin";
 IMAGE_LABELS[143] = "piza-ericwhite-KYS-throwie, fillin";
-IMAGE_LABELS[144] = "catch-ericwhite-OHK,PTG,BNE-straightletter";
+IMAGE_LABELS[144] = "catch-OHK,PTG,BNE-ericwhite-straightletter";
 IMAGE_LABELS[145] = "st-ericwhite-throwie, fillin";
 // ----- END AUTO-GENERATED LABELS -----
 
