@@ -259,7 +259,7 @@ const TOY_BLACKLIST = [
 // considered interchangeable for search purposes. Add or edit groups here.
 const SYNONYM_GROUPS = [
   ['throwie', 'bubble letter', 'throw', 'bubbleletter', 'throw up', 'throwups', 'throwup', 'throw ups'],
-  ['antistyle', 'anti style', 'anti', 'hipster graffiti', 'hipster graff', 'hipstergraff'],
+  ['antistyle', 'anti style', 'anti', 'hipster graffiti', 'hipster graff', 'hipstergraff', 'hipstergraffiti'],
   ['catch', 'cache']
 ];
 
