@@ -62,7 +62,7 @@ nav a:hover::after { width:100%; }
   box-shadow: 0 8px 22px rgba(0,0,0,0.35);
   /* Make dropdown appear above hovered gallery images (z ~40)
      but keep it below modal arrows (z:100000). */
-  z-index: 50010;
+  z-index: 500000010;
   padding: 8px;
   overflow: auto;
   flex-direction: column;
@@ -390,6 +390,26 @@ body.dark-mode .modal-arrow:hover {
   white-space: normal;       /* allow wrapping */
   word-break: break-word;    /* break long filenames */
   z-index: 1000;
+}
+
+/* Blocked 'toy' message shown in gallery area when toy slang is searched */
+.toy-blocked {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 160px;
+  padding: 18px 12px;
+  font-size: 1.05rem;
+  font-weight: 600;
+  background: transparent;
+  color: #000; /* default for light mode */
+  text-align: center;
+  border-radius: 6px;
+}
+
+body.dark-mode .toy-blocked {
+  color: #fff; /* white text in dark mode */
 }
 
 /* simple ad-card defaults so inserted ads look consistent */

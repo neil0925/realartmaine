@@ -241,25 +241,21 @@ let currentDisplayedList = [];
 
 const DEFAULT_ASPECT = 0.66;
 
-// Toy blacklist: if the user's search query contains any of these tokens
-// we show a friendly blocked message instead of search results.
+
+// Slang blacklist: non-literal toy-related slang (used to label inexperienced
+// or poser writers). Edit this list if you want different terms.
 const TOY_BLACKLIST = [
-  'toy', 'toys', 'doll', 'dolls', 'plush', 'plushie', 'figure', 'figures',
-  'lego', 'legos', 'funko', 'action', 'action-figure', 'actionfigure',
-  'hotwheels', 'hot-wheels', 'hot wheels', 'model', 'model-car', 'modelcar',
-  'rc', 'remote', 'remote-control', 'nerf'
+  'toy', 'toys', 'toywriter', 'toyass', 'new', 'newbie', 'newb', 'noob', 'noobs',
+  'poser', 'posers', 'fake', 'feeder', 'trash', 'soft'
 ].map(s => s.toLowerCase());
 
 function showToyBlockedMessage() {
   if (!gallery) return;
-  // clear gallery
   gallery.innerHTML = '';
-  // create a full-width friendly message element
-  const msg = document.createElement('div');
-  msg.className = 'loading-error';
-  msg.textContent = "Sorry we don't let toys on our site";
-  gallery.appendChild(msg);
-  // ensure current displayed list is empty to avoid background loads
+  const msgWrap = document.createElement('div');
+  msgWrap.className = 'toy-blocked';
+  msgWrap.textContent = "Sorry we don't let toys on our site";
+  gallery.appendChild(msgWrap);
   currentDisplayedList = [];
 }
 
