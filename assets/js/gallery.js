@@ -284,6 +284,9 @@ function tokensForSrc(src) {
 // <-- ADDITION: ensure DOM refs and load token exist before any function runs -->
 const gallery = document.getElementById("galleryContainer");
 const searchInput = document.getElementById("searchInput");
+// sort control (newest/oldest)
+const sortSelect = document.getElementById("sortSelect");
+let currentSort = (sortSelect && sortSelect.value) ? sortSelect.value : 'newest';
 // load-run token used to cancel obsolete loads
 let currentLoadId = 0;
 // the list currently displayed in the gallery (changes with search/filter)
@@ -1138,8 +1141,18 @@ function loadImageIntoCard(meta, card, wrap, placeholder, expectedLoadId) {
 function filterGallery(q) {
   if (!gallery) return;
   q = (q || "").trim().toLowerCase();
+  // Determine active sort from the select (may be changed by UI)
+  if (sortSelect) currentSort = sortSelect.value || currentSort;
+
   if (!q) {
-    loadImagesSequentially(imagesList);
+    // when no query, apply current sort to the full imagesList
+    const all = imagesList.slice();
+    all.sort((a, b) => {
+      const ia = getNumericIndexFromSrc(a);
+      const ib = getNumericIndexFromSrc(b);
+      return currentSort === 'newest' ? ib - ia : ia - ib;
+    });
+    loadImagesSequentially(all);
     return;
   }
 
@@ -1180,11 +1193,44 @@ function filterGallery(q) {
     return Array.from(expandedQueryTokens).some(qt => metaTokens.has(qt));
   });
 
+  // sort filtered list by numeric index according to currentSort
+  filtered.sort((a, b) => {
+    const ia = getNumericIndexFromSrc(a);
+    const ib = getNumericIndexFromSrc(b);
+    return currentSort === 'newest' ? ib - ia : ia - ib;
+  });
+
   loadImagesSequentially(filtered);
 }
 
 if (searchInput) {
   searchInput.addEventListener("input", (e) => filterGallery(e.target.value));
+}
+
+// helper: extract numeric index from a numericSrc or path (fallbacks robustly)
+function getNumericIndexFromSrc(src) {
+  if (!src) return 0;
+  try {
+    // if meta exists, prefer meta.index
+    if (typeof metaBySrc !== 'undefined' && metaBySrc[src] && typeof metaBySrc[src].index === 'number') return metaBySrc[src].index;
+  } catch (e) {}
+  // otherwise, extract leading number from filename
+  try {
+    const base = src.replace(/^.*\/(assets\/images\/)?/, '');
+    const m = base.match(/(\d+)/);
+    if (m && m[1]) return parseInt(m[1], 10) || 0;
+  } catch (e) {}
+  return 0;
+}
+
+// sort control listener: re-run current filter when changed
+if (sortSelect) {
+  sortSelect.addEventListener('change', () => {
+    currentSort = sortSelect.value || currentSort;
+    // re-run filter using existing input value
+    const q = (searchInput && searchInput.value) ? searchInput.value : '';
+    filterGallery(q);
+  });
 }
 
 // masonry resize helper
