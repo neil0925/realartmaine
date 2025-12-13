@@ -91,12 +91,11 @@ nav a.active:focus::after {
   top: 44px;
   right: 0;
   width: 160px;
-  height: 200px;
-  background: #222;
+  max-height: 220px;
+  background: #fff; /* light by default; switched in dark-mode */
+  color: #000;
   border-radius: 6px;
-  box-shadow: 0 8px 22px rgba(0,0,0,0.35);
-  /* Make dropdown appear above hovered gallery images (z ~40)
-     but keep it below modal arrows (z:100000). */
+  box-shadow: 0 8px 22px rgba(0,0,0,0.12);
   z-index: 500000010;
   padding: 8px;
   overflow: auto;
@@ -104,6 +103,7 @@ nav a.active:focus::after {
   gap: 8px;
   align-items: center;    /* center horizontally */
   justify-content: flex-start; /* put items near top */
+  border: 1px solid rgba(0,0,0,0.06);
 }
 .dropdown-content.show { display: flex; }
 
@@ -123,6 +123,26 @@ nav a.active:focus::after {
 
 /* Mode icon inside button */
 #modeIcon { width:150px; height:130px; object-fit:contain; display:block; }
+
+/* dropdown adapts to dark mode */
+body.dark-mode .dropdown-content {
+  background: #222;
+  color: #fff;
+  border-color: rgba(255,255,255,0.06);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.35);
+}
+
+/* Make theme-switch smaller when placed inside dropdown so it fits */
+.dropdown-content .theme-switch {
+  --toggle-size: 22px;
+  --container-width: 4.2em;
+  --container-height: 1.9em;
+  --container-radius: 4.5em;
+  --circle-container-diameter: 2.5em;
+  --sun-moon-diameter: 1.6em;
+}
+
+.dropdown-content button { color: inherit; }
 
 /* Main and footer */
 main { padding:30px; /* allow gallery to use full width */ max-width: none; margin:auto; width:100%; flex:1; }
