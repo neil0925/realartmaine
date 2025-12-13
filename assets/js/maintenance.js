@@ -114,28 +114,21 @@
     return wrapper;
   }
 
-  // insert banner in a non-destructive way: prefer `#galleryContainer` or `main`.
+  // insert a full-page overlay that covers the content but leaves the top nav usable
   document.addEventListener('DOMContentLoaded', () => {
     const banner = createBanner((document.title || window.location.pathname).replace(/\s*\|.*$/, '').trim());
 
-    // keep the container node present so other scripts don't crash
-    const galleryEl = document.getElementById('galleryContainer');
-    if (galleryEl) {
-      galleryEl.innerHTML = '';
-      galleryEl.appendChild(banner);
-      return;
-    }
+    // Create overlay which will cover the page content but sit under the nav
+    const overlay = document.createElement('div');
+    overlay.className = 'maintenance-overlay';
+    overlay.appendChild(banner);
 
-    const mainEl = document.querySelector('main');
-    if (mainEl) {
-      // don't remove nav/footer — replace main content
-      mainEl.innerHTML = '';
-      mainEl.appendChild(banner);
-      return;
-    }
+    // Append overlay but preserve the page DOM (don't remove main/gallery)
+    // Nav has z-index:20 in stylesheet so overlay's z-index is chosen lower.
+    document.body.appendChild(overlay);
 
-    // fallback: replace body with simple message but keep nav if possible
-    document.body.innerHTML = '';
-    document.body.appendChild(banner);
+    // prevent scrolling of the page content behind the overlay for clarity
+    document.documentElement.style.overflow = 'hidden';
+    document.body.style.overflow = 'hidden';
   });
 })();

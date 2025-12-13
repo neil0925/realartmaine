@@ -488,3 +488,30 @@ body.dark-mode .maintenance-banner .maintenance-note { color: #ccc; }
   font-weight: 700;
   font-size: 0.82rem;
 }
+
+/* Full-page maintenance overlay that covers content but stays below nav (nav z-index:20) */
+.maintenance-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 15; /* below nav (20) so nav remains visible and usable */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(250,250,250,0.97);
+  padding: 24px;
+  box-sizing: border-box;
+  overflow: auto;
+}
+
+body.dark-mode .maintenance-overlay {
+  background: rgba(10,10,10,0.95);
+}
+
+.maintenance-overlay .maintenance-banner {
+  width: 100%;
+  max-width: 920px;
+  box-shadow: 0 12px 36px rgba(0,0,0,0.12);
+  border-radius: 8px;
+  padding: 28px 20px;
+  background: transparent;
+}
