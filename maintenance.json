@@ -1,9 +1,9 @@
 
 {
 	"/Gallery": {
-		"estimated": "12:30",
-		"note": "this is a test the page should be up very soon",
-		"enabled": true
+		"estimated": "",
+		"note": "",
+		"enabled": false
 	},
 	"/Home": {
 		"estimated": "",
