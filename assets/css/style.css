@@ -66,11 +66,11 @@ nav a.active::after { width: 100%; }
 
 /* Stretch the Gallery image itself and keep anchors tight so underline centers */
 .nav-gallery { display: inline-block; }
-.nav-gallery .nav-icon { width: 77px; height: 45px; }
+.nav-gallery .nav-icon { width: 77px; height: 36px; }
 
 @media (max-width: 600px) {
   .nav-icon { width: 39px; height: 39px; }
-  .nav-gallery .nav-icon { width: 66px; height: 39px; }
+  .nav-gallery .nav-icon { width: 66px; height: 31px; }
 }
 
 /* Settings dropdown (gear) - gear is at right, nav stays centered */
