@@ -798,49 +798,43 @@ async function loadImagesSequentially(list) {
   const cols = Math.max(1, Math.floor((galleryWidth + gap) / (minCol + gap)));
   const columnWidth = Math.max(120, Math.floor((galleryWidth - (cols - 1) * gap) / cols));
 
-  // Phase A: create just enough image cards+placeholders to fill the viewport
-  // (we'll create additional cards on-the-fly during loading so initial DOM
-  //  size is reasonable for large galleries)
+  // Phase A: create all image cards+placeholders synchronously (NO ads here)
   const cards = [];
+  for (let i = 0; i < list.length; i++) {
+    if (myLoadId !== currentLoadId) return;
 
-  // conservative placeholder height based on estimated column width
-  const defaultH = Math.max(80, Math.round(columnWidth * DEFAULT_ASPECT));
+    const meta = parseFilename(list[i]);
 
-  // compute how many rows are needed to roughly fill the viewport
-  const viewportH = Math.max(300, window.innerHeight || document.documentElement.clientHeight);
-  const rowGap = parseInt(window.getComputedStyle(grid).getPropertyValue("gap") || "10");
-  const rowsNeeded = Math.max(1, Math.ceil((viewportH + rowGap) / (defaultH + rowGap)));
-  const itemsToCreate = Math.min(list.length, Math.max(1, rowsNeeded * cols));
-
-  // helper to create a card at given index (keeps order)
-  function createCardAt(index) {
-    const meta = parseFilename(list[index]);
     const card = document.createElement("div");
     card.className = "card";
+
     const wrap = document.createElement("div");
     wrap.className = "image-wrap";
+
+    // conservative placeholder height based on estimated column width
+    const defaultH = Math.max(80, Math.round(columnWidth * DEFAULT_ASPECT));
     wrap.style.height = `${defaultH}px`;
+
+    // placeholder wrapper (CSS spinner, not an img)
     const placeholder = document.createElement("div");
     placeholder.className = "placeholder-box";
+
     const spinner = document.createElement("div");
     spinner.className = "spinner";
     placeholder.appendChild(spinner);
+
     wrap.appendChild(placeholder);
     card.appendChild(wrap);
     gallery.appendChild(card);
 
     // set initial grid-row span so layout immediately forms columns
     const rowHeight = parseInt(window.getComputedStyle(grid).getPropertyValue("grid-auto-rows") || "10");
+    const rowGap = parseInt(window.getComputedStyle(grid).getPropertyValue("gap") || "10");
     const initialRowSpan = Math.max(1, Math.ceil((defaultH + rowGap) / (rowHeight + rowGap)));
     card.style.gridRowEnd = `span ${initialRowSpan}`;
 
-    cards[index] = { meta, card, wrap, placeholder };
-    return cards[index];
-  }
-
-  for (let i = 0; i < itemsToCreate; i++) {
-    if (myLoadId !== currentLoadId) return;
-    createCardAt(i);
+    // keep structure and metadata for phase B
+    cards.push({ meta, card, wrap, placeholder });
   }
 
   // Phase B: sequentially load real images into cards. If we run out of
