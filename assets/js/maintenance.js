@@ -23,13 +23,30 @@
   const params = new URLSearchParams(window.location.search || '');
   const debugMode = params.get('debug') === 'true';
 
-  let text;
+  let text = null;
+  // Try absolute path first (production), then relative paths for local previews.
+  async function tryFetchVariants() {
+    const candidates = ['/maintenance.json', 'maintenance.json', './maintenance.json'];
+    for (const p of candidates) {
+      try {
+        const r = await fetch(p, { cache: 'no-store' });
+        if (r && r.ok) return await r.text();
+      } catch (err) {
+        // continue to next candidate
+      }
+    }
+    return null;
+  }
+
   try {
-    const resp = await fetch('/maintenance.json', { cache: 'no-store' });
-    if (!resp.ok) return; // no config or not found
-    text = await resp.text();
+    text = await tryFetchVariants();
+    if (!text) {
+      // Helpful debug hint for local testing environments
+      console.info('maintenance: no maintenance.json found at /maintenance.json or local path.');
+      return;
+    }
   } catch (e) {
-    // network errors or local files - treat as no maintenance
+    console.warn('maintenance: failed to fetch maintenance.json', e);
     return;
   }
 
