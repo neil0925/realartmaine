@@ -38,10 +38,14 @@ nav {
   position: relative;
   z-index: 20;
 }
-nav a { color: #fff; text-decoration: none; font-size: 1.1em; letter-spacing: 0.5px; transition: all 0.18s ease; }
+nav a { color: #fff; text-decoration: none; font-size: 1.1em; letter-spacing: 0.5px; transition: all 0.18s ease; display: inline-flex; align-items: center; justify-content: center; padding: 6px; }
 nav a:hover { transform: scale(1.07); }
-nav a::after { content: ''; display:block; height:2px; width:0; background:#fff; transition:width .18s; margin:0 auto; }
+nav a::after { content: ''; display:block; height:2px; width:0; background:#fff; transition:width .18s; margin:6px auto 0 auto; }
 nav a:hover::after { width:100%; }
+
+/* active link (based on current page) */
+nav a.active { transform: scale(1.06); }
+nav a.active::after { width: 100%; }
 
 /* Nav icon used instead of text: keep same visual size as other UI icons */
 .nav-icon {

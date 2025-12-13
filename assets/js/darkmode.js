@@ -89,4 +89,19 @@ document.addEventListener("DOMContentLoaded", () => {
       if (gear) gear.setAttribute("aria-expanded", "false");
     }
   });
+
+  // Mark the current page's nav anchor as active (adds underline/scale)
+  try {
+    const normalize = (p) => (p || '').replace(/\/$/, '');
+    const path = normalize(location.pathname) || '/Home';
+    document.querySelectorAll('nav a[href]').forEach(a => {
+      try {
+        const hrefPath = normalize(new URL(a.href, location.origin).pathname);
+        if (hrefPath === path) a.classList.add('active');
+        else a.classList.remove('active');
+      } catch (e) { /* ignore malformed hrefs */ }
+    });
+  } catch (err) {
+    console.warn('nav active mark failed', err);
+  }
 });
