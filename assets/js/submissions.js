@@ -99,14 +99,14 @@ document.addEventListener('DOMContentLoaded', () => {
   // Build sorted leaderboard
   const list = Object.entries(counts).sort((a,b) => b[1] - a[1]);
 
-  let html = '<h1>Top Photographers</h1>';
+  let html = '<h1>Top flickers</h1>';
   if (list.length === 0) {
     html += '<p>No submissions found.</p>';
   } else {
     html += '<div class="table-wrap"><table class="leaderboard-table"><thead><tr>' +
       '<th class="rank-col">Place</th>' +
       '<th class="photog-col">Photographer</th>' +
-      '<th class="count-col">photos</th>' +
+      '<th class="count-col">flicks</th>' +
       '</tr></thead><tbody>';
 
     list.slice(0, 200).forEach(([name, cnt], idx) => {
