@@ -140,6 +140,13 @@ footer hr { border:none; border-top:1px solid #aaa; margin:10px 0; }
 .search-bar input {
   padding:10px; width:80%; max-width:420px; border:1px solid #333; border-radius:6px; font-size:1em;
 }
+/* sort select next to search input */
+.search-bar select {
+  padding:8px; border-radius:6px; border:1px solid #333; background: #fff; color: #000; font-size:1em; margin-left:8px;
+}
+body.dark-mode .search-bar select {
+  background: #222; color: #fff; border-color: #555;
+}
 
 /* Masonry / puzzle-style gallery */
 .gallery {
@@ -485,6 +492,8 @@ body.dark-mode .ad-card { background: #222; color: #aaa; border-color: #333; }
 @media (max-width:600px) {
   .gallery { grid-template-columns: repeat(auto-fill, minmax(140px,1fr)); gap:8px; padding:12px; }
   #modeIcon { width:120px; height:90px; }
+  .search-bar input { width:72%; }
+  .search-bar select { margin-left:6px; padding:6px; }
 }
 
 /* fade keyframes */

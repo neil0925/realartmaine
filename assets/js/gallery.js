@@ -286,7 +286,16 @@ const gallery = document.getElementById("galleryContainer");
 const searchInput = document.getElementById("searchInput");
 // sort control (newest/oldest)
 const sortSelect = document.getElementById("sortSelect");
-let currentSort = (sortSelect && sortSelect.value) ? sortSelect.value : 'newest';
+const SORT_KEY = 'gallerySort';
+// load saved preference (safe localStorage access)
+let currentSort = 'newest';
+try {
+  const saved = (typeof localStorage !== 'undefined') ? localStorage.getItem(SORT_KEY) : null;
+  if (saved === 'newest' || saved === 'oldest') currentSort = saved;
+} catch (e) {}
+if (sortSelect) {
+  try { sortSelect.value = currentSort; } catch (e) {}
+}
 // load-run token used to cancel obsolete loads
 let currentLoadId = 0;
 // the list currently displayed in the gallery (changes with search/filter)
@@ -1227,6 +1236,7 @@ function getNumericIndexFromSrc(src) {
 if (sortSelect) {
   sortSelect.addEventListener('change', () => {
     currentSort = sortSelect.value || currentSort;
+    try { localStorage.setItem(SORT_KEY, currentSort); } catch (e) {}
     // re-run filter using existing input value
     const q = (searchInput && searchInput.value) ? searchInput.value : '';
     filterGallery(q);
@@ -1347,6 +1357,13 @@ function maybeInsertAdAfter(card, index, gallery) {
 }
 
 // start
-document.addEventListener("DOMContentLoaded", () => loadImagesSequentially(imagesList));
+// On initial load, honor saved sort preference and load gallery accordingly
+document.addEventListener("DOMContentLoaded", () => {
+  if (sortSelect) {
+    try { sortSelect.value = currentSort; } catch (e) {}
+  }
+  // trigger gallery load through filterGallery with empty query so sorting applies
+  try { filterGallery(''); } catch (e) { loadImagesSequentially(imagesList); }
+});
 window.addEventListener("resize", () => requestAnimationFrame(resizeAllMasonryItems));
 window.addEventListener("load", resizeAllMasonryItems);
