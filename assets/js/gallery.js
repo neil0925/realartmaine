@@ -306,6 +306,74 @@ const DEFAULT_ASPECT = 0.66;
 
 // Cache name used for storing fetched gallery image responses (persistent)
 const GALLERY_CACHE = 'realart-gallery-v1';
+// GUI assets to pre-cache for faster UI (icons, arrows, gear, mode toggles)
+const GUI_ASSETS = [
+  '/assets/GUI/home.png',
+  '/assets/GUI/gallery.png',
+  '/assets/GUI/gear.png',
+  '/assets/GUI/arrow.png',
+  '/assets/GUI/DarkMode.png',
+  '/assets/GUI/LightMode.png'
+];
+
+// Track created blob URLs so they can be revoked on unload
+const __createdGuiBlobUrls = [];
+
+// Pre-cache GUI assets into the same GALLERY_CACHE (cache-first strategy)
+async function preCacheGuiAssets() {
+  if (typeof caches === 'undefined' || !caches.open) return;
+  try {
+    const cache = await caches.open(GALLERY_CACHE);
+    for (const p of GUI_ASSETS) {
+      try {
+        const match = await cache.match(p);
+        if (match && match.ok) continue; // already cached
+        const resp = await fetch(p, { method: 'GET' });
+        if (resp && resp.ok) {
+          try { await cache.put(p, resp.clone()); } catch (e) {}
+        }
+      } catch (e) {
+        // ignore individual failures
+      }
+    }
+  } catch (e) {
+    // ignore cache open errors
+  }
+}
+
+// Replace on-page GUI <img> elements with blob URLs from Cache Storage when available
+async function replaceGuiImagesFromCache() {
+  if (typeof caches === 'undefined' || !caches.open) return;
+  try {
+    const cache = await caches.open(GALLERY_CACHE);
+    const imgs = Array.from(document.querySelectorAll('img'));
+    for (const img of imgs) {
+      try {
+        const src = img.getAttribute('src') || img.src || '';
+        // only handle assets/GUI paths
+        if (!src.includes('/assets/GUI/')) continue;
+        // Normalize path (keep origin-less)
+        const path = src.replace(location.origin, '');
+        const cached = await cache.match(path);
+        if (cached && cached.ok) {
+          const blob = await cached.blob();
+          const blobUrl = URL.createObjectURL(blob);
+          __createdGuiBlobUrls.push(blobUrl);
+          img.src = blobUrl;
+        }
+      } catch (e) {
+        // ignore per-image errors
+      }
+    }
+  } catch (e) {
+    // ignore
+  }
+}
+
+// Revoke created blob URLs on unload to free memory
+window.addEventListener('unload', () => {
+  try { __createdGuiBlobUrls.forEach(u => { try { URL.revokeObjectURL(u); } catch (e) {} }); } catch (e) {}
+});
 
 
 
@@ -1362,6 +1430,9 @@ document.addEventListener("DOMContentLoaded", () => {
   if (sortSelect) {
     try { sortSelect.value = currentSort; } catch (e) {}
   }
+  // pre-cache GUI assets and replace any on-page GUI images from cache
+  try { preCacheGuiAssets().catch(()=>{}); } catch (e) {}
+  try { replaceGuiImagesFromCache().catch(()=>{}); } catch (e) {}
   // trigger gallery load through filterGallery with empty query so sorting applies
   try { filterGallery(''); } catch (e) { loadImagesSequentially(imagesList); }
 });
