@@ -303,7 +303,7 @@ function showToyBlockedMessage() {
 // Ad configuration: set publisherId to 'ca-pub-XXXXXXXXXXXX' to enable real AdSense.
 // Leave empty ('') to keep plain "Ad placeholder" boxes.
 const ADS_CONFIG = {
-  publisherId: 'ca-pub-6627789827798682', // <-- set to your publisher id
+  publisherId: '', // <-- set to your publisher id
   adInterval: 25,  // insert ad every 25 images
   // Enable real AdSense loading. Keep `false` when running under a strict
   // Content-Security-Policy that disallows eval/new Function (common with
@@ -797,52 +797,66 @@ async function loadImagesSequentially(list) {
   const cols = Math.max(1, Math.floor((galleryWidth + gap) / (minCol + gap)));
   const columnWidth = Math.max(120, Math.floor((galleryWidth - (cols - 1) * gap) / cols));
 
-  // Phase A: create all image cards+placeholders synchronously (NO ads here)
+  // Phase A: create just enough image cards+placeholders to fill the viewport
+  // (we'll create additional cards on-the-fly during loading so initial DOM
+  //  size is reasonable for large galleries)
   const cards = [];
-  for (let i = 0; i < list.length; i++) {
-    if (myLoadId !== currentLoadId) return;
 
-    const meta = parseFilename(list[i]);
+  // conservative placeholder height based on estimated column width
+  const defaultH = Math.max(80, Math.round(columnWidth * DEFAULT_ASPECT));
 
+  // compute how many rows are needed to roughly fill the viewport
+  const viewportH = Math.max(300, window.innerHeight || document.documentElement.clientHeight);
+  const rowGap = parseInt(window.getComputedStyle(grid).getPropertyValue("gap") || "10");
+  const rowsNeeded = Math.max(1, Math.ceil((viewportH + rowGap) / (defaultH + rowGap)));
+  const itemsToCreate = Math.min(list.length, Math.max(1, rowsNeeded * cols));
+
+  // helper to create a card at given index (keeps order)
+  function createCardAt(index) {
+    const meta = parseFilename(list[index]);
     const card = document.createElement("div");
     card.className = "card";
-
     const wrap = document.createElement("div");
     wrap.className = "image-wrap";
-
-    // conservative placeholder height based on estimated column width
-    const defaultH = Math.max(80, Math.round(columnWidth * DEFAULT_ASPECT));
     wrap.style.height = `${defaultH}px`;
-
-    // placeholder wrapper (CSS spinner, not an img)
     const placeholder = document.createElement("div");
     placeholder.className = "placeholder-box";
-
     const spinner = document.createElement("div");
     spinner.className = "spinner";
     placeholder.appendChild(spinner);
-
     wrap.appendChild(placeholder);
     card.appendChild(wrap);
     gallery.appendChild(card);
 
     // set initial grid-row span so layout immediately forms columns
     const rowHeight = parseInt(window.getComputedStyle(grid).getPropertyValue("grid-auto-rows") || "10");
-    const rowGap = parseInt(window.getComputedStyle(grid).getPropertyValue("gap") || "10");
     const initialRowSpan = Math.max(1, Math.ceil((defaultH + rowGap) / (rowHeight + rowGap)));
     card.style.gridRowEnd = `span ${initialRowSpan}`;
 
-    // keep structure and metadata for phase B
-    cards.push({ meta, card, wrap, placeholder });
+    cards[index] = { meta, card, wrap, placeholder };
+    return cards[index];
   }
 
-  // Phase B: sequentially load real images into existing cards — strictly one at a time
+  for (let i = 0; i < itemsToCreate; i++) {
+    if (myLoadId !== currentLoadId) return;
+    createCardAt(i);
+  }
+
+  // Phase B: sequentially load real images into cards. If we run out of
+  // pre-created cards, create them on demand so the page grows as loading
+  // progresses (initial view still filled quickly).
   let loadedCount = 0;
   // mark the first placeholder active so single spinner shows
   if (cards.length > 0 && cards[0].placeholder) cards[0].placeholder.classList.add("active");
 
-  for (let i = 0; i < cards.length; i++) {
+  for (let i = 0; i < list.length; i++) {
     if (myLoadId !== currentLoadId) return;
+
+    // create card on demand if it wasn't created in Phase A
+    if (!cards[i]) {
+      createCardAt(i);
+    }
+
     const { meta, card, wrap, placeholder } = cards[i];
     const ok = await loadImageIntoCard(meta, card, wrap, placeholder, myLoadId);
     if (myLoadId !== currentLoadId) return;
@@ -852,7 +866,7 @@ async function loadImagesSequentially(list) {
       placeholder.classList.remove("active");
     }
     // activate next placeholder (single spinner moves forward)
-    if (i + 1 < cards.length && cards[i + 1].placeholder) {
+    if (i + 1 < list.length && cards[i + 1] && cards[i + 1].placeholder) {
       cards[i + 1].placeholder.classList.add("active");
     }
 
