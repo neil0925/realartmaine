@@ -68,8 +68,29 @@
   const normalizedConfig = {};
   Object.keys(cfg).forEach(k => { normalizedConfig[normalizeKey(k)] = cfg[k]; });
 
-  const entry = normalizedConfig[normPath] || null;
-  if (!entry) return; // nothing for this page
+  // Attempt exact match first; if not found, try tolerant matching to support
+  // file:// previews and nested paths (e.g. '/C:/.../Gallery/index.html').
+  let entry = normalizedConfig[normPath] || null;
+  if (!entry) {
+    // build a list of candidate keys (longest-first)
+    const keys = Object.keys(normalizedConfig).sort((a,b) => b.length - a.length);
+    for (const key of keys) {
+      // match when the current path ends with the configured key (folder or page)
+      if (normPath === key || normPath.endsWith(key) || key.endsWith(normPath)) {
+        entry = normalizedConfig[key];
+        break;
+      }
+      // also match when the path contains the key as a path segment
+      if (normPath.indexOf('/' + key.replace(/^\//, '')) >= 0) {
+        entry = normalizedConfig[key];
+        break;
+      }
+    }
+  }
+  if (!entry) {
+    console.info('maintenance: no matching config entry for path', normPath, 'available keys:', Object.keys(normalizedConfig));
+    return; // nothing for this page
+  }
 
   // If entry explicitly contains enabled:false, treat as not active
   if (Object.prototype.hasOwnProperty.call(entry, 'enabled') && !entry.enabled) {
