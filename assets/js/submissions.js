@@ -89,7 +89,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const final = chosen.trim();
       if (!final) continue;
-      // don't exclude 'realartmaine' — include site photographer counts
+      // Exclude the site's own account from the leaderboard
+      if (final.toLowerCase().includes('realartmaine')) continue;
       const key = final;
       counts[key] = (counts[key] || 0) + 1;
     }
