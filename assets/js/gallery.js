@@ -614,14 +614,28 @@ function openModal(meta) {
     try { if (rightArrow) rightArrow.style.visibility = 'visible'; } catch (e) {}
   }
 
-  // Load modal image from Cache Storage when possible, falling back to
-  // network. This mirrors the gallery caching strategy so opening the
-  // spotlight uses locally cached images when available. Reveal modal
-  // content only after the image has been set and (preferably) decoded.
-  (async () => {
+  // Load modal image into the existing modal elements. This function is
+  // reusable so navigating between images updates the displayed image
+  // without recreating arrows or the modal wrapper (keeps arrows persistent).
+  async function loadMeta(innerMeta, innerIndex) {
+    modalLoaded = false;
+    // update indices and highlight
+    if (typeof innerIndex === 'number') currentIndex = innerIndex;
+    highlightCard();
+
+    // reset UI: show spinner, hide image and caption until ready
+    try { if (modalSpinner && modalSpinner.parentNode) modalSpinner.style.display = 'block'; } catch (e) {}
+    try { img.style.visibility = 'hidden'; img.style.display = 'none'; } catch (e) {}
+    try { if (caption) caption.style.visibility = 'hidden'; } catch (e) {}
+    try { if (leftArrow) leftArrow.style.visibility = 'hidden'; } catch (e) {}
+    try { if (rightArrow) rightArrow.style.visibility = 'hidden'; } catch (e) {}
+
     try {
-      const candidate = meta && meta.src ? meta.src : null;
-      if (!candidate) return;
+      const candidate = innerMeta && innerMeta.src ? innerMeta.src : null;
+      if (!candidate) {
+        try { revealModalContent(); } catch (e) {}
+        return;
+      }
 
       // try cache first
       if (typeof caches !== 'undefined' && caches.open) {
@@ -632,54 +646,42 @@ function openModal(meta) {
             const blob = await cached.blob();
             const blobUrl = URL.createObjectURL(blob);
             img.src = blobUrl;
-            try {
-              await img.decode();
-            } catch (e) {
-              // decoding failed; still reveal so browser can show fallback
-            }
+            try { await img.decode(); } catch (e) {}
             try { URL.revokeObjectURL(blobUrl); } catch (e) {}
-            revealModalContent();
+            try { revealModalContent(); } catch (e) {}
             return;
           }
         } catch (e) {
-          // ignore cache errors and fall through to network fetch
+          // ignore cache errors and fall through to network
         }
       }
 
-      // not cached: fetch from network and cache if possible
+      // fetch from network and cache as fallback
       try {
         const resp = await fetch(candidate, { method: 'GET' });
         if (resp && resp.ok) {
-          // attempt to cache a clone (ignore failures)
           try {
             if (typeof caches !== 'undefined' && caches.open) {
               const cache = await caches.open(GALLERY_CACHE);
               try { await cache.put(candidate, resp.clone()); } catch (e) {}
             }
           } catch (e) {}
-
           const blob = await resp.blob();
           const blobUrl = URL.createObjectURL(blob);
           img.src = blobUrl;
-          try {
-            await img.decode();
-          } catch (e) {
-            // decoding failed; still reveal so browser can show fallback
-          }
+          try { await img.decode(); } catch (e) {}
           try { URL.revokeObjectURL(blobUrl); } catch (e) {}
-          revealModalContent();
+          try { revealModalContent(); } catch (e) {}
           return;
         }
       } catch (e) {
-        // network failed; leave img.src unset so browser shows alt text
+        // network failed
       }
     } catch (e) {
-      // swallow any unexpected errors to avoid breaking modal
       console.warn('modal image load error', e);
     }
-    // Ensure modal UI is visible even if image failed to load (so user can navigate/close)
     try { revealModalContent(); } catch (e) {}
-  })();
+  }
   // append spinner then image (image remains hidden until reveal)
   imgwrap.appendChild(modalSpinner);
   imgwrap.appendChild(img);
@@ -846,6 +848,8 @@ function openModal(meta) {
   };
   highlightCard();
   
+  // initial load into modal elements (keeps arrows persistent)
+  try { loadMeta(meta, currentIndex); } catch (e) {}
   // Close modal function
   const closeModal = () => {
     // Remove highlight from all cards
@@ -863,17 +867,14 @@ function openModal(meta) {
     document.removeEventListener("keydown", handleKeyboard);
   };
   
-  // Navigation function
+  // Navigation function (loads new image into existing modal so arrows persist)
   const navigateTo = (newIndex) => {
     const listForNav = (Array.isArray(currentDisplayedList) && currentDisplayedList.length > 0) ? currentDisplayedList : imagesList;
     if (!Array.isArray(listForNav) || listForNav.length === 0) return;
     const loopedIndex = ((newIndex % listForNav.length) + listForNav.length) % listForNav.length;
     const src = listForNav[loopedIndex];
     const newMeta = parseFilename(src);
-
-    // Close current modal and open the new one (prevents stacking)
-    closeModal();
-    openModal(newMeta);
+    try { loadMeta(newMeta, loopedIndex); } catch (e) {}
   };
   
   // Arrow button click handlers
