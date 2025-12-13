@@ -38,7 +38,7 @@ nav {
   position: relative;
   z-index: 20;
 }
-nav a { color: #fff; text-decoration: none; font-size: 1.1em; letter-spacing: 0.5px; transition: all 0.18s ease; display: inline-flex; align-items: center; justify-content: center; padding: 6px; }
+nav a { color: #fff; text-decoration: none; font-size: 1.1em; letter-spacing: 0.5px; transition: all 0.18s ease; display: inline-block; text-align: center; padding: 6px 0; }
 nav a:hover { transform: scale(1.07); }
 nav a::after { content: ''; display:block; height:2px; width:0; background:#fff; transition:width .18s; margin:6px auto 0 auto; }
 nav a:hover::after { width:100%; }
@@ -64,18 +64,13 @@ nav a.active::after { width: 100%; }
 
 /* Nav icons use base image colors in all modes by default */
 
-/* Make the Gallery anchor slightly wider than Home so longer label feels balanced */
-.nav-gallery {
-  padding: 6px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  /* target: make gallery anchor ~1.7x wider than default Home anchor */
-  min-width: 97px; /* approx: (45px + 12px) * 1.7 ≈ 97px */
-}
+/* Stretch the Gallery image itself and keep anchors tight so underline centers */
+.nav-gallery { display: inline-block; }
+.nav-gallery .nav-icon { width: 77px; height: 45px; }
 
 @media (max-width: 600px) {
-  .nav-gallery { min-width: 79px; padding-left:6px; padding-right:6px; }
+  .nav-icon { width: 39px; height: 39px; }
+  .nav-gallery .nav-icon { width: 66px; height: 39px; }
 }
 
 /* Settings dropdown (gear) - gear is at right, nav stays centered */
