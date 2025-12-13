@@ -71,6 +71,18 @@
   const entry = normalizedConfig[normPath] || null;
   if (!entry) return; // nothing for this page
 
+  // If entry explicitly contains enabled:false, treat as not active
+  if (Object.prototype.hasOwnProperty.call(entry, 'enabled') && !entry.enabled) {
+    // allow debug badge to still appear when requested
+    if (debugMode) {
+      const badge = document.createElement('div');
+      badge.className = 'maintenance-debug-badge';
+      badge.textContent = 'MAINTENANCE CONFIGURED (disabled)';
+      document.addEventListener('DOMContentLoaded', () => document.body.appendChild(badge));
+    }
+    return;
+  }
+
   if (debugMode) {
     // show small debug badge but allow page access
     const badge = document.createElement('div');

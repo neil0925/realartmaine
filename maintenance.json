@@ -1,11 +1,13 @@
 
 {
 	"/Gallery": {
-		"estimated": "10:30",
-		"note": "this is a test the page should be up very soon"
+		"estimated": "12:30",
+		"note": "this is a test the page should be up very soon",
+		"enabled": true
 	},
 	"/Home": {
 		"estimated": "",
-		"note": ""
+		"note": "",
+		"enabled": false
 	}
 }
