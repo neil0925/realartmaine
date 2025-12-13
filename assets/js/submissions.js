@@ -11,9 +11,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Attempt to use structured `metaList` if available (preferred)
   const counts = Object.create(null);
-  if (window.metaList && Array.isArray(window.metaList)) {
-    window.metaList.forEach(m => {
-      const p = (m.photographer || m.photographerName || m.author || m.by || '').trim();
+  // `metaList` and `IMAGE_LABELS` may be declared as top-level `const` in
+  // `gallery.js` (not as window properties). Support both forms.
+  const globalMetaList = (typeof metaList !== 'undefined') ? metaList : (window.metaList || null);
+  const globalImageLabels = (typeof IMAGE_LABELS !== 'undefined') ? IMAGE_LABELS : (window.IMAGE_LABELS || null);
+
+  if (globalMetaList && Array.isArray(globalMetaList)) {
+    globalMetaList.forEach(m => {
+      const p = (m.photographer || m.photographerName || m.author || m.by || '').toString().trim();
       if (!p) return;
       const key = p;
       if (key.toLowerCase().includes('realartmaine')) return; // exclude
@@ -22,13 +27,13 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Fallback: parse IMAGE_LABELS if present
-  if (window.IMAGE_LABELS && Array.isArray(window.IMAGE_LABELS)) {
+  if (globalImageLabels && Array.isArray(globalImageLabels)) {
     const stopwords = new Set([
       'tag','tags','throwie','piece','stencil','character','hollow','fillin','antistyle','straightletter','paintroller','blackbook','minnowfeed','notmaine','hand','handstyle'
     ]);
 
-    for (let i = 1; i < window.IMAGE_LABELS.length; i++) {
-      const label = (window.IMAGE_LABELS[i] || '').toString();
+    for (let i = 1; i < globalImageLabels.length; i++) {
+      const label = (globalImageLabels[i] || '').toString();
       if (!label) continue;
       const tokens = label.split(',').map(t => t.trim()).filter(Boolean);
       tokens.forEach(tok => {
