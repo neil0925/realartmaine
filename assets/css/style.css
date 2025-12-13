@@ -43,6 +43,19 @@ nav a:hover { transform: scale(1.07); }
 nav a::after { content: ''; display:block; height:2px; width:0; background:#fff; transition:width .18s; margin:0 auto; }
 nav a:hover::after { width:100%; }
 
+/* Nav icon used instead of text: keep same visual size as other UI icons */
+.nav-icon {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+  display: block;
+  pointer-events: none; /* clicks handled by the anchor */
+}
+
+@media (max-width: 600px) {
+  .nav-icon { width: 26px; height: 26px; }
+}
+
 /* Settings dropdown (gear) - gear is at right, nav stays centered */
 .settings-dropdown { position: absolute; right: 18px; top: 50%; transform: translateY(-50%); pointer-events: auto; z-index: 5000000; }
 .gear-box { display:inline-block; padding:3px; background:black; border:1px solid #fff; border-radius:6px; }
