@@ -295,7 +295,7 @@ function showToyBlockedMessage() {
   gallery.innerHTML = '';
   const msgWrap = document.createElement('div');
   msgWrap.className = 'toy-blocked';
-  msgWrap.textContent = "Sorry we don't let toys on our site";
+  msgWrap.textContent = "Sorry, we don't let toys on our site.";
   gallery.appendChild(msgWrap);
   currentDisplayedList = [];
 }
