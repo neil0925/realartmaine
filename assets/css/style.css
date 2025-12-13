@@ -50,10 +50,17 @@ nav a:hover::after { width:100%; }
   object-fit: contain;
   display: block;
   pointer-events: none; /* clicks handled by the anchor */
+  filter: invert(1) brightness(1.05);
+  transition: filter 0.18s ease, transform 0.18s ease;
 }
 
 @media (max-width: 600px) {
   .nav-icon { width: 26px; height: 26px; }
+}
+
+/* In dark mode, show original (non-inverted) icons */
+body.dark-mode .nav-icon {
+  filter: none;
 }
 
 /* Settings dropdown (gear) - gear is at right, nav stays centered */
