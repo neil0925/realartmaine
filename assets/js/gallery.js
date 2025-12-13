@@ -483,6 +483,12 @@ function openModal(meta) {
   // track whether modal content has been revealed
   let modalLoaded = false;
 
+  // declare variables that will be assigned below so revealModalContent
+  // can safely reference them even if called from the async loader.
+  let caption;
+  let leftArrow;
+  let rightArrow;
+
   function revealModalContent() {
     modalLoaded = true;
     try { if (modalSpinner && modalSpinner.parentNode) modalSpinner.parentNode.removeChild(modalSpinner); } catch (e) {}
@@ -563,7 +569,7 @@ function openModal(meta) {
   imgwrap.appendChild(img);
   modal.appendChild(imgwrap);
 
-  const caption = document.createElement("div");
+  caption = document.createElement("div");
   caption.className = "caption";
   
   // Extract tags and photographer from the label.
@@ -604,7 +610,7 @@ function openModal(meta) {
   // declare observer variable in this scope so closeModal can disconnect it
   let bodyClassObserver = null;
 
-  const leftArrow = document.createElement("button");
+  leftArrow = document.createElement("button");
   leftArrow.className = "modal-arrow modal-arrow-left";
   leftArrow.setAttribute("aria-label", "Previous image");
   // hide until image has loaded
@@ -635,7 +641,7 @@ function openModal(meta) {
   };
   leftArrow.appendChild(leftImg);
 
-  const rightArrow = document.createElement("button");
+  rightArrow = document.createElement("button");
   rightArrow.className = "modal-arrow modal-arrow-right";
   rightArrow.setAttribute("aria-label", "Next image");
   // hide until image has loaded
