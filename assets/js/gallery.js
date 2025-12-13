@@ -571,38 +571,45 @@ function openModal(meta) {
 
   caption = document.createElement("div");
   caption.className = "caption";
-  
-  // Extract tags and photographer from the label.
-  let tagText = '';
-  let photographerText = '';
-  
-  if (meta && meta.label) {
-    const dashParts = meta.label.split('-');
-    if (dashParts.length > 0) {
-      tagText = dashParts[0].trim();
+
+  // Debug mode: when URL contains ?debug=true show full label and numeric index
+  const isDebug = (() => {
+    try { return new URLSearchParams(window.location.search).get('debug') === 'true'; }
+    catch (e) { return false; }
+  })();
+
+  if (isDebug) {
+    const full = (meta && (meta.label || meta.rawBase)) ? (meta.label || meta.rawBase) : '';
+    let idx = (meta && meta.index) ? meta.index : null;
+    if (!idx && meta && (meta.numericSrc || meta.src)) {
+      try {
+        const s = (meta.numericSrc || meta.src).split('/').pop();
+        const m = s.match(/^(\d+)/);
+        if (m) idx = parseInt(m[1], 10);
+      } catch (e) { idx = null; }
     }
-    let photographerIndex = -1;
-    if (dashParts.length >= 4) {
-      photographerIndex = 2;
-    } else if (dashParts.length >= 3) {
-      photographerIndex = 1;
+    caption.textContent = full + (idx ? ` (${idx})` : '');
+  } else {
+    // Extract tags and photographer from the label for concise caption
+    let tagText = '';
+    let photographerText = '';
+    if (meta && meta.label) {
+      const dashParts = meta.label.split('-');
+      if (dashParts.length > 0) tagText = dashParts[0].trim();
+      let photographerIndex = -1;
+      if (dashParts.length >= 4) photographerIndex = 2;
+      else if (dashParts.length >= 3) photographerIndex = 1;
+      if (photographerIndex >= 0 && dashParts[photographerIndex]) {
+        const photoStr = dashParts[photographerIndex].trim();
+        const photoTokens = photoStr.split(/[\s,]+/);
+        photographerText = photoTokens[0];
+      }
     }
-    if (photographerIndex >= 0 && dashParts[photographerIndex]) {
-      const photoStr = dashParts[photographerIndex].trim();
-      const photoTokens = photoStr.split(/[\s,]+/);
-      photographerText = photoTokens[0];
-    }
+    let captionText = '';
+    if (tagText) captionText = tagText;
+    if (photographerText) captionText += (captionText ? ' ' : '') + `flicked by ${photographerText}`;
+    caption.textContent = captionText || (meta && meta.rawBase) || '';
   }
-  
-  let captionText = '';
-  if (tagText) {
-    captionText = tagText;
-  }
-  if (photographerText) {
-    captionText += (captionText ? ' ' : '') + `flicked by ${photographerText}`;
-  }
-  
-  caption.textContent = captionText || (meta && meta.rawBase) || '';
   // hide caption until modal image is ready
   caption.style.visibility = 'hidden';
   modal.appendChild(caption);
