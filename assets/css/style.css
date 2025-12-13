@@ -66,11 +66,16 @@ nav a.active::after { width: 100%; }
 
 /* Make the Gallery anchor slightly wider than Home so longer label feels balanced */
 .nav-gallery {
-  padding-left: 8px;
-  padding-right: 20px;
+  padding: 6px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  /* target: make gallery anchor ~1.7x wider than default Home anchor */
+  min-width: 97px; /* approx: (45px + 12px) * 1.7 ≈ 97px */
+}
+
+@media (max-width: 600px) {
+  .nav-gallery { min-width: 79px; padding-left:6px; padding-right:6px; }
 }
 
 /* Settings dropdown (gear) - gear is at right, nav stays centered */
