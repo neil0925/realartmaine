@@ -104,8 +104,8 @@ document.addEventListener('DOMContentLoaded', () => {
     html += '<p>No submissions found.</p>';
   } else {
     html += '<div class="table-wrap"><table class="leaderboard-table"><thead><tr>' +
-      '<th class="rank-col">Place</th>' +
-      '<th class="photog-col">Photographer</th>' +
+      '<th class="rank-col">#</th>' +
+      '<th class="photog-col">Flickers</th>' +
       '<th class="count-col">flicks</th>' +
       '</tr></thead><tbody>';
 
