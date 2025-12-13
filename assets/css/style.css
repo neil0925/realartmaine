@@ -60,6 +60,15 @@ nav a:hover::after { width:100%; }
 
 /* Nav icons use base image colors in all modes by default */
 
+/* Make the Gallery anchor slightly wider than Home so longer label feels balanced */
+.nav-gallery {
+  padding-left: 8px;
+  padding-right: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
 /* Settings dropdown (gear) - gear is at right, nav stays centered */
 .settings-dropdown { position: absolute; right: 18px; top: 50%; transform: translateY(-50%); pointer-events: auto; z-index: 5000000; }
 .gear-box { display:inline-block; padding:3px; background:black; border:1px solid #fff; border-radius:6px; }
