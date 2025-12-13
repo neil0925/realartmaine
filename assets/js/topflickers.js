@@ -104,9 +104,9 @@ document.addEventListener('DOMContentLoaded', () => {
     html += '<p>No Top Flickers found.</p>';
   } else {
     html += '<div class="table-wrap"><table class="leaderboard-table"><thead><tr>' +
-      '<th class="rank-col">Place</th>' +
-      '<th class="photog-col">Photographer</th>' +
-      '<th class="count-col">Number of Submissions</th>' +
+      '<th class="rank-col">#</th>' +
+      '<th class="photog-col">Flicker</th>' +
+      '<th class="count-col">Flicks</th>' +
       '</tr></thead><tbody>';
 
     list.slice(0, 200).forEach(([name, cnt], idx) => {
