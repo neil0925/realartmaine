@@ -469,7 +469,27 @@ function openModal(meta) {
   const img = document.createElement("img");
   img.alt = meta.rawBase;
   img.className = "modal-image";
-  // image element for modal (appended directly)
+  // Hide the image initially; show a spinner until the image is fully decoded
+  img.style.visibility = 'hidden';
+  img.style.display = 'none';
+
+  // spinner shown inside the modal while loading
+  const modalSpinner = document.createElement('div');
+  modalSpinner.className = 'spinner modal-spinner';
+  // ensure spinner is visible (spinner class is hidden by default in some contexts)
+  modalSpinner.style.display = 'block';
+
+  // track whether modal content has been revealed
+  let modalLoaded = false;
+
+  function revealModalContent() {
+    modalLoaded = true;
+    try { if (modalSpinner && modalSpinner.parentNode) modalSpinner.parentNode.removeChild(modalSpinner); } catch (e) {}
+    try { img.style.visibility = 'visible'; img.style.display = 'block'; } catch (e) {}
+    try { if (caption) caption.style.visibility = 'visible'; } catch (e) {}
+    try { if (leftArrow) leftArrow.style.visibility = 'visible'; } catch (e) {}
+    try { if (rightArrow) rightArrow.style.visibility = 'visible'; } catch (e) {}
+  }
 
   // Load modal image from Cache Storage when possible, falling back to
   // network. This mirrors the gallery caching strategy so opening the
@@ -495,7 +515,7 @@ function openModal(meta) {
               // decoding failed; still reveal so browser can show fallback
             }
             try { URL.revokeObjectURL(blobUrl); } catch (e) {}
-            return;
+            revealModalContent();
             return;
           }
         } catch (e) {
@@ -524,7 +544,7 @@ function openModal(meta) {
             // decoding failed; still reveal so browser can show fallback
           }
           try { URL.revokeObjectURL(blobUrl); } catch (e) {}
-          return;
+          revealModalContent();
           return;
         }
       } catch (e) {
@@ -534,8 +554,8 @@ function openModal(meta) {
       // swallow any unexpected errors to avoid breaking modal
       console.warn('modal image load error', e);
     }
-    // no-op fallback: if loading fails we simply let the modal remain so
-    // users can still close or navigate. (Previous reveal logic removed.)
+    // Ensure modal UI is visible even if image failed to load (so user can navigate/close)
+    try { revealModalContent(); } catch (e) {}
   })();
   // append spinner then image (image remains hidden until reveal)
   imgwrap.appendChild(modalSpinner);
@@ -905,8 +925,8 @@ function loadImageIntoCard(meta, card, wrap, placeholder, expectedLoadId) {
           errEl.className = "loading-error";
           errEl.textContent = `Failed: ${filename}`;
           if (placeholder && placeholder.parentNode === wrap) {
-            try { placeholder.remove(); } catch (e) { try { placeholder.parentNode && placeholder.parentNode.removeChild(placeholder); } catch (e) {} }
-            wrap.appendChild(errEl);
+            placeholder.innerHTML = "";
+            placeholder.appendChild(errEl);
           } else {
             wrap.appendChild(errEl);
           }
@@ -934,12 +954,12 @@ function loadImageIntoCard(meta, card, wrap, placeholder, expectedLoadId) {
         const finalH = getRenderedImageHeight(img, wrap.clientWidth) || parseInt(wrap.style.height) || 150;
         wrap.style.height = `${finalH}px`;
 
-              img.classList.remove("hidden");
-              img.classList.add("fade-in");
+        img.classList.remove("hidden");
+        img.classList.add("fade-in");
 
-        // remove the placeholder element so it doesn't overlay/capture clicks
+        // clear placeholder box contents (remove spinner) but keep the box
         if (placeholder && placeholder.parentNode === wrap) {
-          try { placeholder.remove(); } catch (e) { try { placeholder.parentNode && placeholder.parentNode.removeChild(placeholder); } catch (e) {} }
+          placeholder.innerHTML = "";
         }
         wrap.appendChild(img);
 
@@ -988,9 +1008,7 @@ function loadImageIntoCard(meta, card, wrap, placeholder, expectedLoadId) {
               wrap.style.height = `${finalH}px`;
               img.classList.remove("hidden");
               img.classList.add("fade-in");
-              if (placeholder && placeholder.parentNode === wrap) {
-                try { placeholder.remove(); } catch (e) { try { placeholder.parentNode && placeholder.parentNode.removeChild(placeholder); } catch (e) {} }
-              }
+              if (placeholder && placeholder.parentNode === wrap) placeholder.innerHTML = "";
               wrap.appendChild(img);
               requestAnimationFrame(() => {
                 const rowSpan = Math.max(1, Math.ceil((finalH + rowGap) / (rowHeight + rowGap)));
@@ -1032,9 +1050,7 @@ function loadImageIntoCard(meta, card, wrap, placeholder, expectedLoadId) {
             wrap.style.height = `${finalH}px`;
             img.classList.remove("hidden");
             img.classList.add("fade-in");
-            if (placeholder && placeholder.parentNode === wrap) {
-              try { placeholder.remove(); } catch (e) { try { placeholder.parentNode && placeholder.parentNode.removeChild(placeholder); } catch (e) {} }
-            }
+            if (placeholder && placeholder.parentNode === wrap) placeholder.innerHTML = "";
             wrap.appendChild(img);
             requestAnimationFrame(() => {
               const rowSpan = Math.max(1, Math.ceil((finalH + rowGap) / (rowHeight + rowGap)));
