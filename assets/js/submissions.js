@@ -32,34 +32,66 @@ document.addEventListener('DOMContentLoaded', () => {
       'tag','tags','throwie','piece','stencil','character','hollow','fillin','antistyle','straightletter','paintroller','blackbook','minnowfeed','notmaine','hand','handstyle'
     ]);
 
+    // More robust approach: split the entire label on '-' to get logical
+    // segments and look for style words (stopwords) near the end. The
+    // photographer is usually the segment immediately before style tokens.
     for (let i = 1; i < globalImageLabels.length; i++) {
       const label = (globalImageLabels[i] || '').toString();
       if (!label) continue;
-      const tokens = label.split(',').map(t => t.trim()).filter(Boolean);
-      tokens.forEach(tok => {
-        // exclude tokens that are clearly descriptors
-        const low = tok.toLowerCase();
-        if (stopwords.has(low)) return;
-        if (low.includes('realartmaine')) return; // exclude site account
 
-          // Extract photographer based on dash-count rule:
-          // - If token has 3 dashes (parts.length === 4), photographer is between last two dashes -> parts[parts.length-2]
-          // - If token has 2 dashes (parts.length === 3), photographer is the middle part -> parts[1]
-          // - If token has 1 dash (parts.length === 2), fall back to the second part
-          if (tok.includes('-')) {
-            const parts = tok.split('-').map(p => p.trim()).filter(Boolean);
-            let cand = null;
-            if (parts.length >= 3) {
-              cand = parts[parts.length - 2];
-            } else if (parts.length === 2) {
-              cand = parts[1];
-            }
-            if (!cand) return;
-            if (stopwords.has(cand.toLowerCase())) return;
-            if (cand.toLowerCase().includes('realartmaine')) return;
-            counts[cand] = (counts[cand] || 0) + 1;
-          }
-      });
+      // Break label into hyphen-separated segments (these tend to be
+      // subject / crew / photographer / styles)
+      const parts = label.split('-').map(p => p.trim()).filter(Boolean);
+      if (!parts.length) continue;
+
+      // Find the rightmost segment that contains a style/descriptor from stopwords.
+      // Photographer is likely the segment immediately before that.
+      let photographerSeg = null;
+      for (let j = parts.length - 1; j >= 0; j--) {
+        const seg = parts[j].toLowerCase();
+        // check if any comma-separated token in this segment matches a style
+        const segTokens = seg.split(/[,\s]+/).map(s => s.trim()).filter(Boolean);
+        const hasStyle = segTokens.some(t => stopwords.has(t));
+        if (hasStyle) {
+          if (j - 1 >= 0) photographerSeg = parts[j - 1];
+          break;
+        }
+      }
+
+      // Fallbacks if we couldn't locate a style marker
+      if (!photographerSeg) {
+        if (parts.length >= 3) photographerSeg = parts[parts.length - 2];
+        else if (parts.length === 2) photographerSeg = parts[1];
+        else photographerSeg = parts[0];
+      }
+
+      if (!photographerSeg) continue;
+
+      // The segment might contain multiple comma-separated names (crews).
+      // Prefer a candidate that looks like a real photographer name: not
+      // an all-uppercase crew code and not a style word.
+      const candNames = photographerSeg.split(',').map(s => s.trim()).filter(Boolean);
+      let chosen = null;
+      for (const n of candNames) {
+        const low = n.toLowerCase();
+        if (!low) continue;
+        if (stopwords.has(low)) continue;
+        // skip obvious crew lists like "PTG,OHK" (all-uppercase tokens or short codes)
+        const isLikelyCrew = /^[A-Z0-9,\s]{1,6}$/.test(n) && n === n.toUpperCase();
+        if (isLikelyCrew) continue;
+        chosen = n;
+        break;
+      }
+
+      // If no good candidate found, fall back to first comma-part (best-effort)
+      if (!chosen && candNames.length) chosen = candNames[0];
+      if (!chosen) continue;
+
+      const final = chosen.trim();
+      if (!final) continue;
+      // don't exclude 'realartmaine' — include site photographer counts
+      const key = final;
+      counts[key] = (counts[key] || 0) + 1;
     }
   }
 
