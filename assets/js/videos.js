@@ -6,6 +6,13 @@
 
 function escapeHtml(s){ return String(s).replace(/[&<>\"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 
+// Ensure a 1-based `VIDEO_LABELS` mapping exists on `window` if not provided
+if (typeof window !== 'undefined' && typeof window.VIDEO_LABELS === 'undefined') {
+  window.VIDEO_LABELS = [null];
+  // Test entry (index 1): format mirrors IMAGE_LABELS (tags-crew-photographer-styles)
+  window.VIDEO_LABELS[1] = "test-realartmaine-test";
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   const container = document.getElementById('galleryContainer');
   if (!container) return;
@@ -13,6 +20,82 @@ document.addEventListener('DOMContentLoaded', () => {
   const globalMetaList = (typeof metaList !== 'undefined') ? metaList : (window.metaList || null);
   const globalVideoLabels = (typeof VIDEO_LABELS !== 'undefined') ? VIDEO_LABELS : (window.VIDEO_LABELS || null);
   const globalVideoFiles = (typeof VIDEO_FILES !== 'undefined') ? VIDEO_FILES : (window.VIDEO_FILES || null);
+
+  // Parse VIDEO_LABELS into a structured meta list similar to gallery.js
+  function parseVideoLabel(label) {
+    const out = { tags: [], crew: null, photographer: '', styles: [], raw: label || '' };
+    if (!label) return out;
+    const parts = label.split('-').map(p => p.trim()).filter(Boolean);
+    if (!parts.length) return out;
+
+    // Last segment is styles
+    const stylesPart = parts[parts.length - 1] || '';
+    out.styles = stylesPart.split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
+
+    // Photographer is usually the segment immediately before styles
+    const photographerSeg = parts.length >= 2 ? parts[parts.length - 2] : '';
+    // Crew (if present) is the segment before photographer when there are at least 3 segments
+    const crewSeg = parts.length >= 3 ? parts[parts.length - 3] : '';
+    // Tags are usually the first segment(s) (everything before crew/photographer)
+    const tagsSeg = parts.slice(0, Math.max(0, parts.length - 3)).join('-') || (parts[0] || '');
+
+    out.tags = (tagsSeg || '').split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
+
+    // Normalize crew: prefer comma-separated list or an uppercase short crew code
+    if (crewSeg) {
+      const isLikelyCrew = /^[A-Z0-9,\s]{1,12}$/.test(crewSeg) && crewSeg === crewSeg.toUpperCase();
+      if (isLikelyCrew || crewSeg.indexOf(',') >= 0) out.crew = crewSeg.toLowerCase();
+    }
+
+    // Photographer: prefer a candidate that isn't an obvious crew code
+    if (photographerSeg) {
+      const cand = photographerSeg.split(',').map(s => s.trim()).filter(Boolean);
+      let chosen = null;
+      for (const c of cand) {
+        if (!c) continue;
+        const isLikelyCrew = /^[A-Z0-9]{1,6}$/.test(c) && c === c.toUpperCase();
+        if (isLikelyCrew) continue;
+        chosen = c;
+        break;
+      }
+      if (!chosen && cand.length) chosen = cand[0];
+      out.photographer = (chosen || '').toLowerCase();
+    }
+
+    return out;
+  }
+
+  // Build a numeric video meta list (1-based mapping) from VIDEO_LABELS (fallback to metaList if provided)
+  const videoMetaList = (function() {
+    const list = [];
+    const total = globalVideoLabels && Array.isArray(globalVideoLabels) ? Math.max(0, globalVideoLabels.length - 1) : (globalMetaList ? globalMetaList.length : 0);
+    for (let i = 0; i <= total; i++) list.push(null); // 0 index placeholder so it's 1-based
+    for (let i = 1; i <= total; i++) {
+      const entry = { index: i, numericSrc: `/assets/videos/${i}.mp4`, label: '', tags: [], crew: null, photographer: '', styles: [], rawBase: String(i) };
+      if (globalVideoLabels && globalVideoLabels[i]) {
+        entry.label = globalVideoLabels[i];
+        entry.rawBase = globalVideoLabels[i];
+        const parsed = parseVideoLabel(globalVideoLabels[i]);
+        entry.tags = parsed.tags;
+        entry.crew = parsed.crew;
+        entry.photographer = parsed.photographer;
+        entry.styles = parsed.styles;
+      }
+      // Allow an explicit metaList (with videoPath) to override
+      if (globalMetaList && Array.isArray(globalMetaList) && globalMetaList[i]) {
+        const m = globalMetaList[i];
+        if (m.videoPath) entry.numericSrc = m.videoPath;
+        if (m.label) entry.label = m.label;
+        if (m.tags) entry.tags = m.tags;
+        if (m.photographer) entry.photographer = m.photographer;
+        if (m.crew) entry.crew = m.crew;
+        if (m.styles) entry.styles = m.styles;
+      }
+      list[i] = entry;
+    }
+    return list;
+  })();
+
 
   // Helper to resolve video source by index (1-based). Tries: metaList.path,
   // VIDEO_FILES mapping, then common filename patterns.
@@ -24,8 +107,8 @@ document.addEventListener('DOMContentLoaded', () => {
     return candidates[0];
   }
 
-  // Create card elements for each video label entry (or metaList length)
-  const count = (globalVideoLabels && Array.isArray(globalVideoLabels)) ? globalVideoLabels.length - 1 : (globalMetaList ? globalMetaList.length : 0);
+  // Create card elements for each video meta entry (or metaList length)
+  const count = (Array.isArray(videoMetaList) ? Math.max(0, videoMetaList.length - 1) : 0);
   if (count <= 0) {
     container.innerHTML = '<p>No videos found.</p>';
     return;
@@ -44,7 +127,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const poster = document.createElement('div');
     poster.className = 'gallery-image poster';
-    poster.textContent = 'Video ' + i;
+    const meta = videoMetaList[i] || { photographer: '', tags: [], label: '' };
+    const title = meta.photographer || meta.label || ('Video ' + i);
+    const subtitle = (meta.tags && meta.tags.length) ? meta.tags.slice(0,3).join(', ') : '';
+    poster.innerHTML = `<strong>${escapeHtml(title)}</strong>` + (subtitle ? `<div class="small">${escapeHtml(subtitle)}</div>` : '');
     poster.setAttribute('aria-hidden','true');
 
     imgWrap.appendChild(placeholder);
@@ -52,9 +138,11 @@ document.addEventListener('DOMContentLoaded', () => {
     wrap.appendChild(imgWrap);
 
     // attach click to open spotlight/modal with custom controls
-    wrap.addEventListener('click', (ev) => {
-      openSpotlight(i);
-    });
+    (function(idx){
+      wrap.addEventListener('click', (ev) => {
+        openSpotlight(idx);
+      });
+    })(i);
 
     container.appendChild(wrap);
   }
@@ -107,7 +195,10 @@ document.addEventListener('DOMContentLoaded', () => {
     video.style.height = 'auto';
 
     // Resolve source and add cache-busting param so browser doesn't permanently cache
-    const src = resolveVideoSrc(index) + (resolveVideoSrc(index).includes('?') ? '&' : '?') + 'cb=' + Date.now();
+    // Prefer any explicit videoMetaList path if present
+    const meta = videoMetaList[index] || null;
+    const resolved = (meta && meta.numericSrc) ? meta.numericSrc : resolveVideoSrc(index);
+    const src = resolved + (resolved.includes('?') ? '&' : '?') + 'cb=' + Date.now();
     video.src = src;
 
     stage.appendChild(video);
