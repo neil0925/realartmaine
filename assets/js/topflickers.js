@@ -96,6 +96,57 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  // Also parse VIDEO_LABELS (video takers) so video authors appear in leaderboard
+  const globalVideoLabels = (typeof VIDEO_LABELS !== 'undefined') ? VIDEO_LABELS : (window.VIDEO_LABELS || null);
+  if (globalVideoLabels && Array.isArray(globalVideoLabels)) {
+    const stopwords = new Set([
+      'tag','tags','throwie','piece','stencil','character','hollow','fillin','antistyle','straightletter','paintroller','blackbook','minnowfeed','notmaine','hand','handstyle'
+    ]);
+
+    for (let i = 1; i < globalVideoLabels.length; i++) {
+      const label = (globalVideoLabels[i] || '').toString();
+      if (!label) continue;
+      const parts = label.split('-').map(p => p.trim()).filter(Boolean);
+      if (!parts.length) continue;
+
+      let photographerSeg = null;
+      for (let j = parts.length - 1; j >= 0; j--) {
+        const seg = parts[j].toLowerCase();
+        const segTokens = seg.split(/[,\s]+/).map(s => s.trim()).filter(Boolean);
+        const hasStyle = segTokens.some(t => stopwords.has(t));
+        if (hasStyle) {
+          if (j - 1 >= 0) photographerSeg = parts[j - 1];
+          break;
+        }
+      }
+
+      if (!photographerSeg) {
+        if (parts.length >= 3) photographerSeg = parts[parts.length - 2];
+        else if (parts.length === 2) photographerSeg = parts[1];
+        else photographerSeg = parts[0];
+      }
+
+      if (!photographerSeg) continue;
+      const candNames = photographerSeg.split(',').map(s => s.trim()).filter(Boolean);
+      let chosen = null;
+      for (const n of candNames) {
+        const low = n.toLowerCase();
+        if (!low) continue;
+        if (stopwords.has(low)) continue;
+        const isLikelyCrew = /^[A-Z0-9,\s]{1,6}$/.test(n) && n === n.toUpperCase();
+        if (isLikelyCrew) continue;
+        chosen = n;
+        break;
+      }
+      if (!chosen && candNames.length) chosen = candNames[0];
+      if (!chosen) continue;
+      const final = chosen.trim();
+      if (!final) continue;
+      if (final.toLowerCase().includes('realartmaine')) continue;
+      counts[final] = (counts[final] || 0) + 1;
+    }
+  }
+
   // Build sorted leaderboard
   const list = Object.entries(counts).sort((a,b) => b[1] - a[1]);
 

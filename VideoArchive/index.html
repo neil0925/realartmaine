@@ -3,14 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Real Art Maine | Home</title>
+  <title>Real Art Maine | Video Archive</title>
   <link rel="stylesheet" href="/assets/css/style.css">
-  <!-- Use single site logo as favicon -->
   <link rel="icon" href="/assets/logo.png" type="image/png">
+  <style>
+    .leaderboard { display:none; }
+    main { padding:18px; }
+    .gallery { min-height: 60vh; }
+  </style>
 </head>
 <body>
-
-  <!-- Navigation -->
   <nav>
     <a href="/Home" aria-label="Home">
       <img src="/assets/GUI/home.png" alt="Home" class="nav-icon">
@@ -21,7 +23,6 @@
     <a href="/VideoArchive" aria-label="Videos" class="nav-videos">Videos</a>
     <a href="/TopFlickers" aria-label="Top Flickers" class="nav-topflickers">Top Flickers</a>
 
-    <!-- Settings Dropdown -->
     <div class="settings-dropdown">
       <div class="gear-box">
         <img src="/assets/GUI/gear.png" alt="Settings" class="gear-icon">
@@ -35,19 +36,21 @@
   </nav>
 
   <main>
-    <h1>Real Art Maine</h1>
-    <p><strong>Real Art Maine</strong> is dedicated to documenting graffiti and street art throughout Maine.</p>
-    <p>Explore our gallery to see tags, crews, and styles captured by photographers and artists from around the state.</p>
+    <div class="search-bar">
+      <input type="text" id="searchInput" placeholder="Search videographers, tags, crews, or styles...">
+      <select id="sortSelect" aria-label="Sort results" title="Sort results" style="margin-left:10px;padding:8px;border-radius:6px;">
+        <option value="newest">Newest</option>
+        <option value="oldest">Oldest</option>
+      </select>
+    </div>
+
+    <div class="gallery" id="galleryContainer">
+      <!-- Videos inserted by JS -->
+    </div>
   </main>
 
-  <footer>
-    <hr>
-    <p>
-      Disclaimer: All street art featured on this site is the property of the original artists. This website documents graffiti and street art for educational, archival, and journalistic purposes only. We do not condone, promote, or encourage illegal activity. All images are used for commentary and documentation; no copyright infringement is intended. Any commercial use of these images is prohibited without the express permission of the original artist.
-    </p>
-  </footer>
-
   <script src="/assets/js/maintenance.js"></script>
+  <script src="/assets/js/videos.js"></script>
   <script src="/assets/js/darkmode.js"></script>
 </body>
 </html>
