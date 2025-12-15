@@ -300,15 +300,14 @@ IMAGE_LABELS[277] = "mazzy13-meangirl-piece";
 IMAGE_LABELS[278] = "high8-OHK-meangirl-straightletter";
 IMAGE_LABELS[279] = "ojea3-HEX,OY!-meangirl-piece, character";
 IMAGE_LABELS[280] = "mule, argo, grazi-5G,DWT-meangirl-antistyle";
-IMAGE_LABELS[281] = "kindbud-SDH,5G-meangirl-straightletter";
+IMAGE_LABELS[281] = "high8-OHK-meangirl-straightletter";
 IMAGE_LABELS[282] = "enzyme, paeday-DWT-meangirl-throwie, fillin";
 IMAGE_LABELS[283] = "catch, halt, cargo, cevs, pyle, ojea3-5G,BNE,PTG,SLT,OHK,HEX,OY!-meangirl-piece, throwie, fillin";
-IMAGE_LABELS[284] = "folie-meangirl-piece";
-IMAGE_LABELS[285] = "plato-HEX-meangirl-piece";
-IMAGE_LABELS[286] = "enzyme, ozek-MGI,DPW-meangirl-piece, character";
-IMAGE_LABELS[287] = "tears-HEX-meangirl-piece";
-IMAGE_LABELS[288] = "high8-OHK-meangirl-straightletter"
-
+IMAGE_LABELS[284] = "tears-HEX-meangirl-piece";
+IMAGE_LABELS[285] = "high8-OHK-meangirl-straightletter";
+IMAGE_LABELS[286] = "folie-meangirl-antistyle";
+IMAGE_LABELS[287] = "plato-HEX-meangirl-piece";
+IMAGE_LABELS[288] = "kindbud-SDH,5G-meangirl-straightletter"
 
 
 // ----- END AUTO-GENERATED LABELS -----
