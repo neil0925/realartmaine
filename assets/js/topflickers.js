@@ -1,171 +1,195 @@
-// topflickers.js
-// Build a simple leaderboard of photographers using data available
-// in `gallery.js`. Heuristics are used when explicit metadata isn't
-// present: we parse `IMAGE_LABELS` tokens and pick candidate names.
-
-function escapeHtml(s){ return String(s).replace(/[&<>\"]/g, c=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c])); }
+function escapeHtml(s){
+  return String(s).replace(/[&<>\"]/g, c => ({
+    '&':'&amp;',
+    '<':'&lt;',
+    '>':'&gt;',
+    '"':'&quot;'
+  }[c]));
+}
 
 document.addEventListener('DOMContentLoaded', () => {
   const out = document.getElementById('leaderboard');
   if (!out) return;
 
-  // Attempt to use structured `metaList` if available (preferred)
-  const counts = Object.create(null);
-  // `metaList` and `IMAGE_LABELS` may be declared as top-level `const` in
-  // `gallery.js` (not as window properties). Support both forms.
-  const globalMetaList = (typeof metaList !== 'undefined') ? metaList : (window.metaList || null);
-  const globalImageLabels = (typeof IMAGE_LABELS !== 'undefined') ? IMAGE_LABELS : (window.IMAGE_LABELS || null);
+  // Debug mode ONLY when ?debug=true is present
+  const debugMode = new URLSearchParams(window.location.search).get('debug') === 'true';
 
+  const counts = Object.create(null);
+
+  // Support both global and window-scoped vars
+  const globalMetaList =
+    (typeof metaList !== 'undefined') ? metaList : (window.metaList || null);
+  const globalImageLabels =
+    (typeof IMAGE_LABELS !== 'undefined') ? IMAGE_LABELS : (window.IMAGE_LABELS || null);
+  const globalVideoLabels =
+    (typeof VIDEO_LABELS !== 'undefined') ? VIDEO_LABELS : (window.VIDEO_LABELS || null);
+
+  /* =========================
+     META LIST (preferred)
+  ========================= */
   if (globalMetaList && Array.isArray(globalMetaList)) {
     globalMetaList.forEach(m => {
-      const p = (m.photographer || m.photographerName || m.author || m.by || '').toString().trim();
+      const p = (m.photographer || m.photographerName || m.author || m.by || '')
+        .toString()
+        .trim();
       if (!p) return;
-      const key = p;
-      if (key.toLowerCase().includes('realartmaine')) return; // exclude
-      counts[key] = (counts[key] || 0) + 1;
+
+      if (!debugMode && p.toLowerCase().includes('realartmaine')) return;
+
+      counts[p] = (counts[p] || 0) + 1;
     });
   }
 
-  // Fallback: parse IMAGE_LABELS if present
+  /* =========================
+     IMAGE LABELS (fallback)
+  ========================= */
   if (globalImageLabels && Array.isArray(globalImageLabels)) {
     const stopwords = new Set([
-      'tag','tags','throwie','piece','stencil','character','hollow','fillin','antistyle','straightletter','paintroller','blackbook','minnowfeed','notmaine','hand','handstyle'
+      'tag','tags','throwie','piece','stencil','character','hollow','fillin',
+      'antistyle','straightletter','paintroller','blackbook','minnowfeed',
+      'notmaine','hand','handstyle'
     ]);
 
-    // More robust approach: split the entire label on '-' to get logical
-    // segments and look for style words (stopwords) near the end. The
-    // photographer is usually the segment immediately before style tokens.
     for (let i = 1; i < globalImageLabels.length; i++) {
-      const label = (globalImageLabels[i] || '').toString();
+      const label = String(globalImageLabels[i] || '');
       if (!label) continue;
 
-      // Break label into hyphen-separated segments (these tend to be
-      // subject / crew / photographer / styles)
       const parts = label.split('-').map(p => p.trim()).filter(Boolean);
       if (!parts.length) continue;
 
-      // Find the rightmost segment that contains a style/descriptor from stopwords.
-      // Photographer is likely the segment immediately before that.
       let photographerSeg = null;
+
       for (let j = parts.length - 1; j >= 0; j--) {
-        const seg = parts[j].toLowerCase();
-        // check if any comma-separated token in this segment matches a style
-        const segTokens = seg.split(/[,\s]+/).map(s => s.trim()).filter(Boolean);
-        const hasStyle = segTokens.some(t => stopwords.has(t));
-        if (hasStyle) {
-          if (j - 1 >= 0) photographerSeg = parts[j - 1];
+        const segTokens = parts[j].toLowerCase().split(/[,\s]+/);
+        if (segTokens.some(t => stopwords.has(t))) {
+          photographerSeg = parts[j - 1] || null;
           break;
         }
       }
 
-      // Fallbacks if we couldn't locate a style marker
       if (!photographerSeg) {
         if (parts.length >= 3) photographerSeg = parts[parts.length - 2];
-        else if (parts.length === 2) photographerSeg = parts[1];
-        else photographerSeg = parts[0];
+        else photographerSeg = parts[parts.length - 1];
       }
 
       if (!photographerSeg) continue;
 
-      // The segment might contain multiple comma-separated names (crews).
-      // Prefer a candidate that looks like a real photographer name: not
-      // an all-uppercase crew code and not a style word.
-      const candNames = photographerSeg.split(',').map(s => s.trim()).filter(Boolean);
+      const candidates = photographerSeg.split(',').map(s => s.trim()).filter(Boolean);
       let chosen = null;
-      for (const n of candNames) {
+
+      for (const n of candidates) {
         const low = n.toLowerCase();
-        if (!low) continue;
         if (stopwords.has(low)) continue;
-        // skip obvious crew lists like "PTG,OHK" (all-uppercase tokens or short codes)
-        const isLikelyCrew = /^[A-Z0-9,\s]{1,6}$/.test(n) && n === n.toUpperCase();
-        if (isLikelyCrew) continue;
+        if (/^[A-Z0-9,\s]{1,6}$/.test(n) && n === n.toUpperCase()) continue;
         chosen = n;
         break;
       }
 
-      // If no good candidate found, fall back to first comma-part (best-effort)
-      if (!chosen && candNames.length) chosen = candNames[0];
+      if (!chosen && candidates.length) chosen = candidates[0];
       if (!chosen) continue;
 
-      const final = chosen.trim();
-      if (!final) continue;
-      // Exclude the site's own account from the leaderboard
-      if (final.toLowerCase().includes('realartmaine')) continue;
-      const key = final;
-      counts[key] = (counts[key] || 0) + 1;
+      if (!debugMode && chosen.toLowerCase().includes('realartmaine')) continue;
+
+      counts[chosen] = (counts[chosen] || 0) + 1;
     }
   }
 
-  // Also parse VIDEO_LABELS (video takers) so video authors appear in leaderboard
-  const globalVideoLabels = (typeof VIDEO_LABELS !== 'undefined') ? VIDEO_LABELS : (window.VIDEO_LABELS || null);
+  /* =========================
+     VIDEO LABELS
+  ========================= */
   if (globalVideoLabels && Array.isArray(globalVideoLabels)) {
     const stopwords = new Set([
-      'tag','tags','throwie','piece','stencil','character','hollow','fillin','antistyle','straightletter','paintroller','blackbook','minnowfeed','notmaine','hand','handstyle'
+      'tag','tags','throwie','piece','stencil','character','hollow','fillin',
+      'antistyle','straightletter','paintroller','blackbook','minnowfeed',
+      'notmaine','hand','handstyle'
     ]);
 
     for (let i = 1; i < globalVideoLabels.length; i++) {
-      const label = (globalVideoLabels[i] || '').toString();
+      const label = String(globalVideoLabels[i] || '');
       if (!label) continue;
+
       const parts = label.split('-').map(p => p.trim()).filter(Boolean);
       if (!parts.length) continue;
 
       let photographerSeg = null;
+
       for (let j = parts.length - 1; j >= 0; j--) {
-        const seg = parts[j].toLowerCase();
-        const segTokens = seg.split(/[,\s]+/).map(s => s.trim()).filter(Boolean);
-        const hasStyle = segTokens.some(t => stopwords.has(t));
-        if (hasStyle) {
-          if (j - 1 >= 0) photographerSeg = parts[j - 1];
+        const segTokens = parts[j].toLowerCase().split(/[,\s]+/);
+        if (segTokens.some(t => stopwords.has(t))) {
+          photographerSeg = parts[j - 1] || null;
           break;
         }
       }
 
       if (!photographerSeg) {
         if (parts.length >= 3) photographerSeg = parts[parts.length - 2];
-        else if (parts.length === 2) photographerSeg = parts[1];
-        else photographerSeg = parts[0];
+        else photographerSeg = parts[parts.length - 1];
       }
 
       if (!photographerSeg) continue;
-      const candNames = photographerSeg.split(',').map(s => s.trim()).filter(Boolean);
+
+      const candidates = photographerSeg.split(',').map(s => s.trim()).filter(Boolean);
       let chosen = null;
-      for (const n of candNames) {
+
+      for (const n of candidates) {
         const low = n.toLowerCase();
-        if (!low) continue;
         if (stopwords.has(low)) continue;
-        const isLikelyCrew = /^[A-Z0-9,\s]{1,6}$/.test(n) && n === n.toUpperCase();
-        if (isLikelyCrew) continue;
+        if (/^[A-Z0-9,\s]{1,6}$/.test(n) && n === n.toUpperCase()) continue;
         chosen = n;
         break;
       }
-      if (!chosen && candNames.length) chosen = candNames[0];
+
+      if (!chosen && candidates.length) chosen = candidates[0];
       if (!chosen) continue;
-      const final = chosen.trim();
-      if (!final) continue;
-      if (final.toLowerCase().includes('realartmaine')) continue;
-      counts[final] = (counts[final] || 0) + 1;
+
+      if (!debugMode && chosen.toLowerCase().includes('realartmaine')) continue;
+
+      counts[chosen] = (counts[chosen] || 0) + 1;
     }
   }
 
-  // Build sorted leaderboard
-  const list = Object.entries(counts).sort((a,b) => b[1] - a[1]);
+  /* =========================
+     BUILD LEADERBOARD
+  ========================= */
+  const list = Object.entries(counts).sort((a, b) => b[1] - a[1]);
 
   let html = '<h1>Top Flickers</h1>';
-  if (list.length === 0) {
+
+  if (debugMode) {
+    html += '<p style="opacity:.6">Debug mode enabled</p>';
+  }
+
+  if (!list.length) {
     html += '<p>No Top Flickers found.</p>';
   } else {
-    html += '<div class="table-wrap"><table class="leaderboard-table"><thead><tr>' +
-      '<th class="rank-col">#</th>' +
-      '<th class="photog-col">Flicker</th>' +
-      '<th class="count-col">Flicks</th>' +
-      '</tr></thead><tbody>';
+    html += `
+      <div class="table-wrap">
+        <table class="leaderboard-table">
+          <thead>
+            <tr>
+              <th class="rank-col">#</th>
+              <th class="photog-col">Flicker</th>
+              <th class="count-col">Flicks</th>
+            </tr>
+          </thead>
+          <tbody>
+    `;
 
     list.slice(0, 200).forEach(([name, cnt], idx) => {
-      const place = idx + 1;
-      html += `<tr><td class="rank-col">${place}</td><td class="photog-col">${escapeHtml(name)}</td><td class="count-col">${cnt}</td></tr>`;
+      html += `
+        <tr>
+          <td class="rank-col">${idx + 1}</td>
+          <td class="photog-col">${escapeHtml(name)}</td>
+          <td class="count-col">${cnt}</td>
+        </tr>
+      `;
     });
 
-    html += '</tbody></table></div>';
+    html += `
+          </tbody>
+        </table>
+      </div>
+    `;
   }
 
   out.innerHTML = html;
