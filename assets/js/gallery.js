@@ -388,7 +388,8 @@ const SYNONYM_GROUPS = [
   ['throwie', 'bubble letter', 'throw', 'bubbleletter', 'throw up', 'throwups', 'throwup', 'throw ups'],
   ['antistyle', 'anti style', 'anti', 'hipster graffiti', 'hipster graff', 'hipstergraff', 'hipstergraffiti'],
   ['catch', 'cache'],
-  ['ducky', 'theportlandbee', 'the portland bee']
+  ['ducky', 'theportlandbee', 'the portland bee'],
+  ['dove', 'doves']
 ];
 
 function buildSynonymMap(groups) {
