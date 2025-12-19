@@ -58,7 +58,6 @@ document.addEventListener("DOMContentLoaded", () => {
     // remove legacy toggle button if present
     const old = dropdown.querySelector('#modeToggle');
     if (old && old.parentNode) old.parentNode.removeChild(old);
-
     const markup = `<!-- From Uiverse.io by Galahhad -->
       <label class="theme-switch">
         <input type="checkbox" class="theme-switch__checkbox">
@@ -88,6 +87,74 @@ document.addEventListener("DOMContentLoaded", () => {
         try { safeSet('darkMode', cb.checked ? 'true' : 'false'); } catch (e) {}
         try { applyMode(); } catch (e) {}
       });
+    }
+
+    // Add Clear Cache button to the dropdown (clears storages, caches, SWs and reloads)
+    if (!dropdown.querySelector('#clearCacheBtn')) {
+      const clearBtnHtml = `<button id="clearCacheBtn" aria-label="Clear site cache" style="width:90%;padding:8px;border-radius:6px;">Clear Cache</button>`;
+      dropdown.insertAdjacentHTML('beforeend', clearBtnHtml);
+
+      const clearBtn = dropdown.querySelector('#clearCacheBtn');
+      if (clearBtn) {
+        clearBtn.addEventListener('click', async (ev) => {
+          ev.preventDefault();
+          try {
+            clearBtn.disabled = true;
+            clearBtn.textContent = 'Clearing...';
+          } catch (e) {}
+
+          // Preserve theme and filter-related preferences, then clear other keys
+          function preserveAndClear(storage) {
+            try {
+              const preservePattern = /dark|mode|filter|search|sort|pref|preference|gallery/i;
+              const keys = [];
+              for (let i = 0; i < storage.length; i++) {
+                const k = storage.key(i);
+                if (k) keys.push(k);
+              }
+              const preserved = {};
+              keys.forEach(k => {
+                if (preservePattern.test(k)) {
+                  try { preserved[k] = storage.getItem(k); } catch (e) {}
+                }
+              });
+              try { storage.clear(); } catch (e) {}
+              Object.keys(preserved).forEach(k => {
+                try { storage.setItem(k, preserved[k]); } catch (e) {}
+              });
+            } catch (e) {}
+          }
+
+          try { preserveAndClear(localStorage); } catch (e) {}
+          try { preserveAndClear(sessionStorage); } catch (e) {}
+
+          // Clear Cache Storage if available
+          try {
+            if ('caches' in window) {
+              const keys = await caches.keys();
+              await Promise.all(keys.map(k => caches.delete(k)));
+            }
+          } catch (e) { console.warn('CacheStorage clear failed', e); }
+
+          // Unregister service workers if any
+          try {
+            if (navigator.serviceWorker && navigator.serviceWorker.getRegistrations) {
+              const regs = await navigator.serviceWorker.getRegistrations();
+              await Promise.all(regs.map(r => r.unregister()));
+            }
+          } catch (e) { console.warn('SW unregister failed', e); }
+
+          // Force a cache-busting reload by adding/updating a query param
+          try {
+            const url = new URL(location.href);
+            url.searchParams.set('cb', Date.now());
+            // Use replace so back button doesn't go to old cached URL
+            location.replace(url.toString());
+          } catch (e) {
+            try { location.reload(); } catch (e2) {}
+          }
+        });
+      }
     }
   }
 
