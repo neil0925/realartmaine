@@ -534,7 +534,7 @@ window.addEventListener('unload', () => {
 
 const TOY_BLACKLIST = [
   "arise", "cutie", "love", "lovey", "4kt", "fourkt", "sajak", "sajack", "freeze",
-  "ames", "ame", "chad", "token", "sour", "saint", "ecko", "echo"
+  "ames", "ame", "chad", "token", "sour", "saint", "ecko", "echo", "cemo"
 ].map(s => s.toLowerCase());
 
 // Synonym groups: each sub-array contains equivalent terms that should be
