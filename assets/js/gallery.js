@@ -563,10 +563,10 @@ const SYNONYM_GROUPS = [
   ['antistyle', 'anti style', 'anti', 'hipster graffiti', 'hipster graff', 'hipstergraff', 'hipstergraffiti'],
   ['catch', 'cache'],
   ['ducky', 'theportlandbee', 'the portland bee', 'bee'],
-  ['dove', 'doves']
-  ['VC', 'HKC']
-  ['salud', 'saludpig', 'salud pig', 'pig']
-  ['CTS', 'TNL']
+  ['dove', 'doves'],
+  ['VC', 'HKC'],
+  ['salud', 'saludpig', 'salud pig', 'pig'],
+  ['CTS', 'TNL'],
 ];
 
 function buildSynonymMap(groups) {
