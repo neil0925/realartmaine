@@ -567,6 +567,7 @@ const SYNONYM_GROUPS = [
   ['VC', 'HKC'],
   ['salud', 'saludpig', 'salud pig', 'pig'],
   ['CTS', 'TNL'],
+  ['OY!', 'oh yes!', 'ohyes!'],
 ];
 
 function buildSynonymMap(groups) {
