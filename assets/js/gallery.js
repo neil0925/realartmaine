@@ -553,7 +553,7 @@ window.addEventListener('unload', () => {
 
 const TOY_BLACKLIST = [
   "arise", "cutie", "love", "lovey", "4kt", "fourkt", "sajak", "sajack", "freeze",
-  "ames", "ame", "chad", "token", "sour", "saint", "ecko", "echo", "cemo"
+  "ames", "ame", "chad", "token", "sour", "saint", "ecko", "echo", "cemo", "mohammed hoch", "mohammedhoch"
 ].map(s => s.toLowerCase());
 
 // Synonym groups: each sub-array contains equivalent terms that should be
@@ -562,8 +562,10 @@ const SYNONYM_GROUPS = [
   ['throwie', 'bubble letter', 'throw', 'bubbleletter', 'throw up', 'throwups', 'throwup', 'throw ups'],
   ['antistyle', 'anti style', 'anti', 'hipster graffiti', 'hipster graff', 'hipstergraff', 'hipstergraffiti'],
   ['catch', 'cache'],
-  ['ducky', 'theportlandbee', 'the portland bee'],
+  ['ducky', 'theportlandbee', 'the portland bee', 'bee'],
   ['dove', 'doves']
+  ['VC', 'HKC']
+  ['salud', 'saludpig', 'salud pig', 'pig']
 ];
 
 function buildSynonymMap(groups) {
