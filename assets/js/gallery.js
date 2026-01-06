@@ -46,13 +46,13 @@ IMAGE_LABELS[23] = "lufa-hex-ZPLK-tags, piece";
 IMAGE_LABELS[24] = "nare-az-ZPLK-piece, character";
 IMAGE_LABELS[25] = "wilt-2K69,VC-minnowfeed-blackbook";
 IMAGE_LABELS[26] = "spek, segway, 27, port, melts, yalts-FTS,TSZ,CIRCLET,YME,IMS-minnowfeed-tags, moniker";
-IMAGE_LABELS[27] = "segway-FTS-minnowfeed-throwie, hollow";
+IMAGE_LABELS[27] = "segway-FTS,TSZ-minnowfeed-throwie, hollow";
 IMAGE_LABELS[28] = "same, catch-SLT,PTG,BNE,OHK-realartmaine-tag";
 IMAGE_LABELS[29] = "same, 27, enya-SLT,TVT,TSZ,5G-minnowfeed-tags, stencil";
 IMAGE_LABELS[30] = "rune-LTB,2K69-minnowfeed-piece, antistyle";
 IMAGE_LABELS[31] = "rune, 27-LTB,2K69,TSZ,2GF-minnowfeed-throwie, fillin, antistyle";
 IMAGE_LABELS[32] = "qjoe-5G,UK-minnowfeed-antistyle, piece";
-IMAGE_LABELS[33] = "qjoe, link-5G-realartmaine-antistyle, straightletter";
+IMAGE_LABELS[33] = "qjoe, link-5G,UK,CRAFT,SDH-realartmaine-antistyle, straightletter";
 IMAGE_LABELS[34] = "ojea3-HEX,OY!-minnowfeed-piece";
 IMAGE_LABELS[35] = "ojea3-HEX,OY!-minnowfeed-tags";
 IMAGE_LABELS[36] = "mobi-TSZ-minnowfeed-straightletter";
@@ -295,7 +295,7 @@ IMAGE_LABELS[272] = "ojea3-HEX,OY!-meangirl-piece, character";
 IMAGE_LABELS[273] = "exit-DPW-meangirl-straightletter";
 IMAGE_LABELS[274] = "wilt-VC,2K69,HKC-meangirl-straightletter";
 IMAGE_LABELS[275] = "ozek-MGI-meangirl-straightletter";
-IMAGE_LABELS[276] = "moyo, kindbud, qjoe-OHK,SDH,5G-meangirl-antistyle";
+IMAGE_LABELS[276] = "moyo, kindbud, qjoe-OHK,UK,SDH,5G-meangirl-antistyle";
 IMAGE_LABELS[277] = "moyo-OHK-meangirl-throwie, fillin, antistyle";
 IMAGE_LABELS[278] = "updog, paeday-PTG,OHK-meangirl-antistyle";
 IMAGE_LABELS[279] = "mazzy13-meangirl-piece";
@@ -566,6 +566,7 @@ const SYNONYM_GROUPS = [
   ['dove', 'doves']
   ['VC', 'HKC']
   ['salud', 'saludpig', 'salud pig', 'pig']
+  ['CTS', 'TNL']
 ];
 
 function buildSynonymMap(groups) {
