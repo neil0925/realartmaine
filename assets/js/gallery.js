@@ -370,7 +370,6 @@ IMAGE_LABELS[347] = "wake-LTB-realartmaine-throwie, fillin";
 IMAGE_LABELS[348] = "wake-LTB-realartmaine-throwie, fillin";
 IMAGE_LABELS[349] = "spot, same-SLT,2K69-realartmaine-straightletter, throwie, fillin";
 IMAGE_LABELS[350] = "same, spots, solar, ian-TVT,SLT,2K69,VC,DNB-realartmaine-straightletter, fillin, throwie";
-IMAGE_LABELS[351] = "key-2K69-realartmaine-throwie, fillin";
 
 
 
