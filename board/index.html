@@ -5,21 +5,58 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Free Draw Board | Real Art Maine</title>
   <link rel="stylesheet" href="/assets/css/style.css">
+  <style>
+    /* Drawing toolbar */
+    #drawToolbar {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 12px;
+      margin: 15px auto;
+    }
+    #drawToolbar label {
+      font-weight: bold;
+    }
+    #drawingBoard {
+      width: 90%;
+      height: 70vh;
+      border: 2px solid #000;
+      border-radius: 6px;
+      display: block;
+      margin: 0 auto 20px auto;
+      background: #fff;
+      touch-action: none; /* prevent scrolling on mobile while drawing */
+    }
+    body.dark-mode #drawingBoard {
+      background: #111;
+      border-color: #fff;
+    }
+  </style>
 </head>
 <body>
-  <!-- Navigation placeholder (reuse from other pages) -->
   <nav>
-    <a href="/Home" aria-label="Home">Home</a>
-    <a href="/Gallery" aria-label="Gallery">Gallery</a>
-    <a href="/VideoArchive" aria-label="Videos">Videos</a>
-    <a href="/TopFlickers" aria-label="Top Flickers">Top Flickers</a>
+    <a href="/Home">Home</a>
+    <a href="/Gallery">Gallery</a>
+    <a href="/VideoArchive">Videos</a>
+    <a href="/TopFlickers">Top Flickers</a>
   </nav>
 
   <main>
     <h1>Free Draw Board</h1>
-    <p>Draw anything! Your strokes are saved in your browser.</p>
+    <p>Draw anything! Use the tools below to change color, brush size, or clear the board.</p>
 
-    <!-- Canvas for drawing -->
+    <!-- Toolbar -->
+    <div id="drawToolbar">
+      <label for="colorPicker">Color:</label>
+      <input type="color" id="colorPicker" value="#000000">
+
+      <label for="brushSize">Brush:</label>
+      <input type="range" id="brushSize" min="1" max="30" value="4">
+
+      <button id="clearBtn">Clear</button>
+    </div>
+
+    <!-- Canvas -->
     <canvas id="drawingBoard"></canvas>
   </main>
 
@@ -27,6 +64,59 @@
     <p>Real Art Maine | Graffiti archive</p>
   </footer>
 
-  <script type="module" src="/assets/js/board.js"></script>
+  <!-- Scripts -->
+  <script src="/assets/js/strokes.js"></script>
+  <script src="/assets/js/board.js"></script>
+  <script>
+    // Drawing tools
+    const colorPicker = document.getElementById("colorPicker");
+    const brushSize = document.getElementById("brushSize");
+    const clearBtn = document.getElementById("clearBtn");
+
+    // Override default stroke settings in board.js
+    window.CURRENT_COLOR = colorPicker.value;
+    window.CURRENT_SIZE = parseInt(brushSize.value);
+
+    colorPicker.addEventListener("input", e => {
+      window.CURRENT_COLOR = e.target.value;
+    });
+
+    brushSize.addEventListener("input", e => {
+      window.CURRENT_SIZE = parseInt(e.target.value);
+    });
+
+    clearBtn.addEventListener("click", () => {
+      if (confirm("Clear all your strokes?")) {
+        clearStrokes();
+        redrawStrokes(document.getElementById("drawingBoard").getContext("2d"));
+      }
+    });
+
+    // Add touch support
+    const canvas = document.getElementById("drawingBoard");
+    canvas.addEventListener("touchstart", e => {
+      e.preventDefault();
+      const touch = e.touches[0];
+      const mouseEvent = new MouseEvent("mousedown", {
+        clientX: touch.clientX,
+        clientY: touch.clientY
+      });
+      canvas.dispatchEvent(mouseEvent);
+    });
+    canvas.addEventListener("touchmove", e => {
+      e.preventDefault();
+      const touch = e.touches[0];
+      const mouseEvent = new MouseEvent("mousemove", {
+        clientX: touch.clientX,
+        clientY: touch.clientY
+      });
+      canvas.dispatchEvent(mouseEvent);
+    });
+    canvas.addEventListener("touchend", e => {
+      e.preventDefault();
+      const mouseEvent = new MouseEvent("mouseup", {});
+      canvas.dispatchEvent(mouseEvent);
+    });
+  </script>
 </body>
 </html>
