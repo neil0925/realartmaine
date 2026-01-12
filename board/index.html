@@ -32,11 +32,34 @@
       background: #111;
       border-color: #fff;
     }
+
+    /* brush preview next to slider */
+    #brushPreview {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: inline-block;
+      vertical-align: middle;
+      border: 1px solid rgba(0,0,0,0.12);
+      box-shadow: 0 1px 2px rgba(0,0,0,0.12);
+    }
+
+    /* moving cursor preview overlay (follows pointer) */
+    #brushCursor {
+      position: absolute;
+      pointer-events: none;
+      display: none;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      border: 1px solid rgba(0,0,0,0.18);
+      background: transparent;
+      z-index: 99999;
+    }
   </style>
 </head>
 <body>
   <nav>
-    <a href="/Home">Home</a>
+    <a href="/Home" class="nav-logo" aria-label="Real Art Maine Home"><img src="/assets/img/logo.svg" alt="Real Art Maine" class="nav-icon"></a>
     <a href="/Gallery">Gallery</a>
     <a href="/VideoArchive">Videos</a>
     <a href="/TopFlickers">Top Flickers</a>
@@ -52,13 +75,16 @@
       <input type="color" id="colorPicker" value="#000000">
 
       <label for="brushSize">Brush:</label>
-      <input type="range" id="brushSize" min="1" max="30" value="4">
+      <input type="range" id="brushSize" min="1" max="60" value="4">
 
-      <button id="clearBtn">Clear</button>
+      <!-- small preview circle for selected brush size/color -->
+      <div id="brushPreview" aria-hidden="true" title="Brush preview"></div>
     </div>
 
     <!-- Canvas -->
     <canvas id="drawingBoard"></canvas>
+    <!-- live cursor preview (positioned over page) -->
+    <div id="brushCursor" aria-hidden="true"></div>
   </main>
 
   <footer>
@@ -72,52 +98,40 @@
     // Drawing tools
     const colorPicker = document.getElementById("colorPicker");
     const brushSize = document.getElementById("brushSize");
-    const clearBtn = document.getElementById("clearBtn");
+    const brushPreview = document.getElementById("brushPreview");
 
     // Override default stroke settings in board.js
     window.CURRENT_COLOR = colorPicker.value;
     window.CURRENT_SIZE = parseInt(brushSize.value);
 
+    function updateLocalBrushPreview() {
+      const size = parseInt(brushSize.value, 10);
+      window.CURRENT_SIZE = size;
+      // small toolbar preview
+      brushPreview.style.width = brushPreview.style.height = Math.max(6, size) + 'px';
+      brushPreview.style.background = window.CURRENT_COLOR;
+      // update overlay cursor (board.js exposes updateBrushPreview)
+      if (typeof window.updateBrushPreview === 'function') {
+        window.updateBrushPreview(window.CURRENT_SIZE, window.CURRENT_COLOR);
+      }
+    }
+
     colorPicker.addEventListener("input", e => {
       window.CURRENT_COLOR = e.target.value;
-    });
-
-    brushSize.addEventListener("input", e => {
-      window.CURRENT_SIZE = parseInt(e.target.value);
-    });
-
-    clearBtn.addEventListener("click", () => {
-      if (confirm("Clear all your strokes?")) {
-        clearStrokes();
-        redrawStrokes(document.getElementById("drawingBoard").getContext("2d"));
+      brushPreview.style.background = window.CURRENT_COLOR;
+      if (typeof window.updateBrushPreview === 'function') {
+        window.updateBrushPreview(window.CURRENT_SIZE, window.CURRENT_COLOR);
       }
     });
 
-    // Add touch support
-    const canvas = document.getElementById("drawingBoard");
-    canvas.addEventListener("touchstart", e => {
-      e.preventDefault();
-      const touch = e.touches[0];
-      const mouseEvent = new MouseEvent("mousedown", {
-        clientX: touch.clientX,
-        clientY: touch.clientY
-      });
-      canvas.dispatchEvent(mouseEvent);
+    brushSize.addEventListener("input", e => {
+      updateLocalBrushPreview();
     });
-    canvas.addEventListener("touchmove", e => {
-      e.preventDefault();
-      const touch = e.touches[0];
-      const mouseEvent = new MouseEvent("mousemove", {
-        clientX: touch.clientX,
-        clientY: touch.clientY
-      });
-      canvas.dispatchEvent(mouseEvent);
-    });
-    canvas.addEventListener("touchend", e => {
-      e.preventDefault();
-      const mouseEvent = new MouseEvent("mouseup", {});
-      canvas.dispatchEvent(mouseEvent);
-    });
+
+    // initialize the preview UI
+    updateLocalBrushPreview();
+
+    // Note: pointer events handle touch/mouse/pen input on the canvas; no manual touch shims needed.
   </script>
 </body>
 </html>

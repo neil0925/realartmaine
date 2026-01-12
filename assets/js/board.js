@@ -36,6 +36,27 @@ function getCanvasPoint(clientX, clientY) {
 // Prevent default touch gestures on the canvas; pointer events handle input
 canvas.style.touchAction = canvas.style.touchAction || 'none';
 
+// create brush cursor overlay if missing and expose update function
+let brushCursor = document.getElementById('brushCursor');
+if (!brushCursor) {
+  brushCursor = document.createElement('div');
+  brushCursor.id = 'brushCursor';
+  document.body.appendChild(brushCursor);
+}
+
+window.updateBrushPreview = function(size, color) {
+  window.CURRENT_SIZE = parseInt(size, 10) || window.CURRENT_SIZE || 4;
+  window.CURRENT_COLOR = color || window.CURRENT_COLOR || '#000';
+  const px = Math.max(2, window.CURRENT_SIZE);
+  brushCursor.style.width = brushCursor.style.height = px + 'px';
+  brushCursor.style.background = window.CURRENT_COLOR;
+  brushCursor.style.opacity = 0.65;
+  brushCursor.style.borderColor = 'rgba(0,0,0,0.18)';
+};
+
+// ensure initial look
+window.updateBrushPreview(window.CURRENT_SIZE, window.CURRENT_COLOR);
+
 canvas.addEventListener('pointerdown', (e) => {
   // only handle primary button
   if (e.button !== undefined && e.button !== 0) return;
@@ -45,6 +66,13 @@ canvas.addEventListener('pointerdown', (e) => {
 });
 
 canvas.addEventListener('pointermove', (e) => {
+  // update cursor overlay position
+  if (brushCursor) {
+    brushCursor.style.display = 'block';
+    brushCursor.style.left = (e.clientX + window.scrollX) + 'px';
+    brushCursor.style.top = (e.clientY + window.scrollY) + 'px';
+  }
+
   if (!isDrawing) return;
   const point = getCanvasPoint(e.clientX, e.clientY);
   currentPoints.push(point);
@@ -61,6 +89,10 @@ canvas.addEventListener('pointermove', (e) => {
     ctx.stroke();
   }
 });
+
+// show/hide cursor when entering/leaving canvas
+canvas.addEventListener('pointerenter', (e) => { if (brushCursor) brushCursor.style.display = 'block'; });
+canvas.addEventListener('pointerleave', (e) => { if (brushCursor) brushCursor.style.display = 'none'; });
 
 function endDrawing(e) {
   if (!isDrawing) return;
