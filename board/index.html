@@ -106,6 +106,26 @@
   </footer>
 
   <!-- Scripts -->
+  <script type="module">
+    // Import the functions you need from the SDKs you need
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+    // TODO: Add SDKs for Firebase products that you want to use
+    // https://firebase.google.com/docs/web/setup#available-libraries
+
+    // Your web app's Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyCvLe31qJW7Y0-mD__MYk2Gc8KztkyNz2s",
+      authDomain: "ram-backend-realartmaine.firebaseapp.com",
+      projectId: "ram-backend-realartmaine",
+      storageBucket: "ram-backend-realartmaine.firebasestorage.app",
+      messagingSenderId: "921689493010",
+      appId: "1:921689493010:web:24695faadf84113b9b12cb"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+  </script>
+
   <script src="/assets/js/strokes.js"></script>
   <script src="/assets/js/board.js"></script>
   <script>
