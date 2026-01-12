@@ -41,6 +41,10 @@ let brushCursor = document.getElementById('brushCursor');
 if (!brushCursor) {
   brushCursor = document.createElement('div');
   brushCursor.id = 'brushCursor';
+  // make sure it's fixed (matches CSS but ensure via JS too)
+  brushCursor.style.position = 'fixed';
+  brushCursor.style.pointerEvents = 'none';
+  brushCursor.style.transform = 'translate(-50%, -50%)';
   document.body.appendChild(brushCursor);
 }
 
@@ -69,8 +73,9 @@ canvas.addEventListener('pointermove', (e) => {
   // update cursor overlay position
   if (brushCursor) {
     brushCursor.style.display = 'block';
-    brushCursor.style.left = (e.clientX + window.scrollX) + 'px';
-    brushCursor.style.top = (e.clientY + window.scrollY) + 'px';
+    // use client coordinates and fixed positioning so cursor centers on pointer
+    brushCursor.style.left = e.clientX + 'px';
+    brushCursor.style.top = e.clientY + 'px';
   }
 
   if (!isDrawing) return;
