@@ -30,7 +30,9 @@ function clearStrokes() {
 
 // Function to redraw strokes on a canvas context
 function redrawStrokes(ctx) {
-  ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+  // clear using CSS pixel dimensions because ctx may be scaled for high-DPI
+  const rect = ctx.canvas.getBoundingClientRect();
+  ctx.clearRect(0, 0, rect.width, rect.height);
   strokes.forEach(stroke => {
     if (stroke.points.length < 2) return;
     ctx.beginPath();
