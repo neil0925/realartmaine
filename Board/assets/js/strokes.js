@@ -30,12 +30,12 @@
     ctx.beginPath();
 
     // points may be normalized [0..1] or absolute pixels depending on how they were saved.
-    // To support both, detect values in [0,1] and scale by canvas size when needed.
+    // To support both, detect values in [0,1] and scale by canvas pixel size when needed.
     function getX(pt) {
-      return (pt.x <= 1 ? Math.round(pt.x * canvas.clientWidth) : pt.x);
+      return (pt.x <= 1 ? Math.round(pt.x * canvas.width) : pt.x);
     }
     function getY(pt) {
-      return (pt.y <= 1 ? Math.round(pt.y * canvas.clientHeight) : pt.y);
+      return (pt.y <= 1 ? Math.round(pt.y * canvas.height) : pt.y);
     }
 
     ctx.moveTo(getX(points[0]), getY(points[0]));

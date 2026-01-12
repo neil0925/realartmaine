@@ -23,20 +23,26 @@
 
   function toNormalizedPoint(evt) {
     const rect = canvas.getBoundingClientRect();
-    const x = (evt.clientX - rect.left) / canvas.clientWidth;
-    const y = (evt.clientY - rect.top) / canvas.clientHeight;
+    // Use canvas.width/height (pixel dimensions) for normalization
+    const x = (evt.clientX - rect.left) / canvas.width;
+    const y = (evt.clientY - rect.top) / canvas.height;
     return { x, y };
   }
 
   function drawPointOnCanvas(pt) {
-    const px = Math.round((pt.x <= 1 ? pt.x * canvas.clientWidth : pt.x));
-    const py = Math.round((pt.y <= 1 ? pt.y * canvas.clientHeight : pt.y));
+    const px = Math.round((pt.x <= 1 ? pt.x * canvas.width : pt.x));
+    const py = Math.round((pt.y <= 1 ? pt.y * canvas.height : pt.y));
     ctx.lineTo(px, py);
     ctx.stroke();
   }
 
   function handlePointerDown(e) {
-    if (typeof window.isDrawingAllowed !== 'undefined' && !window.isDrawingAllowed) return;
+    // Check if drawing is allowed before starting a stroke
+    if (typeof window.isDrawingAllowed !== 'undefined' && !window.isDrawingAllowed) {
+      console.log('Drawing is currently disabled (user might be banned).');
+      return;
+    }
+
     ensureCanvasSize();
     isDrawing = true;
     ctx.beginPath();
@@ -47,7 +53,7 @@
 
     const p = toNormalizedPoint(e);
     currentStrokePoints = [p];
-    ctx.moveTo(Math.round(p.x * canvas.clientWidth), Math.round(p.y * canvas.clientHeight));
+    ctx.moveTo(Math.round(p.x * canvas.width), Math.round(p.y * canvas.height));
   }
 
   function handlePointerMove(e) {

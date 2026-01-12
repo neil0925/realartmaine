@@ -1,294 +1,301 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Free Draw Board | Real Art Maine</title>
-  <link rel="stylesheet" href="/assets/css/style.css">
-  <style>
-    /* Drawing toolbar */
-    #drawToolbar {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 12px;
-      margin: 15px auto;
-    }
-    #drawToolbar label {
-      font-weight: bold;
-    }
-    #drawingBoard {
-      width: 90%;
-      height: 70vh;
-      border: 2px solid #000;
-      border-radius: 6px;
-      display: block;
-      margin: 0 auto 20px auto;
-      background: #fff;
-      touch-action: none; /* prevent scrolling on mobile while drawing */
-    }
-    body.dark-mode #drawingBoard {
-      background: #111;
-      border-color: #fff;
-    }
-
-    /* brush preview next to slider (fixed container so it doesn't resize the layout)
-       the inner dot scales to represent the brush size */
-    #brushPreview {
-      width: 36px;
-      height: 28px;
-      border-radius: 6px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      vertical-align: middle;
-      border: 1px solid rgba(0,0,0,0.06);
-      background: transparent;
-      box-shadow: none;
-    }
-    #brushPreviewDot {
-      width: 18px;
-      height: 18px;
-      border-radius: 50%;
-      background: #000;
-      display: block;
-      box-shadow: 0 1px 2px rgba(0,0,0,0.12);
-      transition: width .08s linear, height .08s linear, background .08s linear;
-    }
-
-    /* moving cursor preview overlay (follows pointer) - use fixed so it aligns to viewport coordinates */
-    #brushCursor {
-      position: fixed;
-      pointer-events: none;
-      display: none;
-      transform: translate(-50%, -50%);
-      border-radius: 50%;
-      border: 1px solid rgba(0,0,0,0.18);
-      background: transparent;
-      z-index: 99999;
-      box-sizing: border-box;
-    }
-  </style>
-</head>
-<body>
-  <nav>
-    <a href="/Home" class="nav-logo" aria-label="Real Art Maine Home"><img src="/assets/img/logo.svg" alt="Real Art Maine" class="nav-icon"></a>
-    <a href="/Gallery">Gallery</a>
-    <a href="/VideoArchive">Videos</a>
-    <a href="/TopFlickers">Top Flickers</a>
-  </nav>
-
-  <main>
-
-    <!-- Toolbar -->
-    <div id="drawToolbar">
-      <label for="colorPicker">Color:</label>
-      <input type="color" id="colorPicker" value="#000000">
-
-      <label for="brushSize">Brush:</label>
-      <input type="range" id="brushSize" min="1" max="60" value="4">
-
-      <!-- small preview circle for selected brush size/color (fixed container + inner dot to avoid layout shifts) -->
-      <div id="brushPreview" aria-hidden="true" title="Brush preview"><span id="brushPreviewDot"></span></div>
-    </div>
-
-    <!-- Canvas -->
-    <canvas id="drawingBoard"></canvas>
-    <!-- live cursor preview (positioned over page) -->
-    <div id="brushCursor" aria-hidden="true"></div>
-  </main>
-
-  <footer>
-    <p>Real Art Maine | Graffiti archive</p>
-  </footer>
-
-  <!-- Scripts -->
-  <script type="module">
-    // Import the functions you need from the Firebase SDKs
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
-    import { getDatabase, ref, push, onChildAdded, set, get, onValue } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-database.js";
-
-    // Your web app's Firebase configuration
-    const firebaseConfig = {
-      apiKey: "AIzaSyCvLe31qJW7Y0-mD__MYk2Gc8KztkyNz2s",
-      authDomain: "ram-backend-realartmaine.firebaseapp.com",
-      // Realtime Database URL
-      // https://ram-backend-realartmaine-default-rtdb.firebaseio.com/
-      databaseURL: "https://ram-backend-realartmaine-default-rtdb.firebaseio.com/",
-      projectId: "ram-backend-realartmaine",
-      storageBucket: "ram-backend-realartmaine.firebasestorage.app",
-      messagingSenderId: "921689493010",
-      appId: "1:921689493010:web:24695faadf84113b9b12cb"
-    };
-
-    // Initialize Firebase
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-
-    // Save a stroke to Realtime Database
-    // stroke = { userId, color, size, points, timestamp }
-    window.saveStroke = async function saveStroke(stroke) {
-      try {
-        const result = await push(ref(db, 'strokes'), stroke);
-        return result;
-      } catch (err) {
-        console.error('[Firebase] saveStroke error:', err);
-        throw err;
+  <!DOCTYPE html>
+  <html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Free Draw Board | Real Art Maine</title>
+    <link rel="stylesheet" href="/assets/css/style.css">
+    <style>
+      /* Drawing toolbar */
+      #drawToolbar {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 12px;
+        margin: 15px auto;
       }
-    };
+      #drawToolbar label {
+        font-weight: bold;
+      }
+      #drawingBoard {
+        width: 90%;
+        height: 70vh;
+        border: 2px solid #000;
+        border-radius: 6px;
+        display: block;
+        margin: 0 auto 20px auto;
+        background: #fff;
+        touch-action: none; /* prevent scrolling on mobile while drawing */
+      }
+      body.dark-mode #drawingBoard {
+        background: #111;
+        border-color: #fff;
+      }
 
-    // Local stroke deduplication helpers (keep client-generated IDs for a short time)
-    window._localStrokeIds = new Set();
-    window._markLocalStroke = function(clientId, ttlMs = 15000) {
-      if (!clientId) return;
-      window._localStrokeIds.add(clientId);
-      setTimeout(() => {
-        window._localStrokeIds.delete(clientId);
-      }, ttlMs);
-    };
-    window._isLocalStroke = function(clientId) {
-      return clientId && window._localStrokeIds.has(clientId);
-    };
+      /* brush preview next to slider (fixed container so it doesn't resize the layout)
+        the inner dot scales to represent the brush size */
+      #brushPreview {
+        width: 36px;
+        height: 28px;
+        border-radius: 6px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        vertical-align: middle;
+        border: 1px solid rgba(0,0,0,0.06);
+        background: transparent;
+        box-shadow: none;
+      }
+      #brushPreviewDot {
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: #000;
+        display: block;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.12);
+        transition: width .08s linear, height .08s linear, background .08s linear;
+      }
 
-    // Listen for new strokes and invoke drawStrokeOnCanvas(stroke) for each
-    window.setupRealtimeStrokeListener = function setupRealtimeStrokeListener(drawStrokeOnCanvas) {
-      const strokesRef = ref(db, 'strokes');
+      /* moving cursor preview overlay (follows pointer) - use fixed so it aligns to viewport coordinates */
+      #brushCursor {
+        position: fixed;
+        pointer-events: none;
+        display: none;
+        transform: translate(-50%, -50%);
+        border-radius: 50%;
+        border: 1px solid rgba(0,0,0,0.18);
+        background: transparent;
+        z-index: 99999;
+        box-sizing: border-box;
+      }
+    </style>
+  </head>
+  <body>
+    <nav>
+      <a href="/Home" class="nav-logo" aria-label="Real Art Maine Home"><img src="/assets/img/logo.svg" alt="Real Art Maine" class="nav-icon"></a>
+      <a href="/Gallery">Gallery</a>
+      <a href="/VideoArchive">Videos</a>
+      <a href="/TopFlickers">Top Flickers</a>
+    </nav>
+
+    <main>
+
+      <!-- Toolbar -->
+      <div id="drawToolbar">
+        <label for="colorPicker">Color:</label>
+        <input type="color" id="colorPicker" value="#000000">
+
+        <label for="brushSize">Brush:</label>
+        <input type="range" id="brushSize" min="1" max="60" value="4">
+
+        <!-- small preview circle for selected brush size/color (fixed container + inner dot to avoid layout shifts) -->
+        <div id="brushPreview" aria-hidden="true" title="Brush preview"><span id="brushPreviewDot"></span></div>
+      </div>
+
+      <!-- Canvas -->
+      <canvas id="drawingBoard"></canvas>
+      <!-- live cursor preview (positioned over page) -->
+      <div id="brushCursor" aria-hidden="true"></div>
+    </main>
+
+    <footer>
+      <p>Real Art Maine | Graffiti archive</p>
+    </footer>
+
+    <!-- Scripts -->
+    <script type="module">
+      // Import the functions you need from the Firebase SDKs
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+      import { getDatabase, ref, push, onChildAdded, set, get, onValue } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-database.js";
+
+      // Your web app's Firebase configuration
+      const firebaseConfig = {
+        apiKey: "AIzaSyCvLe31qJW7Y0-mD__MYk2Gc8KztkyNz2s",
+        authDomain: "ram-backend-realartmaine.firebaseapp.com",
+        // Realtime Database URL
+        // https://ram-backend-realartmaine-default-rtdb.firebaseio.com/
+        databaseURL: "https://ram-backend-realartmaine-default-rtdb.firebaseio.com/",
+        projectId: "ram-backend-realartmaine",
+        storageBucket: "ram-backend-realartmaine.firebasestorage.app",
+        messagingSenderId: "921689493010",
+        appId: "1:921689493010:web:24695faadf84113b9b12cb"
+      };
+
+      // Initialize Firebase
+      const app = initializeApp(firebaseConfig);
+      const db = getDatabase(app);
+
+      // Save a stroke to Realtime Database
+      // stroke = { userId, color, size, points, timestamp }
+      window.saveStroke = async function saveStroke(stroke) {
+        try {
+          const result = await push(ref(db, 'strokes'), stroke);
+          return result;
+        } catch (err) {
+          console.error('[Firebase] saveStroke error:', err);
+          throw err;
+        }
+      };
+
+      // Local stroke deduplication helpers (keep client-generated IDs for a short time)
+      window._localStrokeIds = new Set();
+      window._markLocalStroke = function(clientId, ttlMs = 15000) {
+        if (!clientId) return;
+        window._localStrokeIds.add(clientId);
+        setTimeout(() => {
+          window._localStrokeIds.delete(clientId);
+        }, ttlMs);
+      };
+      window._isLocalStroke = function(clientId) {
+        return clientId && window._localStrokeIds.has(clientId);
+      };
+
+      // Listen for new strokes and invoke drawStrokeOnCanvas(stroke) for each
+      window.setupRealtimeStrokeListener = function setupRealtimeStrokeListener(drawStrokeOnCanvas) {
+        const strokesRef = ref(db, 'strokes');
+      let initialLoadComplete = false;
+
+      // 1) Load existing strokes once
+      get(strokesRef).then(snapshot => {
+        if (snapshot.exists()) {
+          const strokes = snapshot.val();
+          Object.keys(strokes).forEach(key => {
+            const stroke = strokes[key];
+            if (!stroke || stroke.deleted) return;
+            if (stroke.clientId && window._isLocalStroke(stroke.clientId)) return;
+            drawStrokeOnCanvas(stroke);
+          });
+          console.log('Initial batch of existing strokes loaded.');
+        } else {
+          console.log('No existing strokes found on initial load.');
+        }
+        initialLoadComplete = true;
+      }).catch(error => {
+        console.error('Error loading initial strokes:', error);
+        initialLoadComplete = true; // allow real-time updates even if initial fetch failed
+      });
+
+      // 2) Listen for new strokes after initial load
       onChildAdded(strokesRef, snap => {
+        if (!initialLoadComplete) return; // wait until initial batch processed
         const stroke = snap.val();
         if (!stroke || stroke.deleted) return;
-        // Skip strokes that were just created by this client (avoid duplicate rendering)
-        if (stroke.clientId && window._isLocalStroke(stroke.clientId)) return;
-        drawStrokeOnCanvas(stroke);
-      });
-    };
+        if (stroke.clientId && window._isLocalStroke(stroke.clientId)) return; // Deduplicate local strokes
+      // Quick check
+      console.log('[Firebase] initialized:', app.options.projectId);
 
-    // Register or update a user in Realtime DB at /users/<uid>
-    // user = { uid, createdAt, userAgent, platform, ... }
-    window.registerUser = async function registerUser(user) {
-      try {
-        await set(ref(db, `users/${user.uid}`), user);
-        return true;
-      } catch (err) {
-        console.error('[Firebase] registerUser error:', err);
-        throw err;
-      }
-    };
+      // Drawing permission flag
+      window.isDrawingAllowed = true;
 
-    // Quick check
-    console.log('[Firebase] initialized:', app.options.projectId);
+      // Ban check and listener
+      async function checkAndListenForBanStatus() {
+        const userId = (typeof window.getUID === 'function') ? window.getUID() : null;
+        if (!userId) {
+          console.warn('User ID not available yet to check ban status. Will retry shortly.');
+          // Retry after a short delay
+          setTimeout(checkAndListenForBanStatus, 800);
+          return;
+        }
 
-    // Drawing permission flag
-    window.isDrawingAllowed = true;
+        const banRef = ref(db, `bans/${userId}`);
 
-    // Ban check and listener
-    async function checkAndListenForBanStatus() {
-      const userId = (typeof window.getUID === 'function') ? window.getUID() : null;
-      if (!userId) {
-        console.warn('User ID not available yet to check ban status. Will retry shortly.');
-        // Retry after a short delay
-        setTimeout(checkAndListenForBanStatus, 800);
-        return;
-      }
+        // Initial check
+        try {
+          const snapshot = await get(banRef);
+          if (snapshot.exists()) {
+            const banData = snapshot.val();
+            const isBanned = banData.until === 'permanent' || (banData.until && new Date(banData.until).getTime() > Date.now());
+            window.isDrawingAllowed = !isBanned;
+            if (isBanned) {
+              console.warn(`User ${userId} is currently banned. Reason: ${banData.reason}`);
+            }
+          } else {
+            window.isDrawingAllowed = true;
+          }
+        } catch (err) {
+          console.error('Error checking ban status:', err);
+          window.isDrawingAllowed = true;
+        }
 
-      const banRef = ref(db, `bans/${userId}`);
-
-      // Initial check
-      try {
-        const snapshot = await get(banRef);
-        if (snapshot.exists()) {
+        // Realtime updates for ban status
+        onValue(banRef, (snapshot) => {
+          if (!snapshot.exists()) {
+            window.isDrawingAllowed = true;
+            return;
+          }
           const banData = snapshot.val();
           const isBanned = banData.until === 'permanent' || (banData.until && new Date(banData.until).getTime() > Date.now());
           window.isDrawingAllowed = !isBanned;
           if (isBanned) {
-            console.warn(`User ${userId} is currently banned. Reason: ${banData.reason}`);
+            console.warn(`User ${userId} is now banned. Reason: ${banData.reason}`);
+          } else {
+            console.log(`User ${userId} ban removed.`);
           }
-        } else {
-          window.isDrawingAllowed = true;
-        }
-      } catch (err) {
-        console.error('Error checking ban status:', err);
-        window.isDrawingAllowed = true;
+        }, (error) => {
+          console.error('Error listening to ban changes:', error);
+        });
       }
 
-      // Realtime updates for ban status
-      onValue(banRef, (snapshot) => {
-        if (!snapshot.exists()) {
-          window.isDrawingAllowed = true;
-          return;
-        }
-        const banData = snapshot.val();
-        const isBanned = banData.until === 'permanent' || (banData.until && new Date(banData.until).getTime() > Date.now());
-        window.isDrawingAllowed = !isBanned;
-        if (isBanned) {
-          console.warn(`User ${userId} is now banned. Reason: ${banData.reason}`);
-        } else {
-          console.log(`User ${userId} ban removed.`);
-        }
-      }, (error) => {
-        console.error('Error listening to ban changes:', error);
+      // Start ban checking after DOM ready
+      document.addEventListener('DOMContentLoaded', () => {
+        checkAndListenForBanStatus();
       });
-    }
 
-    // Start ban checking after DOM ready
-    document.addEventListener('DOMContentLoaded', () => {
-      checkAndListenForBanStatus();
-    });
+      /* Example usage (uncomment & adapt as needed):
+      const userId = 'testUser123';
+      const exampleStroke = { userId, color: '#FF0000', size: 4, points: [{x:10,y:10},{x:20,y:20}], timestamp: Date.now() };
+      // saveStroke(exampleStroke).then(() => console.log('saved')); // save a stroke
+      // setupRealtimeStrokeListener(stroke => console.log('remote stroke', stroke)); // listen for remote strokes
+      */
+    </script>
 
-    /* Example usage (uncomment & adapt as needed):
-    const userId = 'testUser123';
-    const exampleStroke = { userId, color: '#FF0000', size: 4, points: [{x:10,y:10},{x:20,y:20}], timestamp: Date.now() };
-    // saveStroke(exampleStroke).then(() => console.log('saved')); // save a stroke
-    // setupRealtimeStrokeListener(stroke => console.log('remote stroke', stroke)); // listen for remote strokes
-    */
-  </script>
+    <script src="/assets/js/uid.js" defer></script>
+    <script src="/assets/js/strokes.js"></script>
+    <script src="/assets/js/board.js"></script>
+    <script>
+      // Drawing tools
+      const colorPicker = document.getElementById("colorPicker");
+      const brushSize = document.getElementById("brushSize");
+      const brushPreview = document.getElementById("brushPreview");
 
-  <script src="/assets/js/uid.js" defer></script>
-  <script src="/assets/js/strokes.js"></script>
-  <script src="/assets/js/board.js"></script>
-  <script>
-    // Drawing tools
-    const colorPicker = document.getElementById("colorPicker");
-    const brushSize = document.getElementById("brushSize");
-    const brushPreview = document.getElementById("brushPreview");
+      // Override default stroke settings in board.js
+      window.CURRENT_COLOR = colorPicker.value;
+      window.CURRENT_SIZE = parseInt(brushSize.value);
 
-    // Override default stroke settings in board.js
-    window.CURRENT_COLOR = colorPicker.value;
-    window.CURRENT_SIZE = parseInt(brushSize.value);
-
-    function updateLocalBrushPreview() {
-      const size = parseInt(brushSize.value, 10);
-      window.CURRENT_SIZE = size;
-      // small toolbar preview: inner dot (capped so it won't push layout)
-      const dot = document.getElementById('brushPreviewDot');
-      const capped = Math.max(6, Math.min(28, Math.round(size)));
-      if (dot) {
-        dot.style.width = dot.style.height = capped + 'px';
-        dot.style.background = window.CURRENT_COLOR;
+      function updateLocalBrushPreview() {
+        const size = parseInt(brushSize.value, 10);
+        window.CURRENT_SIZE = size;
+        // small toolbar preview: inner dot (capped so it won't push layout)
+        const dot = document.getElementById('brushPreviewDot');
+        const capped = Math.max(6, Math.min(28, Math.round(size)));
+        if (dot) {
+          dot.style.width = dot.style.height = capped + 'px';
+          dot.style.background = window.CURRENT_COLOR;
+        }
+        // update overlay cursor (board.js exposes updateBrushPreview)
+        if (typeof window.updateBrushPreview === 'function') {
+          window.updateBrushPreview(window.CURRENT_SIZE, window.CURRENT_COLOR);
+        }
       }
-      // update overlay cursor (board.js exposes updateBrushPreview)
-      if (typeof window.updateBrushPreview === 'function') {
-        window.updateBrushPreview(window.CURRENT_SIZE, window.CURRENT_COLOR);
-      }
-    }
 
-    colorPicker.addEventListener("input", e => {
-      window.CURRENT_COLOR = e.target.value;
-      const dot = document.getElementById('brushPreviewDot');
-      if (dot) dot.style.background = window.CURRENT_COLOR;
-      if (typeof window.updateBrushPreview === 'function') {
-        window.updateBrushPreview(window.CURRENT_SIZE, window.CURRENT_COLOR);
-      }
-    });
+      colorPicker.addEventListener("input", e => {
+        window.CURRENT_COLOR = e.target.value;
+        const dot = document.getElementById('brushPreviewDot');
+        if (dot) dot.style.background = window.CURRENT_COLOR;
+        if (typeof window.updateBrushPreview === 'function') {
+          window.updateBrushPreview(window.CURRENT_SIZE, window.CURRENT_COLOR);
+        }
+      });
 
-    brushSize.addEventListener("input", e => {
+      brushSize.addEventListener("input", e => {
+        updateLocalBrushPreview();
+      });
+
+      // initialize the preview UI
       updateLocalBrushPreview();
-    });
 
-    // initialize the preview UI
-    updateLocalBrushPreview();
-
-    // Note: pointer events handle touch/mouse/pen input on the canvas; no manual touch shims needed.
-  </script>
-</body>
-</html>
+      // Note: pointer events handle touch/mouse/pen input on the canvas; no manual touch shims needed.
+    </script>
+  </body>
+  </html>
