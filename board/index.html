@@ -80,8 +80,6 @@
   </nav>
 
   <main>
-    <h1>Free Draw Board</h1>
-    <p>Draw anything! Use the tools below to change color, brush size, or clear the board.</p>
 
     <!-- Toolbar -->
     <div id="drawToolbar">
@@ -107,15 +105,17 @@
 
   <!-- Scripts -->
   <script type="module">
-    // Import the functions you need from the SDKs you need
+    // Import the functions you need from the Firebase SDKs
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
-    // TODO: Add SDKs for Firebase products that you want to use
-    // https://firebase.google.com/docs/web/setup#available-libraries
+    import { getDatabase, ref, push, onChildAdded, set, get, onValue } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-database.js";
 
     // Your web app's Firebase configuration
     const firebaseConfig = {
       apiKey: "AIzaSyCvLe31qJW7Y0-mD__MYk2Gc8KztkyNz2s",
       authDomain: "ram-backend-realartmaine.firebaseapp.com",
+      // Realtime Database URL
+      // https://ram-backend-realartmaine-default-rtdb.firebaseio.com/
+      databaseURL: "https://ram-backend-realartmaine-default-rtdb.firebaseio.com/",
       projectId: "ram-backend-realartmaine",
       storageBucket: "ram-backend-realartmaine.firebasestorage.app",
       messagingSenderId: "921689493010",
@@ -124,8 +124,126 @@
 
     // Initialize Firebase
     const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    // Save a stroke to Realtime Database
+    // stroke = { userId, color, size, points, timestamp }
+    window.saveStroke = async function saveStroke(stroke) {
+      try {
+        const result = await push(ref(db, 'strokes'), stroke);
+        return result;
+      } catch (err) {
+        console.error('[Firebase] saveStroke error:', err);
+        throw err;
+      }
+    };
+
+    // Local stroke deduplication helpers (keep client-generated IDs for a short time)
+    window._localStrokeIds = new Set();
+    window._markLocalStroke = function(clientId, ttlMs = 15000) {
+      if (!clientId) return;
+      window._localStrokeIds.add(clientId);
+      setTimeout(() => {
+        window._localStrokeIds.delete(clientId);
+      }, ttlMs);
+    };
+    window._isLocalStroke = function(clientId) {
+      return clientId && window._localStrokeIds.has(clientId);
+    };
+
+    // Listen for new strokes and invoke drawStrokeOnCanvas(stroke) for each
+    window.setupRealtimeStrokeListener = function setupRealtimeStrokeListener(drawStrokeOnCanvas) {
+      const strokesRef = ref(db, 'strokes');
+      onChildAdded(strokesRef, snap => {
+        const stroke = snap.val();
+        if (!stroke || stroke.deleted) return;
+        // Skip strokes that were just created by this client (avoid duplicate rendering)
+        if (stroke.clientId && window._isLocalStroke(stroke.clientId)) return;
+        drawStrokeOnCanvas(stroke);
+      });
+    };
+
+    // Register or update a user in Realtime DB at /users/<uid>
+    // user = { uid, createdAt, userAgent, platform, ... }
+    window.registerUser = async function registerUser(user) {
+      try {
+        await set(ref(db, `users/${user.uid}`), user);
+        return true;
+      } catch (err) {
+        console.error('[Firebase] registerUser error:', err);
+        throw err;
+      }
+    };
+
+    // Quick check
+    console.log('[Firebase] initialized:', app.options.projectId);
+
+    // Drawing permission flag
+    window.isDrawingAllowed = true;
+
+    // Ban check and listener
+    async function checkAndListenForBanStatus() {
+      const userId = (typeof window.getUID === 'function') ? window.getUID() : null;
+      if (!userId) {
+        console.warn('User ID not available yet to check ban status. Will retry shortly.');
+        // Retry after a short delay
+        setTimeout(checkAndListenForBanStatus, 800);
+        return;
+      }
+
+      const banRef = ref(db, `bans/${userId}`);
+
+      // Initial check
+      try {
+        const snapshot = await get(banRef);
+        if (snapshot.exists()) {
+          const banData = snapshot.val();
+          const isBanned = banData.until === 'permanent' || (banData.until && new Date(banData.until).getTime() > Date.now());
+          window.isDrawingAllowed = !isBanned;
+          if (isBanned) {
+            console.warn(`User ${userId} is currently banned. Reason: ${banData.reason}`);
+          }
+        } else {
+          window.isDrawingAllowed = true;
+        }
+      } catch (err) {
+        console.error('Error checking ban status:', err);
+        window.isDrawingAllowed = true;
+      }
+
+      // Realtime updates for ban status
+      onValue(banRef, (snapshot) => {
+        if (!snapshot.exists()) {
+          window.isDrawingAllowed = true;
+          return;
+        }
+        const banData = snapshot.val();
+        const isBanned = banData.until === 'permanent' || (banData.until && new Date(banData.until).getTime() > Date.now());
+        window.isDrawingAllowed = !isBanned;
+        if (isBanned) {
+          console.warn(`User ${userId} is now banned. Reason: ${banData.reason}`);
+        } else {
+          console.log(`User ${userId} ban removed.`);
+        }
+      }, (error) => {
+        console.error('Error listening to ban changes:', error);
+      });
+    }
+
+    // Start ban checking after DOM ready
+    document.addEventListener('DOMContentLoaded', () => {
+      checkAndListenForBanStatus();
+    });
+
+    /* Example usage (uncomment & adapt as needed):
+    const userId = 'testUser123';
+    const exampleStroke = { userId, color: '#FF0000', size: 4, points: [{x:10,y:10},{x:20,y:20}], timestamp: Date.now() };
+    // saveStroke(exampleStroke).then(() => console.log('saved')); // save a stroke
+    // setupRealtimeStrokeListener(stroke => console.log('remote stroke', stroke)); // listen for remote strokes
+    */
   </script>
 
+  <script src="/assets/js/uid.js" defer></script>
   <script src="/assets/js/strokes.js"></script>
   <script src="/assets/js/board.js"></script>
   <script>
