@@ -126,6 +126,31 @@
       const app = initializeApp(firebaseConfig);
       const db = getDatabase(app);
 
+      // Register or update a user record in /users/{uid}
+      window.registerUser = async function(userObj) {
+        if (!userObj || !userObj.uid) throw new Error('registerUser requires userObj.uid');
+        const userRef = ref(db, 'users/' + userObj.uid);
+        try {
+          const snapshot = await get(userRef);
+          if (snapshot.exists()) {
+            const existing = snapshot.val() || {};
+            const updated = Object.assign({}, existing, {
+              lastSeen: Date.now(),
+              userAgent: userObj.userAgent || existing.userAgent || null,
+              platform: userObj.platform || existing.platform || null
+            });
+            await set(userRef, updated);
+          } else {
+            const newUser = Object.assign({}, userObj, { lastSeen: Date.now() });
+            await set(userRef, newUser);
+          }
+          return true;
+        } catch (err) {
+          console.warn('[Firebase] registerUser failed:', err);
+          throw err;
+        }
+      };
+
       // Save a stroke to Realtime Database
       // stroke = { userId, color, size, points, timestamp }
       window.saveStroke = async function saveStroke(stroke) {
@@ -154,34 +179,38 @@
       // Listen for new strokes and invoke drawStrokeOnCanvas(stroke) for each
       window.setupRealtimeStrokeListener = function setupRealtimeStrokeListener(drawStrokeOnCanvas) {
         const strokesRef = ref(db, 'strokes');
-      let initialLoadComplete = false;
+        let initialLoadComplete = false;
 
-      // 1) Load existing strokes once
-      get(strokesRef).then(snapshot => {
-        if (snapshot.exists()) {
-          const strokes = snapshot.val();
-          Object.keys(strokes).forEach(key => {
-            const stroke = strokes[key];
-            if (!stroke || stroke.deleted) return;
-            if (stroke.clientId && window._isLocalStroke(stroke.clientId)) return;
-            drawStrokeOnCanvas(stroke);
-          });
-          console.log('Initial batch of existing strokes loaded.');
-        } else {
-          console.log('No existing strokes found on initial load.');
-        }
-        initialLoadComplete = true;
-      }).catch(error => {
-        console.error('Error loading initial strokes:', error);
-        initialLoadComplete = true; // allow real-time updates even if initial fetch failed
-      });
+        // 1) Load existing strokes once
+        get(strokesRef).then(snapshot => {
+          if (snapshot.exists()) {
+            const strokes = snapshot.val();
+            Object.keys(strokes).forEach(key => {
+              const stroke = strokes[key];
+              if (!stroke || stroke.deleted) return;
+              if (stroke.clientId && window._isLocalStroke(stroke.clientId)) return;
+              drawStrokeOnCanvas(stroke);
+            });
+            console.log('Initial batch of existing strokes loaded.');
+          } else {
+            console.log('No existing strokes found on initial load.');
+          }
+          initialLoadComplete = true;
+        }).catch(error => {
+          console.error('Error loading initial strokes:', error);
+          initialLoadComplete = true; // allow real-time updates even if initial fetch failed
+        });
 
-      // 2) Listen for new strokes after initial load
-      onChildAdded(strokesRef, snap => {
-        if (!initialLoadComplete) return; // wait until initial batch processed
-        const stroke = snap.val();
-        if (!stroke || stroke.deleted) return;
-        if (stroke.clientId && window._isLocalStroke(stroke.clientId)) return; // Deduplicate local strokes
+        // 2) Listen for new strokes after initial load
+        onChildAdded(strokesRef, snap => {
+          if (!initialLoadComplete) return; // wait until initial batch processed
+          const stroke = snap.val();
+          if (!stroke || stroke.deleted) return;
+          if (stroke.clientId && window._isLocalStroke(stroke.clientId)) return; // Deduplicate local strokes
+          drawStrokeOnCanvas(stroke);
+        });
+      };
+
       // Quick check
       console.log('[Firebase] initialized:', app.options.projectId);
 
@@ -254,6 +283,25 @@
     <script src="/assets/js/strokes.js"></script>
     <script src="/assets/js/board.js"></script>
     <script>
+      // Bridge: listen for remote strokes and draw them on the local canvas
+      function drawStrokeFromRemote(stroke) {
+        try {
+          // Avoid adding duplicate strokes if they were created locally
+          if (stroke && stroke.clientId && window._isLocalStroke && window._isLocalStroke(stroke.clientId)) return;
+          if (typeof strokes !== 'undefined' && typeof redrawStrokes === 'function' && typeof ctx !== 'undefined') {
+            strokes.push(stroke);
+            redrawStrokes(ctx);
+          }
+        } catch (e) {
+          console.warn('drawStrokeFromRemote error', e);
+        }
+      }
+
+      if (typeof setupRealtimeStrokeListener === 'function') {
+        setupRealtimeStrokeListener(drawStrokeFromRemote);
+      }
+    </script>
+    <script>
       // Drawing tools
       const colorPicker = document.getElementById("colorPicker");
       const brushSize = document.getElementById("brushSize");
@@ -298,4 +346,4 @@
       // Note: pointer events handle touch/mouse/pen input on the canvas; no manual touch shims needed.
     </script>
   </body>
-  </html>
+</html>

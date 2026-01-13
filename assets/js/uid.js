@@ -8,7 +8,8 @@
 
   function getStoredUID() {
     try {
-      return localStorage.getItem(KEY);
+      // Prefer modern key, fall back to legacy localStorage.userId for compatibility
+      return localStorage.getItem(KEY) || localStorage.userId || null;
     } catch (e) {
       return null;
     }
@@ -17,6 +18,8 @@
   function saveLocalUID(uid) {
     try {
       localStorage.setItem(KEY, uid);
+      // Also write legacy key so older code continues to work (e.g., strokes.js)
+      try { localStorage.userId = uid; } catch (e) {}
     } catch (e) {
       console.warn('[UID] could not save to localStorage', e);
     }
