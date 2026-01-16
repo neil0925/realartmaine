@@ -118,7 +118,7 @@ IMAGE_LABELS[95] = "neptune, mobi-DNB,AWC,TSZ-realartmaine-tags, character, holl
 IMAGE_LABELS[96] = "notice-realartmaine-straightletter";
 IMAGE_LABELS[97] = "pigeon-realartmaine-character";
 IMAGE_LABELS[98] = "salud, senegra-PTG,OHK-realartmaine-tags";
-IMAGE_LABELS[99] = "same, calcium, ducky, yart-SLT,IMS,TVT,OHK-realartmaine-throwie, fillin, character, antistyle";
+IMAGE_LABELS[99] = "same, ducky, yart-SLT,IMS,TVT,OHK-realartmaine-throwie, fillin, character, antistyle";
 IMAGE_LABELS[100] = "skipio, pyle-2GF,PTG,OHK,BNE-realartmaine-throwie, fillin";
 IMAGE_LABELS[101] = "soft, same-SLT,2K69-realartmaine-throwie, fillin";
 IMAGE_LABELS[102] = "some1-realartmaine-character, hollow";
@@ -425,7 +425,7 @@ IMAGE_LABELS[402] = "27-TSZ,2GF-chagrinedminnow-throwie, antistyle, hollow";
 IMAGE_LABELS[403] = "unidetified, writer-5G-chagrinedminnow-antistyle";
 IMAGE_LABELS[404] = "ankle-2K69,LTB-chagrinedminnow-throwie, fillin";
 IMAGE_LABELS[405] = "enzyme, auto-LSE,CTS,DPW-chagrinedminnow-antistyle, throwie, fillin";
-IMAGE_LABELS[406] = "catch, calcium-OHK,BNE,PTG,SLT-chagrinedminnow-blackbook";
+IMAGE_LABELS[406] = "catch-OHK,BNE,PTG,SLT-chagrinedminnow-blackbook";
 IMAGE_LABELS[407] = "rune, 27-TSZ,2GF,LTB,2K69-chagrinedminnow-tags";
 
 // ----- END AUTO-GENERATED LABELS -----
@@ -606,7 +606,7 @@ window.addEventListener('unload', () => {
 
 const TOY_BLACKLIST = [
   "arise", "cutie", "love", "lovey", "4kt", "fourkt", "sajak", "sajack", "freeze",
-  "ames", "ame", "chad", "token", "sour", "saint", "ecko", "echo", "cemo", "mohammed hoch", "mohammedhoch"
+  "ames", "ame", "chad", "token", "sour", "saint", "ecko", "echo", "cemo", "mohammed hoch", "mohammedhoch", "calcium", "cal",
 ].map(s => s.toLowerCase());
 
 // Synonym groups: each sub-array contains equivalent terms that should be
