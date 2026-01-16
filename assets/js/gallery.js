@@ -86,7 +86,7 @@ IMAGE_LABELS[63] = "digitalnail-realartmaine-stencil";
 IMAGE_LABELS[64] = "digitalnail-realartmaine-stencil";
 IMAGE_LABELS[65] = "wake, dean, link, auto, dove-LTB,CFM,SLT,5G,CTS,TNL,SDH,CRAFT-realartmaine-piece, antistyle, paintroller";
 IMAGE_LABELS[66] = "wake, rune, doves, same-SLT,LTB,TVT-realartmaine-throwie, piece, fillin, tags, tag";
-IMAGE_LABELS[67] = "wd40-realartmaine-tags";
+IMAGE_LABELS[67] = "27-2GF,TSZ-chagrinedminnow-stencil";
 IMAGE_LABELS[68] = "write-SFL-realartmaine-piece, straightletter";
 IMAGE_LABELS[69] = "yami, high8, wake, secret-5G,LTB,OHK-realartmaine-antistyle, tags, tag, pieces";
 IMAGE_LABELS[70] = "feer, kite, enzyme, loupe, auto-DWT,DPW,TNL,CTS-realartmaine-tags, piece, straightletter, antistyle";
@@ -606,7 +606,8 @@ window.addEventListener('unload', () => {
 
 const TOY_BLACKLIST = [
   "arise", "cutie", "love", "lovey", "4kt", "fourkt", "sajak", "sajack", "freeze",
-  "ames", "ame", "chad", "token", "sour", "saint", "ecko", "echo", "cemo", "mohammed hoch", "mohammedhoch", "calcium", "cal",
+  "ames", "ame", "chad", "token", "sour", "saint", "ecko", "echo", "cemo", "mohammed hoch", "mohammedhoch", 
+  "calcium", "cal", "moyo", "wd40"
 ].map(s => s.toLowerCase());
 
 // Synonym groups: each sub-array contains equivalent terms that should be
