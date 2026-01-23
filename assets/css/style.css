@@ -1,5 +1,5 @@
 /* style.css - RealArtMaine (masonry + hover pop-out)
-   Dark mode removed per user request. */
+  Single-theme stylesheet (theme and switch UI removed) */
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html { scrollbar-gutter: stable both-edges; }
@@ -15,10 +15,34 @@ body {
   transition: background-color 0.28s ease, color 0.28s ease;
 }
 
+/* Masonry / puzzle-style gallery */
+.gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  grid-auto-rows: 10px; /* base row height (JS uses this) */
+  gap: 10px;
+  padding: 20px;
+  grid-auto-flow: row;
+  justify-items: stretch;
+  align-items: start;
+  width: 100%;
+}
+
+/* card must allow overflow so hovered image can pop out above neighbors */
+.card {
+  position: relative;
+  overflow: visible;    /* important: allow hover to grow outside box */
+  border-radius: 6px;
+  display: block;
+  width: 100%;
+  align-self: start;
+  min-width: 0;
+}
+
 /* Navigation */
 nav {
   display: flex;
-  justify-content: center;   /* center Home + Gallery */
+  justify-content: center;
   align-items: center;
   gap: 2rem;
   background: black;
@@ -33,46 +57,20 @@ nav a:hover { transform: scale(1.07); }
 nav a::after { content: ''; display:block; height:2px; width:0; background:#fff; transition:width .18s; margin:6px auto 0 auto; }
 nav a:hover::after { width:100%; }
 
-/* active link (based on current page) */
 nav a.active { transform: scale(1.06); }
-/* Active page: do not show underline (even on hover/focus) */
-nav a.active::after,
-nav a.active:hover::after,
-nav a.active:focus::after {
-  width: 0 !important;
-}
+nav a.active::after, nav a.active:hover::after, nav a.active:focus::after { width: 0 !important; }
 
-/* Nav icon used instead of text: keep same visual size as other UI icons */
-.nav-icon {
-  width: 45px;
-  height: 45px;
-  object-fit: contain;
-  display: block;
-  pointer-events: none; /* clicks handled by the anchor */
-  filter: none;
-  transition: filter 0.18s ease, transform 0.18s ease;
-}
-
-@media (max-width: 600px) {
-  .nav-icon { width: 39px; height: 39px; }
-}
-
-/* Nav icons use base image colors in all modes by default */
-
-/* Stretch the Gallery image itself and keep anchors tight so underline centers */
+.nav-icon { width: 45px; height: 45px; object-fit: contain; display: block; pointer-events: none; filter: none; transition: filter .18s ease, transform .18s ease; }
+@media (max-width: 600px) { .nav-icon { width: 39px; height: 39px; } }
 .nav-gallery { display: inline-block; }
 .nav-gallery .nav-icon { width: 77px; height: 36px; }
+@media (max-width: 600px) { .nav-gallery .nav-icon { width: 66px; height: 31px; } }
 
-@media (max-width: 600px) {
-  .nav-icon { width: 39px; height: 39px; }
-  .nav-gallery .nav-icon { width: 66px; height: 31px; }
-}
-
-/* Settings dropdown (gear) - gear is at right, nav stays centered */
+/* Settings dropdown (gear) */
 .settings-dropdown { position: absolute; right: 18px; top: 50%; transform: translateY(-50%); pointer-events: auto; z-index: 5000000; }
 .gear-box { display:inline-block; padding:3px; background:black; border:1px solid #fff; border-radius:6px; }
 .gear-icon { width:30px; height:30px; display:block; cursor:pointer; transition:transform .28s ease; }
-.gear-icon:hover { transform: rotate(18deg); } /* only the gear rotates */
+.gear-icon:hover { transform: rotate(18deg); }
 
 /* Dropdown box - hidden by default; JS toggles .show */
 .dropdown-content {
@@ -91,59 +89,39 @@ nav a.active:focus::after {
   overflow: auto;
   flex-direction: column;
   gap: 8px;
-  align-items: center;    /* center horizontally */
-  justify-content: flex-start; /* put items near top */
+  align-items: center;
+  justify-content: flex-start;
   border: 1px solid rgba(0,0,0,0.06);
 }
 .dropdown-content.show { display: flex; }
-
-/* dropdown button (top) */
-.dropdown-content button {
-  width: 90%;
-  padding: 8px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  border-radius: 6px;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-}
+.dropdown-content button { width: 90%; padding: 8px; background: none; border: none; cursor: pointer; border-radius: 6px; display:flex; justify-content:center; align-items:center; }
 .dropdown-content button:hover { background:#333; color:#fff; }
 
-/* Mode icon inside button */
-#modeIcon { width:150px; height:130px; object-fit:contain; display:block; }
-
 /* Main and footer */
-main { padding:30px; /* allow gallery to use full width */ max-width: none; margin:auto; width:100%; flex:1; }
-main h1 { text-align:center; margin-bottom:20px; }
-main p { margin-bottom:14px; }
+/* style.css - RealArtMaine (masonry + hover pop-out)
+  Single-theme stylesheet (theme and switch UI removed) */
 
-footer {
-  background:#f9f9f9; padding:15px 30px; text-align:center;
-  font-size:.9em; color:#555; border-top:1px solid #ccc;
-}
-footer hr { border:none; border-top:1px solid #aaa; margin:10px 0; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scrollbar-gutter: stable both-edges; }
 
-/* Search */
-.search-bar { text-align:center; margin:20px 0; }
-.search-bar input {
-  padding:10px; width:80%; max-width:420px; border:1px solid #333; border-radius:6px; font-size:1em;
-}
-/* sort select next to search input */
-.search-bar select {
-  padding:8px; border-radius:6px; border:1px solid #333; background: #fff; color: #000; font-size:1em; margin-left:8px;
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  background: #fff;
+  color: #000;
+  line-height: 1.6;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  transition: background-color 0.28s ease, color 0.28s ease;
 }
 
 /* Masonry / puzzle-style gallery */
 .gallery {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); /* changed to auto-fill so columns don't stretch */
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
   grid-auto-rows: 10px; /* base row height (JS uses this) */
   gap: 10px;
   padding: 20px;
-
-  /* Ensure grid auto-flow is row-based and items stretch to column width */
   grid-auto-flow: row;
   justify-items: stretch;
   align-items: start;
@@ -155,435 +133,154 @@ footer hr { border:none; border-top:1px solid #aaa; margin:10px 0; }
   position: relative;
   overflow: visible;    /* important: allow hover to grow outside box */
   border-radius: 6px;
-  /* ensure the card fills the grid column width */
   display: block;
   width: 100%;
   align-self: start;
-  /* allow the card to shrink inside the grid column (prevents forcing one column) */
   min-width: 0;
 }
 
-/* wrapper that holds the image and provides the layout height. */
-.image-wrap {
-  position: relative;
-  width: 100%;
-  display: block; /* ensure it occupies column width */
-  overflow: visible; /* allow inner img to grow outside without affecting grid size */
-  border-radius: 6px;
-  /* allow shrink */
-  min-width: 0;
-  /* while loading, prevent hover visual effect until JS marks it loaded */
-}
-
-/* placeholder while loading (fills the wrapper; won't scale visually) */
-.loading-placeholder {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  display:block;
-  object-fit:cover;
-  border-radius:6px;
-  opacity:.85;
-  pointer-events: none; /* ensure not interactive */
-}
-
-/* gallery images - loaded images only (absolutely positioned inside wrapper) */
-.gallery-image {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  display: block;
-  object-fit: cover;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: top .22s ease, left .22s ease, width .22s ease, height .22s ease, box-shadow .22s ease;
-  will-change: top, left, width, height;
-  z-index: 1;
-  backface-visibility: hidden;
-}
-
-/* Hover pop-out only after wrapper has been finalized (JS adds .loaded)
-   Visual growth: 5px on each side without changing wrapper size */
-.image-wrap.loaded:hover .gallery-image {
-  top: -5px;
-  left: -5px;
-  width: calc(100% + 10px);
-  height: calc(100% + 10px);
-  z-index: 40;
-  box-shadow: 0 22px 44px rgba(0,0,0,0.52);
-}
-
-/* fade-in animation for images when they finish loading */
-.gallery-image.fade-in { animation: fadeIn .45s ease forwards; }
-
-/* hidden while loading (no hover, no clicks) */
-.gallery-image.hidden { display:none; pointer-events:none; }
-
-/* placeholder wrapper (contains CSS spinner or error text) */
-.placeholder-box {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 6px;
-  background: transparent; /* transparent so no white framed box */
-  color: #666;
-  font-size: 0.95rem;
-  text-align: center;
-  padding: 6px;
-  z-index: 1000; /* ensure placeholder/error sit above images */
-}
-
-/* small CSS spinner (transparent background) */
-.spinner {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  border: 3px solid rgba(0,0,0,0.12);
-  border-top-color: rgba(0,0,0,0.48);
-  animation: spin 0.9s linear infinite;
-  display:none; /* hidden by default */
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-
-/* show spinner only when placeholder is active (single spinner at a time) */
-.placeholder-box.active .spinner { display: block; }
-
-/* ensure modal/backdrop overlays everything */
-.modal-backdrop {
-  position: fixed;
-  inset: 0;
+/* Navigation */
+nav {
   display: flex;
   justify-content: center;
   align-items: center;
-  background: rgba(0, 0, 0, 0.4);
-  z-index: 99999;
-  padding: 8px;
-  overflow: hidden; /* prevent scrolling while backdrop exists */
-}
-
-/* Modal / Spotlight — constrained to viewport with internal scrolling */
-.modal {
-  box-sizing: border-box;
+  gap: 2rem;
+  background: black;
+  color: white;
+  width: 100%;
+  padding: 1rem 0;
   position: relative;
-  width: auto;
-  max-width: min(840px, calc(100vw - 48px));
-  max-height: calc(100vh - 48px);
-  padding: 16px;
-  border-radius: 8px;
-  gap: 8px;
-  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.55);
-  display: flex;
-  flex-direction: column;
-  overflow: auto;
-  align-items: stretch;
+  z-index: 20;
+}
+nav a { color: #fff; text-decoration: none; font-size: 1.1em; letter-spacing: 0.5px; transition: all 0.18s ease; display: inline-block; text-align: center; padding: 6px 0; }
+nav a:hover { transform: scale(1.07); }
+nav a::after { content: ''; display:block; height:2px; width:0; background:#fff; transition:width .18s; margin:6px auto 0 auto; }
+nav a:hover::after { width:100%; }
+
+nav a.active { transform: scale(1.06); }
+nav a.active::after, nav a.active:hover::after, nav a.active:focus::after { width: 0 !important; }
+
+.nav-icon { width: 45px; height: 45px; object-fit: contain; display: block; pointer-events: none; filter: none; transition: filter .18s ease, transform .18s ease; }
+@media (max-width: 600px) { .nav-icon { width: 39px; height: 39px; } }
+.nav-gallery { display: inline-block; }
+.nav-gallery .nav-icon { width: 77px; height: 36px; }
+@media (max-width: 600px) { .nav-gallery .nav-icon { width: 66px; height: 31px; } }
+
+/* Settings dropdown (gear) */
+.settings-dropdown { position: absolute; right: 18px; top: 50%; transform: translateY(-50%); pointer-events: auto; z-index: 5000000; }
+.gear-box { display:inline-block; padding:3px; background:black; border:1px solid #fff; border-radius:6px; }
+.gear-icon { width:30px; height:30px; display:block; cursor:pointer; transition:transform .28s ease; }
+.gear-icon:hover { transform: rotate(18deg); }
+
+/* Dropdown box - hidden by default; JS toggles .show */
+.dropdown-content {
+  display: none;
+  position: absolute;
+  top: 44px;
+  right: 0;
+  width: 160px;
+  max-height: 220px;
   background: #fff;
   color: #000;
-}
-
-/* Highlighted card in background gallery */
-.card.highlighted {
-  outline: 3px solid #4a90e2;
-  outline-offset: 2px;
-}
-
-.caption {
-  padding: 8px 12px;
-  font-size: 0.95rem;
-  text-align: center;
-  color: inherit;
-}
-
-/* Modal navigation arrows - positioned by screen size, not image */
-.modal-arrow {
-  position: fixed;
-  top: 50%;
-  transform: translateY(-50%);
-  background: transparent; /* invisible circle but still clickable */
-  color: white;
-  border: none;
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  font-size: 26px;
-  cursor: pointer;
-  display: flex;
+  border-radius: 6px;
+  box-shadow: 0 8px 22px rgba(0,0,0,0.12);
+  z-index: 500000010;
+  padding: 8px;
+  overflow: auto;
+  flex-direction: column;
+  gap: 8px;
   align-items: center;
-  justify-content: center;
-  transition: background-color 0.2s ease, transform 0.2s ease;
-  z-index: 100000;
-  line-height: 1;
-  padding: 0;
+  justify-content: flex-start;
+  border: 1px solid rgba(0,0,0,0.06);
 }
+.dropdown-content.show { display: flex; }
+.dropdown-content button { width: 90%; padding: 8px; background: none; border: none; cursor: pointer; border-radius: 6px; display:flex; justify-content:center; align-items:center; }
+.dropdown-content button:hover { background:#333; color:#fff; }
 
-.modal-arrow:hover { 
-  transform: translateY(-50%) scale(1.08);
-}
+/* Main and footer */
+main { padding:30px; max-width: none; margin:auto; width:100%; flex:1; }
+main h1 { text-align:center; margin-bottom:20px; }
+main p { margin-bottom:14px; }
 
+footer { background:#f9f9f9; padding:15px 30px; text-align:center; font-size:.9em; color:#555; border-top:1px solid #ccc; }
+footer hr { border:none; border-top:1px solid #aaa; margin:10px 0; }
+
+/* Search */
+.search-bar { text-align:center; margin:20px 0; }
+.search-bar input { padding:10px; width:80%; max-width:420px; border:1px solid #333; border-radius:6px; font-size:1em; }
+.search-bar select { padding:8px; border-radius:6px; border:1px solid #333; background: #fff; color: #000; font-size:1em; margin-left:8px; }
+
+/* Utility / placeholders */
+.caption { padding: 8px 12px; font-size: 0.95rem; text-align: center; color: inherit; }
+.modal-arrow { position: fixed; top: 50%; transform: translateY(-50%); background: transparent; color: white; border: none; width: 44px; height: 44px; border-radius: 50%; font-size: 26px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background-color 0.2s ease, transform 0.2s ease; z-index: 100000; line-height: 1; padding: 0; }
+.modal-arrow:hover { transform: translateY(-50%) scale(1.08); }
 .modal-arrow-left { left: 24px; }
 .modal-arrow-right { right: 24px; }
+.modal-arrow img { display:block; width:36px; height:36px; object-fit:contain; }
 
-/* Ensure arrow image inside the button is sized and centered */
-.modal-arrow img {
-  display: block;
-  width: 36px;
-  height: 36px;
-  object-fit: contain;
-  pointer-events: none; /* clicks go to the button */
-}
+@media (max-width: 900px) { .modal-arrow { width: 42px; height: 42px; font-size: 24px; } .modal-arrow-left { left: 16px; } .modal-arrow-right { right: 16px; } }
+@media (max-width: 600px) { .modal-arrow { width: 40px; height: 40px; font-size: 22px; } .modal-arrow-left { left: 12px; } .modal-arrow-right { right: 12px; } }
 
-/* Tablet and smaller screens */
-@media (max-width: 900px) {
-  .modal-arrow {
-    width: 42px;
-    height: 42px;
-    font-size: 24px;
-  }
-  .modal-arrow-left { left: 16px; }
-  .modal-arrow-right { right: 16px; }
-}
+.gallery-image { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: block; object-fit: cover; border-radius: 6px; cursor: pointer; transition: top .22s ease, left .22s ease, width .22s ease, height .22s ease, box-shadow .22s ease; will-change: top, left, width, height; z-index: 1; }
+.image-wrap.loaded:hover .gallery-image { top: -5px; left: -5px; width: calc(100% + 10px); height: calc(100% + 10px); z-index: 40; box-shadow: 0 22px 44px rgba(0,0,0,0.52); }
 
-/* Mobile screens */
-@media (max-width: 600px) {
-  .modal-arrow {
-    width: 40px;
-    height: 40px;
-    font-size: 22px;
-  }
-  .modal-arrow-left { left: 12px; }
-  .modal-arrow-right { right: 12px; }
-}
+/* small CSS spinner */
+.spinner { width:36px; height:36px; border-radius:50%; border:3px solid rgba(0,0,0,0.12); border-top-color: rgba(0,0,0,0.48); animation: spin 0.9s linear infinite; display:none; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.placeholder-box.active .spinner { display:block; }
 
-.modal-imgwrap {
-  padding: 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  max-height: calc(100vh - 220px);
-  overflow: hidden;
-}
+/* Modal / Spotlight */
+.modal-backdrop { position: fixed; inset: 0; display:flex; justify-content:center; align-items:center; background: rgba(0,0,0,0.4); z-index: 99999; padding:8px; overflow: hidden; }
+.modal { box-sizing: border-box; position: relative; width: auto; max-width: min(840px, calc(100vw - 48px)); max-height: calc(100vh - 48px); padding: 16px; border-radius: 8px; gap: 8px; box-shadow: 0 14px 36px rgba(0,0,0,0.55); display:flex; flex-direction: column; overflow: auto; align-items: stretch; background: #fff; color: #000; }
 
-.modal img,
-.modal .modal-image {
-  max-width: 100%;
-  max-height: calc(100vh - 260px);
-  width: auto;
-  height: auto;
-  object-fit: contain;
-  display: block;
-}
-
-@media (max-width: 600px) {
-  .modal-backdrop { padding: 10px; }
-  .modal { max-width: calc(100vw - 20px); max-height: calc(100vh - 20px); }
-  .modal-imgwrap { max-height: calc(100vh - 160px); }
-  .modal img, .modal .modal-image { max-height: calc(100vh - 180px); }
-}
-
-/* Slightly reduce backdrop padding so modal sits closer to edges on small screens */
-.modal-backdrop { padding: 8px; }
-
-/* loading error: ensure it never overlaps, wraps and matches gallery spacing */
-.loading-error {
-  display: block;
-  width: 100%;
-  padding: 8px 10px;
-  box-sizing: border-box;
-  background: rgba(255,255,255,0.02);
-  color: #d33;
-  font-size: 0.95rem;
-  border-radius: 6px;
-  white-space: normal;       /* allow wrapping */
-  word-break: break-word;    /* break long filenames */
-  z-index: 1000;
-}
-
-/* Blocked 'toy' message shown in gallery area when toy slang is searched */
-.toy-blocked {
-  display: block; /* act like a banner, not an image box */
-  width: 100%;
-  padding: 12px 8px;
-  /* place at the top of the gallery and center horizontally */
-  margin: 8px 0 18px 0;
-  text-align: center;
-  /* span the full gallery grid so the banner uses available width */
-  grid-column: 1 / -1;
-  justify-self: center;
-  /* Responsive large text but clamp so small screens remain usable */
-  font-size: clamp(2.2rem, 5vw, 4.2rem);
-  font-weight: 800;
-  background: transparent;
-  color: #000; /* default for light mode */
-  border-radius: 0;
-  /* ensure normal wrapping behavior (avoid one-word-per-line) */
-  white-space: normal;
-  word-break: normal;
-  overflow-wrap: break-word;
-  box-sizing: border-box;
-  padding-left: 16px;
-  padding-right: 16px;
-}
-
-/* simple ad-card defaults so inserted ads look consistent */
-.ad-card {
-  min-height: 120px;
-  padding: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #f6f6f6;
-  color: #666;
-  border-radius: 8px;
-  border: 1px solid rgba(0,0,0,0.06);
-  font-weight: 600;
-  text-align: center;
-}
-
-/* responsive tweaks */
-@media (max-width:600px) {
-  .gallery { grid-template-columns: repeat(auto-fill, minmax(140px,1fr)); gap:8px; padding:12px; }
-  #modeIcon { width:120px; height:90px; }
-  .search-bar input { width:72%; }
-  .search-bar select { margin-left:6px; padding:6px; }
-}
-
-/* fade keyframes */
-@keyframes fadeIn {
-  from { opacity:0; transform: scale(0.98); }
-  to   { opacity:1; transform: scale(1); }
-}
-
-/* Maintenance banner + debug badge */
-.maintenance-banner {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 28px 16px;
-  gap: 12px;
-  text-align: center;
-  width: 100%;
-  box-sizing: border-box;
-}
+/* Maintenance banner */
+.maintenance-banner { display:flex; flex-direction: column; align-items: center; justify-content: center; padding: 28px 16px; gap: 12px; text-align: center; width:100%; box-sizing: border-box; }
 .maintenance-banner h1 { font-size: clamp(1.6rem, 4vw, 3rem); margin-bottom: 6px; }
-.maintenance-banner .maintenance-estimate { font-weight: 600; color: #333; }
-.maintenance-banner .maintenance-note { color: #555; max-width: 900px; }
+/* style.css - RealArtMaine (masonry + hover pop-out)
+   Clean single-theme stylesheet — syntax validated */
 
-.maintenance-debug-badge {
-  position: fixed;
-  right: 12px;
-  top: 12px;
-  z-index: 200000;
-  background: rgba(0,0,0,0.8);
-  color: #fff;
-  padding: 6px 10px;
-  border-radius: 6px;
-  font-weight: 700;
-  font-size: 0.82rem;
-}
-
-/* Full-page maintenance overlay that covers content but stays below nav (nav z-index:20) */
-.maintenance-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 15; /* below nav (20) so nav remains visible and usable */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(250,250,250,0.97);
-  padding: 24px;
-  box-sizing: border-box;
-  overflow: auto;
-}
-
-.maintenance-overlay .maintenance-banner {
-  width: 100%;
-  max-width: 920px;
-  box-shadow: 0 12px 36px rgba(0,0,0,0.12);
-  border-radius: 8px;
-  padding: 28px 20px;
-  background: transparent;
-}
-
-/* Drawing board canvas */
-#drawingBoard {
-  width: 100%;
-  height: 80vh; /* take 80% of viewport height */
-  border: 2px solid #000;
-  border-radius: 6px;
-  display: block;
-  margin: 20px auto;
-  background: #fff;
-}
-/* style.css - RealArtMaine (masonry + hover pop-out + dark mode)
-   Full stylesheet: hover expands smoothly in all directions without affecting layout.
-*/
-
+/* Reset + base */
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html { scrollbar-gutter: stable both-edges; }
-
-body {
-  font-family: Arial, Helvetica, sans-serif;
-  background: #fff;
-  color: #000;
-  line-height: 1.6;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  transition: background-color 0.28s ease, color 0.28s ease;
-}
-
-/* Dark mode */
-body.dark-mode { background: #111; color: #eee; }
-body.dark-mode nav { background: #000; }
-body.dark-mode footer { background: #222; color: #ccc; }
-body.dark-mode .search-bar input { background: #333; color: #fff; border: 1px solid #555; }
-body.dark-mode .ad-card { background: #222; color: #aaa; border-color: #555; }
-body.dark-mode .modal { background: #111; color: #eee; }
-body.dark-mode .caption { color: #eee; }
+body { font-family: Arial, Helvetica, sans-serif; background: #fff; color: #000; line-height: 1.6; min-height: 100vh; display:flex; flex-direction:column; }
 
 /* Navigation */
-nav {
-  display: flex;
-  justify-content: center;   /* center Home + Gallery */
-  align-items: center;
-  gap: 2rem;
-  background: black;
-  color: white;
-  width: 100%;
-  padding: 1rem 0;
-  position: relative;
-  z-index: 20;
-}
-nav a { color: #fff; text-decoration: none; font-size: 1.1em; letter-spacing: 0.5px; transition: all 0.18s ease; display: inline-block; text-align: center; padding: 6px 0; }
-nav a:hover { transform: scale(1.07); }
-nav a::after { content: ''; display:block; height:2px; width:0; background:#fff; transition:width .18s; margin:6px auto 0 auto; }
-nav a:hover::after { width:100%; }
+nav { display:flex; justify-content:center; align-items:center; gap: 2rem; background:#000; color:#fff; width:100%; padding:1rem 0; z-index:20; }
+nav a { color:#fff; text-decoration:none; padding:6px 0; display:inline-block; transition: transform .18s ease; }
+nav a:hover { transform: scale(1.06); }
 
-/* active link (based on current page) */
-nav a.active { transform: scale(1.06); }
-/* Active page: do not show underline (even on hover/focus) */
-nav a.active::after,
-nav a.active:hover::after,
-nav a.active:focus::after {
-  width: 0 !important;
-}
+/* Settings dropdown (gear) */
+.settings-dropdown { position:absolute; right:18px; top:50%; transform:translateY(-50%); z-index:1000; }
+.dropdown-content { display:none; position:absolute; top:44px; right:0; width:160px; max-height:220px; background:#fff; color:#000; border-radius:6px; box-shadow:0 8px 22px rgba(0,0,0,0.12); padding:8px; overflow:auto; border:1px solid rgba(0,0,0,0.06); }
+.dropdown-content.show { display:block; }
+.dropdown-content button { width:100%; padding:8px; background:none; border:none; cursor:pointer; border-radius:6px; }
 
-/* Nav icon used instead of text: keep same visual size as other UI icons */
-.nav-icon {
-  width: 45px;
-  height: 45px;
-  object-fit: contain;
-  display: block;
-  pointer-events: none; /* clicks handled by the anchor */
-  filter: none;
-  transition: filter 0.18s ease, transform 0.18s ease;
-}
+/* Gallery masonry */
+.gallery { display:grid; grid-template-columns: repeat(auto-fill, minmax(180px,1fr)); grid-auto-rows: 10px; gap:10px; padding:20px; }
+.card { position:relative; overflow:visible; border-radius:6px; }
+.image-wrap { position:relative; width:100%; overflow:visible; border-radius:6px; }
+.gallery-image { position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover; border-radius:6px; transition: top .22s, left .22s, width .22s, height .22s, box-shadow .22s; }
+.image-wrap.loaded:hover .gallery-image { top:-5px; left:-5px; width:calc(100% + 10px); height:calc(100% + 10px); z-index:40; box-shadow: 0 22px 44px rgba(0,0,0,0.52); }
+
+/* Modal */
+.modal-backdrop { position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,0.4); z-index:99999; }
+.modal { box-sizing:border-box; width:auto; max-width:min(840px, calc(100vw - 48px)); max-height:calc(100vh - 48px); padding:16px; border-radius:8px; background:#fff; color:#000; overflow:auto; }
+
+/* Utility */
+.caption { padding:8px 12px; text-align:center; color:inherit; }
+.spinner { width:36px; height:36px; border-radius:50%; border:3px solid rgba(0,0,0,0.12); border-top-color: rgba(0,0,0,0.48); animation: spin 0.9s linear infinite; display:none; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.placeholder-box.active .spinner { display:block; }
+
+/* Maintenance / misc */
+.maintenance-banner { padding:28px 16px; text-align:center; }
+#drawingBoard { width:100%; height:80vh; border:2px solid #000; border-radius:6px; background:#fff; }
+
+/* Responsive tweaks */
+@media (max-width:600px) { .gallery { grid-template-columns: repeat(auto-fill, minmax(140px,1fr)); gap:8px; padding:12px; } .search-bar input { width:72%; } }
+
+/* End of stylesheet */
+
 
 @media (max-width: 600px) {
   .nav-icon { width: 39px; height: 39px; }
@@ -614,7 +311,7 @@ nav a.active:focus::after {
   right: 0;
   width: 160px;
   max-height: 220px;
-  background: #fff; /* light by default; switched in dark-mode */
+  background: #fff; /* light by default */
   color: #000;
   border-radius: 6px;
   box-shadow: 0 8px 22px rgba(0,0,0,0.12);
@@ -643,28 +340,7 @@ nav a.active:focus::after {
 }
 .dropdown-content button:hover { background:#333; color:#fff; }
 
-/* Mode icon inside button */
-#modeIcon { width:150px; height:130px; object-fit:contain; display:block; }
-
-/* dropdown adapts to dark mode */
-body.dark-mode .dropdown-content {
-  background: #222;
-  color: #fff;
-  border-color: rgba(255,255,255,0.06);
-  box-shadow: 0 8px 30px rgba(0,0,0,0.35);
-}
-
-/* Make theme-switch smaller when placed inside dropdown so it fits */
-.dropdown-content .theme-switch {
-  --toggle-size: 22px;
-  --container-width: 4.2em;
-  --container-height: 1.9em;
-  --container-radius: 4.5em;
-  --circle-container-diameter: 2.5em;
-  --sun-moon-diameter: 1.6em;
-}
-
-.dropdown-content button { color: inherit; }
+/* theme UI removed from dropdown */
 
 /* Main and footer */
 main { padding:30px; /* allow gallery to use full width */ max-width: none; margin:auto; width:100%; flex:1; }
@@ -686,9 +362,7 @@ footer hr { border:none; border-top:1px solid #aaa; margin:10px 0; }
 .search-bar select {
   padding:8px; border-radius:6px; border:1px solid #333; background: #fff; color: #000; font-size:1em; margin-left:8px;
 }
-body.dark-mode .search-bar select {
-  background: #222; color: #fff; border-color: #555;
-}
+/* search select uses single-theme styles */
 
 /* Masonry / puzzle-style gallery */
 .gallery {
@@ -809,11 +483,7 @@ body.dark-mode .search-bar select {
 /* show spinner only when placeholder is active (single spinner at a time) */
 .placeholder-box.active .spinner { display: block; }
 
-/* In dark mode invert spinner so it remains visible against dark backgrounds */
-body.dark-mode .spinner {
-  border: 3px solid rgba(255,255,255,0.12);
-  border-top-color: rgba(255,255,255,0.72);
-}
+/* spinner remains default color */
 
 /* ensure modal/backdrop overlays everything */
 .modal-backdrop {
@@ -847,10 +517,7 @@ body.dark-mode .spinner {
   color: #000;
 }
 
-body.dark-mode .modal {
-  background: #1a1a1a;
-  color: #eee;
-}
+/* single-theme modal styling only above */
 
 /* Highlighted card in background gallery */
 .card.highlighted {
@@ -858,9 +525,7 @@ body.dark-mode .modal {
   outline-offset: 2px;
 }
 
-body.dark-mode .card.highlighted {
-  outline-color: #6ba3ff;
-}
+/* highlighted card uses single-theme outline */
 
 .caption {
   padding: 8px 12px;
@@ -899,13 +564,7 @@ body.dark-mode .card.highlighted {
 .modal-arrow-left { left: 24px; }
 .modal-arrow-right { right: 24px; }
 
-body.dark-mode .modal-arrow {
-  background: transparent;
-}
-
-body.dark-mode .modal-arrow:hover {
-  background: transparent;
-}
+/* modal arrow styles unchanged */
 
 /* Ensure arrow image inside the button is sized and centered */
 .modal-arrow img {
@@ -1008,9 +667,7 @@ body.dark-mode .modal-arrow:hover {
   padding-right: 16px;
 }
 
-body.dark-mode .toy-blocked {
-  color: #fff; /* white text in dark mode */
-}
+/* toy-blocked default color remains */
 
 /* simple ad-card defaults so inserted ads look consistent */
 .ad-card {
@@ -1027,13 +684,12 @@ body.dark-mode .toy-blocked {
   text-align: center;
 }
 
-/* dark-mode tweaks */
-body.dark-mode .ad-card { background: #222; color: #aaa; border-color: #333; }
+/* ad-card default styles only */
 
 /* responsive tweaks */
 @media (max-width:600px) {
   .gallery { grid-template-columns: repeat(auto-fill, minmax(140px,1fr)); gap:8px; padding:12px; }
-  #modeIcon { width:120px; height:90px; }
+  /* mode icon removed */
   .search-bar input { width:72%; }
   .search-bar select { margin-left:6px; padding:6px; }
 }
@@ -1059,8 +715,7 @@ body.dark-mode .ad-card { background: #222; color: #aaa; border-color: #333; }
 .maintenance-banner h1 { font-size: clamp(1.6rem, 4vw, 3rem); margin-bottom: 6px; }
 .maintenance-banner .maintenance-estimate { font-weight: 600; color: #333; }
 .maintenance-banner .maintenance-note { color: #555; max-width: 900px; }
-body.dark-mode .maintenance-banner .maintenance-estimate { color: #ddd; }
-body.dark-mode .maintenance-banner .maintenance-note { color: #ccc; }
+/* maintenance banner single-theme colors */
 
 .maintenance-debug-badge {
   position: fixed;
@@ -1089,9 +744,7 @@ body.dark-mode .maintenance-banner .maintenance-note { color: #ccc; }
   overflow: auto;
 }
 
-body.dark-mode .maintenance-overlay {
-  background: rgba(10,10,10,0.95);
-}
+/* maintenance overlay uses light-theme background */
 
 .maintenance-overlay .maintenance-banner {
   width: 100%;
@@ -1102,203 +755,7 @@ body.dark-mode .maintenance-overlay {
   background: transparent;
 }
 
-/* From Uiverse.io by Galahhad - Theme switch styles */
-.theme-switch {
-  --toggle-size: 30px;
-  --container-width: 5.625em;
-  --container-height: 2.5em;
-  --container-radius: 6.25em;
-  --container-light-bg: #3D7EAE;
-  --container-night-bg: #1D1F2C;
-  --circle-container-diameter: 3.375em;
-  --sun-moon-diameter: 2.125em;
-  --sun-bg: #ECCA2F;
-  --moon-bg: #C4C9D1;
-  --spot-color: #959DB1;
-  --circle-container-offset: calc((var(--circle-container-diameter) - var(--container-height)) / 2 * -1);
-  --stars-color: #fff;
-  --clouds-color: #F3FDFF;
-  --back-clouds-color: #AACADF;
-  --transition: .5s cubic-bezier(0, -0.02, 0.4, 1.25);
-  --circle-transition: .3s cubic-bezier(0, -0.02, 0.35, 1.17);
-}
-
-.theme-switch, .theme-switch *, .theme-switch *::before, .theme-switch *::after {
-  -webkit-box-sizing: border-box;
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-  font-size: var(--toggle-size);
-}
-
-.theme-switch__container {
-  width: var(--container-width);
-  height: var(--container-height);
-  background-color: var(--container-light-bg);
-  border-radius: var(--container-radius);
-  overflow: hidden;
-  cursor: pointer;
-  -webkit-box-shadow: 0em -0.062em 0.062em rgba(0, 0, 0, 0.25), 0em 0.062em 0.125em rgba(255, 255, 255, 0.94);
-  box-shadow: 0em -0.062em 0.062em rgba(0, 0, 0, 0.25), 0em 0.062em 0.125em rgba(255, 255, 255, 0.94);
-  -webkit-transition: var(--transition);
-  -o-transition: var(--transition);
-  transition: var(--transition);
-  position: relative;
-}
-
-.theme-switch__container::before {
-  content: "";
-  position: absolute;
-  z-index: 1;
-  inset: 0;
-  -webkit-box-shadow: 0em 0.05em 0.187em rgba(0, 0, 0, 0.25) inset, 0em 0.05em 0.187em rgba(0, 0, 0, 0.25) inset;
-  box-shadow: 0em 0.05em 0.187em rgba(0, 0, 0, 0.25) inset, 0em 0.05em 0.187em rgba(0, 0, 0, 0.25) inset;
-  border-radius: var(--container-radius)
-}
-
-.theme-switch__checkbox {
-  display: none;
-}
-
-.theme-switch__circle-container {
-  width: var(--circle-container-diameter);
-  height: var(--circle-container-diameter);
-  background-color: rgba(255, 255, 255, 0.1);
-  position: absolute;
-  left: var(--circle-container-offset);
-  top: var(--circle-container-offset);
-  border-radius: var(--container-radius);
-  -webkit-box-shadow: inset 0 0 0 3.375em rgba(255, 255, 255, 0.1), inset 0 0 0 3.375em rgba(255, 255, 255, 0.1), 0 0 0 0.625em rgba(255, 255, 255, 0.1), 0 0 0 1.25em rgba(255, 255, 255, 0.1);
-  box-shadow: inset 0 0 0 3.375em rgba(255, 255, 255, 0.1), inset 0 0 0 3.375em rgba(255, 255, 255, 0.1), 0 0 0 0.625em rgba(255, 255, 255, 0.1), 0 0 0 1.25em rgba(255, 255, 255, 0.1);
-  display: -webkit-box;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-transition: var(--circle-transition);
-  -o-transition: var(--circle-transition);
-  transition: var(--circle-transition);
-  pointer-events: none;
-}
-
-.theme-switch__sun-moon-container {
-  pointer-events: auto;
-  position: relative;
-  z-index: 2;
-  width: var(--sun-moon-diameter);
-  height: var(--sun-moon-diameter);
-  margin: auto;
-  border-radius: var(--container-radius);
-  background-color: var(--sun-bg);
-  -webkit-box-shadow: 0.062em 0.062em 0.062em 0em rgba(254, 255, 239, 0.61) inset, 0em -0.062em 0.062em 0em #a1872a inset;
-  box-shadow: 0.062em 0.062em 0.062em 0em rgba(254, 255, 239, 0.61) inset, 0em -0.062em 0.062em 0em #a1872a inset;
-  -webkit-filter: drop-shadow(0.062em 0.125em 0.125em rgba(0, 0, 0, 0.25)) drop-shadow(0em 0.062em 0.125em rgba(0, 0, 0, 0.25));
-  filter: drop-shadow(0.062em 0.125em 0.125em rgba(0, 0, 0, 0.25)) drop-shadow(0em 0.062em 0.125em rgba(0, 0, 0, 0.25));
-  overflow: hidden;
-  -webkit-transition: var(--transition);
-  -o-transition: var(--transition);
-  transition: var(--transition);
-}
-
-.theme-switch__moon {
-  -webkit-transform: translateX(100%);
-  -ms-transform: translateX(100%);
-  transform: translateX(100%);
-  width: 100%;
-  height: 100%;
-  background-color: var(--moon-bg);
-  border-radius: inherit;
-  -webkit-box-shadow: 0.062em 0.062em 0.062em 0em rgba(254, 255, 239, 0.61) inset, 0em -0.062em 0.062em 0em #969696 inset;
-  box-shadow: 0.062em 0.062em 0.062em 0em rgba(254, 255, 239, 0.61) inset, 0em -0.062em 0.062em 0em #969696 inset;
-  -webkit-transition: var(--transition);
-  -o-transition: var(--transition);
-  transition: var(--transition);
-  position: relative;
-}
-
-.theme-switch__spot {
-  position: absolute;
-  top: 0.75em;
-  left: 0.312em;
-  width: 0.75em;
-  height: 0.75em;
-  border-radius: var(--container-radius);
-  background-color: var(--spot-color);
-  -webkit-box-shadow: 0em 0.0312em 0.062em rgba(0, 0, 0, 0.25) inset;
-  box-shadow: 0em 0.0312em 0.062em rgba(0, 0, 0, 0.25) inset;
-}
-
-.theme-switch__spot:nth-of-type(2) {
-  width: 0.375em;
-  height: 0.375em;
-  top: 0.937em;
-  left: 1.375em;
-}
-
-.theme-switch__spot:nth-last-of-type(3) {
-  width: 0.25em;
-  height: 0.25em;
-  top: 0.312em;
-  left: 0.812em;
-}
-
-.theme-switch__clouds {
-  width: 1.25em;
-  height: 1.25em;
-  background-color: var(--clouds-color);
-  border-radius: var(--container-radius);
-  position: absolute;
-  bottom: -0.625em;
-  left: 0.312em;
-  -webkit-box-shadow: 0.937em 0.312em var(--clouds-color), -0.312em -0.312em var(--back-clouds-color), 1.437em 0.375em var(--clouds-color), 0.5em -0.125em var(--back-clouds-color), 2.187em 0 var(--clouds-color), 1.25em -0.062em var(--back-clouds-color), 2.937em 0.312em var(--clouds-color), 2em -0.312em var(--back-clouds-color), 3.625em -0.062em var(--clouds-color), 2.625em 0em var(--back-clouds-color), 4.5em -0.312em var(--clouds-color), 3.375em -0.437em var(--back-clouds-color), 4.625em -1.75em 0 0.437em var(--clouds-color), 4em -0.625em var(--back-clouds-color), 4.125em -2.125em 0 0.437em var(--back-clouds-color);
-  box-shadow: 0.937em 0.312em var(--clouds-color), -0.312em -0.312em var(--back-clouds-color), 1.437em 0.375em var(--clouds-color), 0.5em -0.125em var(--back-clouds-color), 2.187em 0 var(--clouds-color), 1.25em -0.062em var(--back-clouds-color), 2.937em 0.312em var(--clouds-color), 2em -0.312em var(--back-clouds-color), 3.625em -0.062em var(--clouds-color), 2.625em 0em var(--back-clouds-color), 4.5em -0.312em var(--clouds-color), 3.375em -0.437em var(--back-clouds-color), 4.625em -1.75em 0 0.437em var(--clouds-color), 4em -0.625em var(--back-clouds-color), 4.125em -2.125em 0 0.437em var(--back-clouds-color);
-  -webkit-transition: 0.5s cubic-bezier(0, -0.02, 0.4, 1.25);
-  -o-transition: 0.5s cubic-bezier(0, -0.02, 0.4, 1.25);
-  transition: 0.5s cubic-bezier(0, -0.02, 0.4, 1.25);
-}
-
-.theme-switch__stars-container {
-  position: absolute;
-  color: var(--stars-color);
-  top: -100%;
-  left: 0.312em;
-  width: 2.75em;
-  height: auto;
-  -webkit-transition: var(--transition);
-  -o-transition: var(--transition);
-  transition: var(--transition);
-}
-
-.theme-switch__checkbox:checked + .theme-switch__container {
-  background-color: var(--container-night-bg);
-}
-
-.theme-switch__checkbox:checked + .theme-switch__container .theme-switch__circle-container {
-  left: calc(100% - var(--circle-container-offset) - var(--circle-container-diameter));
-}
-
-.theme-switch__checkbox:checked + .theme-switch__container .theme-switch__circle-container:hover {
-  left: calc(100% - var(--circle-container-offset) - var(--circle-container-diameter) - 0.187em)
-}
-
-.theme-switch__circle-container:hover {
-  left: calc(var(--circle-container-offset) + 0.187em);
-}
-
-.theme-switch__checkbox:checked + .theme-switch__container .theme-switch__moon {
-  -webkit-transform: translate(0);
-  -ms-transform: translate(0);
-  transform: translate(0);
-}
-
-.theme-switch__checkbox:checked + .theme-switch__container .theme-switch__clouds {
-  bottom: -4.062em;
-}
-
-.theme-switch__checkbox:checked + .theme-switch__container .theme-switch__stars-container {
-  top: 50%;
-  -webkit-transform: translateY(-50%);
-  -ms-transform: translateY(-50%);
-  transform: translateY(-50%);
-}
+/* Theme switch removed */
 
 /* Drawing board canvas */
 #drawingBoard {
@@ -1311,7 +768,4 @@ body.dark-mode .maintenance-overlay {
   background: #fff;
 }
 
-body.dark-mode #drawingBoard {
-  background: #111;
-  border-color: #fff;
-}
+/* End of stylesheet */
