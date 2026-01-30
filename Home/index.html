@@ -18,42 +18,55 @@
   <!-- Use single site logo as favicon -->
   <link rel="icon" href="/assets/logo.png" type="image/png">
   <style>
-    /* Full-bleed responsive banner */
-    .banner {
-      position: relative;
-      left: 50%;
-      right: 50%;
-      margin-left: -50vw;
-      margin-right: -50vw;
-      width: 100vw;
-      overflow: hidden;
+    /* Top navigation styling */
+    nav {
+      background: #30513d;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 14px;
+      box-sizing: border-box;
     }
-    .banner img { width: 100%; height: auto; display: block; }
+    .nav-left { display:flex; gap:14px; align-items:center; }
+    .nav-left a { color:#fff; text-decoration:none; font-weight:600; padding:6px 10px; border-radius:6px; }
+    .nav-left a:hover { background: rgba(255,255,255,0.04); }
+    .site-title { color:#fff; font-weight:800; font-size:1.05rem; margin-left:12px; }
+    .settings-dropdown { margin-left:8px; }
+
+    /* Banner: simple full-width responsive banner without negative margins */
+    .banner { width:100%; overflow:hidden; display:block; }
+    .banner img { width:100%; height:auto; display:block; }
   </style>
 </head>
 <body>
 
   <!-- Navigation -->
   <nav>
-    <a href="/Home" aria-label="Home">
-      <img src="/assets/GUI/home.png" alt="Home" class="nav-icon">
-    </a>
-    <a href="/Gallery" aria-label="Gallery" class="nav-gallery">
-      <img src="/assets/GUI/gallery.png" alt="Gallery" class="nav-icon">
-    </a>
-    <a href="/VideoArchive" aria-label="Videos" class="nav-videos">Videos</a>
-    <a href="/TopFlickers" aria-label="Top Flickers" class="nav-topflickers">Top Flickers</a>
+    <div class="nav-left">
+      <a href="/Home" aria-label="Home">Home</a>
+      <a href="/Gallery" aria-label="Gallery">Gallery</a>
+      <a href="/VideoArchive" aria-label="Videos">Videos</a>
+      <a href="/TopFlickers" aria-label="Leaderboard">Leaderboard</a>
+    </div>
 
-    <!-- Settings Dropdown -->
-    <div class="settings-dropdown">
-      <div class="gear-box">
-        <img src="/assets/GUI/gear.png" alt="Settings" class="gear-icon">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div class="settings-dropdown">
+        <div class="gear-box">
+          <img src="/assets/GUI/gear.png" alt="Settings" class="gear-icon" style="filter:invert(1);opacity:0.9;">
+        </div>
+        <div class="dropdown-content" style="background:transparent;">
+          <label style="display:flex;align-items:center;gap:6px;color:#fff;">
+            <input type="checkbox" id="tileToggle"> Tiles
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;color:#fff;margin-top:6px;">
+            Tile px:
+            <input type="number" id="tileSizeInput" min="8" max="512" value="64" style="width:70px;padding:4px;border-radius:4px;border:1px solid rgba(255,255,255,0.12);">
+          </label>
+          <button id="modeToggle" style="margin-top:8px;background:transparent;border:0;color:#fff;">Toggle Mode</button>
+        </div>
       </div>
-      <div class="dropdown-content">
-        <button id="modeToggle">
-          <img src="/assets/GUI/DarkMode.png" alt="Mode toggle" id="modeIcon">
-        </button>
-      </div>
+
+      <div class="site-title">RealArtMaine</div>
     </div>
   </nav>
 
@@ -75,5 +88,6 @@
 
   <script src="/assets/js/maintenance.js"></script>
   <script src="/assets/js/darkmode.js"></script>
+  <script src="/assets/js/background.js"></script>
 </body>
 </html>
