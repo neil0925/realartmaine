@@ -34,8 +34,11 @@
     }
     .nav-left { display:flex; gap:14px; align-items:center; }
     .nav-left a { color:#fff; text-decoration:none; font-weight:600; padding:6px 10px; border-radius:6px; }
-    .site-title { color:#fff; font-weight:800; font-size:1.05rem; margin-left:12px; }
+    .site-title { color:#fff; font-weight:800; font-size:1.05rem; margin-left:0; }
     .settings-dropdown { margin-left:8px; }
+    /* Stabilize gear icon so it doesn't move */
+    .gear-box { flex: 0 0 32px; display:flex; align-items:center; justify-content:center; }
+    .gear-box img { width:22px; height:22px; display:block; }
     .right-group { display:flex; align-items:center; gap:12px; }
     /* Make settings visually minimal */
     .gear-box { background:transparent; border:0; padding:0; }
