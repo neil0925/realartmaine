@@ -36,6 +36,7 @@
     .nav-left a { color:#fff; text-decoration:none; font-weight:600; padding:6px 10px; border-radius:6px; }
     .site-title { color:#fff; font-weight:800; font-size:1.05rem; margin-left:12px; }
     .settings-dropdown { margin-left:8px; }
+    .right-group { display:flex; align-items:center; gap:12px; }
     /* Make settings visually minimal */
     .gear-box { background:transparent; border:0; padding:0; }
     .gear-box img { width:22px; height:auto; display:block; filter:invert(1); }
@@ -56,11 +57,10 @@
     <div class="nav-left">
       <a href="/Home" aria-label="Home">Home</a>
       <a href="/Gallery" aria-label="Gallery">Gallery</a>
-      <a href="/VideoArchive" aria-label="Videos">Videos</a>
       <a href="/TopFlickers" aria-label="Leaderboard">Leaderboard</a>
     </div>
 
-    <div style="display:flex;align-items:center;gap:12px;">
+    <div class="right-group">
       <div class="settings-dropdown">
         <div class="gear-box">
           <img src="/assets/GUI/gear.png" alt="Settings" class="gear-icon" style="filter:invert(1);opacity:0.9;">

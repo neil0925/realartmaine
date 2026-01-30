@@ -42,22 +42,21 @@
       /* Disable underline/hover animations on nav links */
       .nav-left a { text-decoration:none !important; transition: none !important; }
       .nav-left a::before, .nav-left a::after { display:none !important; }
+      .right-group { display:flex; align-items:center; gap:12px; }
     </style>
-    <nav>
-      <div class="nav-left">
-        <a href="/Home" aria-label="Home">Home</a>
-        <a href="/Gallery" aria-label="Gallery">Gallery</a>
-        <a href="/VideoArchive" aria-label="Videos">Videos</a>
-        <a href="/TopFlickers" aria-label="Leaderboard">Leaderboard</a>
+    <div class="nav-left">
+      <a href="/Home" aria-label="Home">Home</a>
+      <a href="/Gallery" aria-label="Gallery">Gallery</a>
+      <a href="/TopFlickers" aria-label="Leaderboard">Leaderboard</a>
+    </div>
+    <div class="right-group">
+      <div class="settings-dropdown">
+        <div class="gear-box"><img src="/assets/GUI/gear.png" alt="Settings" class="gear-icon" style="filter:invert(1);opacity:0.9;"></div>
+        <div class="dropdown-content" style="background:transparent;"></div>
       </div>
-      <div style="display:flex;align-items:center;gap:12px;">
-        <div class="settings-dropdown">
-          <div class="gear-box"><img src="/assets/GUI/gear.png" alt="Settings" class="gear-icon" style="filter:invert(1);opacity:0.9;"></div>
-          <div class="dropdown-content" style="background:transparent;"></div>
-        </div>
-        <div class="site-title">RealArtMaine</div>
-      </div>
-    </nav>
+      <div class="site-title">RealArtMaine</div>
+    </div>
+  </nav>
 
   <main>
     <div class="search-bar">
@@ -75,6 +74,7 @@
 
   <script src="/assets/js/maintenance.js"></script>
   <script src="/assets/js/videos.js"></script>
+  <script src="/assets/js/background.js"></script>
   <script src="/assets/js/darkmode.js"></script>
 </body>
 </html>
