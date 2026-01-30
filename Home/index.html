@@ -18,11 +18,18 @@
   <!-- Use single site logo as favicon -->
   <link rel="icon" href="/assets/logo.png" type="image/png">
   <style>
-    .banner { text-align:center; padding:1rem 0; }
-    .banner img { max-width:100%; width:720px; height:auto; display:inline-block; }
+    /* Full-bleed responsive banner */
+    .banner {
+      position: relative;
+      left: 50%;
+      right: 50%;
+      margin-left: -50vw;
+      margin-right: -50vw;
+      width: 100vw;
+      overflow: hidden;
+    }
+    .banner img { width: 100%; height: auto; display: block; }
   </style>
-</head>
-<body>
 </head>
 <body>
 
@@ -55,7 +62,6 @@
   <div class="banner" aria-hidden="true">
     <img src="/assets/GUI/realartmainebanner.png" alt="Real Art Maine banner">
   </div>
-    <h1>Real Art Maine</h1>
     <p><strong>Real Art Maine</strong> is dedicated to documenting graffiti and street art throughout Maine.</p>
     <p>Explore our gallery to see tags, crews, and styles captured by photographers and artists from around the state.</p>
   </main>
