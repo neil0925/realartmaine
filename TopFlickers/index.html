@@ -35,11 +35,16 @@
 
   <!-- Navigation (icons kept consistent with other pages) -->
   <style>
+    /* Prevent horizontal cutoff and remove selection/hover effects */
+    html, body { margin:0; padding:0; box-sizing:border-box; min-width:0; }
+    *, *:before, *:after { box-sizing:inherit; }
+    nav a { -webkit-tap-highlight-color: transparent; -webkit-user-select: none; user-select: none; transition: none; }
+    nav a:hover, nav a:active, nav a:focus { background: transparent; outline: none; }
+
     nav { background:#30513d; display:flex; align-items:center; justify-content:space-between; padding:8px 14px; box-sizing:border-box; }
     .nav-left { display:flex; gap:14px; }
     .nav-left a { color:#fff; text-decoration:none; font-weight:600; padding:6px 10px; border-radius:6px; }
     .site-title { color:#fff; font-weight:800; font-size:1.05rem; }
-    .nav-left a:hover { background: rgba(255,255,255,0.04); }
   </style>
   <nav>
     <div class="nav-left">
