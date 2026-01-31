@@ -8,18 +8,32 @@
 
     const nav = qs('nav') || document.body;
 
-    const wrapper = document.createElement('div');
-    wrapper.id = 'settings-dropdown-wrapper';
-    Object.assign(wrapper.style, {
-      position: 'absolute',
-      right: '18px',
-      top: '50%',
-      transform: 'translateY(-50%)',
-      zIndex: 100000,
-      display: 'flex',
-      alignItems: 'center',
-      fontFamily: 'Arial, Helvetica, sans-serif'
-    });
+    // If the page already has a .settings-dropdown element (we added it in HTML),
+    // use that and remove absolute positioning so the gear participates in the
+    // nav layout (left of the site title). Otherwise create a lightweight wrapper
+    // and insert it before the site title.
+    let container = qs('.settings-dropdown');
+    let createdWrapper = false;
+    if (container) {
+      // reset positioning so nav flex layout controls alignment
+      container.style.position = 'static';
+      container.style.right = '';
+      container.style.top = '';
+      container.style.transform = '';
+      container.style.display = 'flex';
+      container.style.alignItems = 'center';
+    } else {
+      container = document.createElement('div');
+      container.className = 'settings-dropdown';
+      Object.assign(container.style, {
+        position: 'static',
+        zIndex: 100000,
+        display: 'flex',
+        alignItems: 'center',
+        fontFamily: 'Arial, Helvetica, sans-serif'
+      });
+      createdWrapper = true;
+    }
 
     const btn = document.createElement('button');
     btn.id = 'settings-btn';
@@ -74,12 +88,21 @@
     dropdown.appendChild(clearSW);
     dropdown.appendChild(note);
 
-    wrapper.appendChild(btn);
-    wrapper.appendChild(dropdown);
+    container.appendChild(btn);
+    container.appendChild(dropdown);
 
-    // attach to nav if possible otherwise body
-    if (nav && nav.appendChild) nav.appendChild(wrapper);
-    else document.body.appendChild(wrapper);
+    // attach: if we created a new wrapper, insert it before the site title
+    if (createdWrapper) {
+      const rightGroup = qs('.right-group');
+      const siteTitle = qs('.site-title');
+      if (rightGroup && siteTitle) {
+        rightGroup.insertBefore(container, siteTitle);
+      } else if (nav && nav.appendChild) {
+        nav.appendChild(container);
+      } else {
+        document.body.appendChild(container);
+      }
+    }
 
     // toggle
     btn.addEventListener('click', (e) => {
