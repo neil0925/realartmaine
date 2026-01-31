@@ -23,7 +23,8 @@
   <!-- Navigation -->
   <style>
     /* Prevent horizontal cutoff and remove selection/hover effects */
-    html, body { margin:0; padding:0; box-sizing:border-box; min-width:0; }
+    html, body { margin:0; padding:0; box-sizing:border-box; min-width:0; height:100%; }
+    body { min-height:100vh; display:flex; flex-direction:column; }
     *, *:before, *:after { box-sizing:inherit; }
     nav a { -webkit-tap-highlight-color: transparent; -webkit-user-select: none; user-select: none; transition: none; }
     nav a:hover, nav a:active, nav a:focus { background: transparent; outline: none; }
@@ -58,7 +59,7 @@
     </div>
   </nav>
 
-  <main>
+  <main style="flex:1 1 auto;">
     <div class="search-bar">
       <input type="text" id="searchInput" placeholder="Search tags, crews, photographers, or styles...">
       <select id="sortSelect" aria-label="Sort results" title="Sort results" style="margin-left:10px;padding:8px;border-radius:6px;">
