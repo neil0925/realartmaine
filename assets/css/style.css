@@ -245,7 +245,7 @@ html { scrollbar-gutter: stable both-edges; }
 body { font-family: Arial, Helvetica, sans-serif; background: #fff; color: #000; line-height: 1.6; min-height: 100vh; display:flex; flex-direction:column; }
 
 /* Navigation */
-nav { display:flex; justify-content:center; align-items:center; gap: 2rem; background:#000; color:#fff; width:100%; padding:1rem 0; z-index:20; }
+nav { display:flex; justify-content:center; align-items:center; gap: 2rem; background:#000; color:#fff; width:100%; padding:0; z-index:20; }
 nav a { color:#fff; text-decoration:none; padding:6px 0; display:inline-block; transition: transform .18s ease; }
 nav a:hover { transform: scale(1.06); }
 
@@ -343,7 +343,7 @@ nav a:hover { transform: scale(1.06); }
 /* theme UI removed from dropdown */
 
 /* Main and footer */
-main { padding:30px; /* allow gallery to use full width */ max-width: none; margin:auto; width:100%; flex:1; }
+main { padding:0; /* allow gallery to use full width */ max-width: none; margin:auto; width:100%; flex:1; }
 main h1 { text-align:center; margin-bottom:20px; }
 main p { margin-bottom:14px; }
 
