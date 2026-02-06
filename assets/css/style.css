@@ -492,7 +492,13 @@ footer hr { border:none; border-top:1px solid #aaa; margin:10px 0; }
   display: flex;
   justify-content: center;
   align-items: center;
-  background: rgba(0, 0, 0, 0.4);
+  /* overlay a semi-transparent black over the site's tiled background
+     (tile from /assets/GUI/tile.png is also used by background.js) */
+  background-image: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('/assets/GUI/tile.png');
+  background-repeat: repeat;
+  background-size: 400px 400px; /* matches background.js default */
+  background-attachment: fixed;
+  background-position: center;
   z-index: 99999;
   padding: 8px;
   overflow: hidden; /* prevent scrolling while backdrop exists */
