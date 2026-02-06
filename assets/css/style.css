@@ -2,7 +2,6 @@
   Single-theme stylesheet (theme and switch UI removed) */
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
-html { scrollbar-gutter: stable both-edges; }
 
 body {
   font-family: Arial, Helvetica, sans-serif;
@@ -102,7 +101,6 @@ nav a.active::after, nav a.active:hover::after, nav a.active:focus::after { widt
   Single-theme stylesheet (theme and switch UI removed) */
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
-html { scrollbar-gutter: stable both-edges; }
 
 body {
   font-family: Arial, Helvetica, sans-serif;
@@ -241,7 +239,6 @@ footer hr { border:none; border-top:1px solid #aaa; margin:10px 0; }
 
 /* Reset + base */
 * { margin: 0; padding: 0; box-sizing: border-box; }
-html { scrollbar-gutter: stable both-edges; }
 body { font-family: Arial, Helvetica, sans-serif; background: #fff; color: #000; line-height: 1.6; min-height: 100vh; display:flex; flex-direction:column; }
 
 /* Navigation */
@@ -280,6 +277,24 @@ nav a:hover { transform: scale(1.06); }
 @media (max-width:600px) { .gallery { grid-template-columns: repeat(auto-fill, minmax(140px,1fr)); gap:8px; padding:12px; } .search-bar input { width:72%; } }
 
 /* End of stylesheet */
+
+/* Hide scrollbars everywhere but keep scrolling */
+html, body {
+  -ms-overflow-style: none; /* IE/Edge legacy */
+  scrollbar-width: none;    /* Firefox */
+}
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+* {
+  scrollbar-width: none; /* Firefox for all scrollable elements */
+}
+*::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
 
 
 @media (max-width: 600px) {
