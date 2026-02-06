@@ -278,24 +278,24 @@ nav a:hover { transform: scale(1.06); }
 
 /* End of stylesheet */
 
-/* Custom fonts (place font files in /assets/fonts/) */
+/* Custom fonts (font files live in /assets/GUI/) */
 @font-face {
   font-family: "RAM-Font6";
-  src: url("/assets/fonts/font6.ttf") format("truetype");
+  src: url("/assets/GUI/font6.ttf") format("truetype");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
   font-family: "RAM-Font8";
-  src: url("/assets/fonts/font8.ttf") format("truetype");
+  src: url("/assets/GUI/font8.ttf") format("truetype");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
   font-family: "RAM-Font11";
-  src: url("/assets/fonts/font11.ttf") format("truetype");
+  src: url("/assets/GUI/font11.ttf") format("truetype");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
