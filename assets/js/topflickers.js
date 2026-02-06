@@ -153,7 +153,7 @@ document.addEventListener('DOMContentLoaded', () => {
   ========================= */
   const list = Object.entries(counts).sort((a, b) => b[1] - a[1]);
 
-  let html = '<h1>Top Flickers</h1>';
+  let html = '<h1>Leaderboard</h1>';
 
   if (debugMode) {
     html += '<p style="opacity:.6">Debug mode enabled</p>';
