@@ -521,7 +521,7 @@ footer hr { border:none; border-top:1px solid #aaa; margin:10px 0; }
   background-size: 400px 400px; /* match background.js default */
   background-attachment: local;
   background-position: center;
-  color: #000;
+  color: #30513d; /* match site banner color */
 }
 
 /* inner white panel that sits above the tile frame. inset matches
@@ -558,6 +558,33 @@ footer hr { border:none; border-top:1px solid #aaa; margin:10px 0; }
   font-size: 0.95rem;
   text-align: center;
   color: inherit;
+}
+
+/* Caption styling when used inside the spotlight/modal.
+   - The caption bar uses the tile as its background and is flush with
+     the tiled modal frame by using negative horizontal margins.
+   - The visible text sits on a near-opaque white inner box so the
+     tile never goes 'over' (obscures) the text. Text color matches
+     the banner color for visual consistency. */
+.modal .caption {
+  margin: 0 -16px 8px -16px; /* extend to tile frame edges (modal inset) */
+  padding: 12px 16px; /* breathing room inside caption */
+  background-image: url('/assets/GUI/tile.png');
+  background-repeat: repeat;
+  background-size: 400px 400px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 0; /* flush with frame */
+}
+
+/* inner box for caption text to ensure legibility */
+.modal .caption .caption-inner {
+  background: rgba(255,255,255,0.96);
+  padding: 6px 10px;
+  border-radius: 6px;
+  color: #30513d; /* banner color */
+  font-weight: 600;
 }
 
 /* Modal navigation arrows - positioned by screen size, not image */
