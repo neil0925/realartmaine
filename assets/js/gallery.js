@@ -450,7 +450,7 @@ IMAGE_LABELS[427] = "rune, racket-SFL,2K69,LTB-realartmaine-tags";
 IMAGE_LABELS[428] = "catch, link, doves-realartmaine-throwie, fillin";
 IMAGE_LABELS[429] = "rich-YME-realartmaine-piece, character";
 IMAGE_LABELS[430] = "wuhan, scipio-2GF-realartmaine-throwie, fillin";
-IMAGE_LABELS[431] = "eons-SLT,TVT,OHK-realrtmaine-tags";
+IMAGE_LABELS[431] = "eons-SLT,TVT,OHK-realartmaine-tags";
 IMAGE_LABELS[432] = "catch-OHK,PTG,SLT,BNE-realartmaine-straightletter";
 IMAGE_LABELS[433] = "27-TSZ,2GF-realartmaine-throwie, hollow, antistyle";
 IMAGE_LABELS[434] = "ozek-MGI,DPW-realartmaine-straightletter";
@@ -484,7 +484,7 @@ IMAGE_LABELS[461] = "tears-HEX-realartmaine-straightletter";
 IMAGE_LABELS[462] = "ojea3, enzyme, tubby-HEX,OY!,DPW-realartmaine-tags";
 IMAGE_LABELS[463] = "enzyme, ojea3-HEX,OY!,DPW-realartmaine-tags";
 IMAGE_LABELS[464] = "racket-SFL,TMS,DPW-realartmaine-tags";
-IMAGE_LABELS[465] = "muul, aura, ohboy, tubby-realartmaine-OHK-tags";
+IMAGE_LABELS[465] = "muul, aura, ohboy, tubby-OHK-realartmaine-tags";
 IMAGE_LABELS[466] = "doves, neone-SLT,CFM-realartmaine-throwie, fillin, straightletter";
 IMAGE_LABELS[467] = "catch-OHK,PTG,BNE,SLT-realartmaine-straightletter";
 
