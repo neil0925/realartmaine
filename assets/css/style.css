@@ -278,6 +278,76 @@ nav a:hover { transform: scale(1.06); }
 
 /* End of stylesheet */
 
+/* Nav fixes + mobile hamburger menu */
+nav .right-group { display: flex; align-items: center; gap: 12px; }
+nav .settings-dropdown {
+  position: relative;
+  right: auto;
+  top: auto;
+  transform: none;
+  display: flex;
+  align-items: center;
+}
+nav .nav-left { align-items: center; }
+
+nav .nav-menu {
+  display: none;
+  position: relative;
+}
+nav .nav-menu summary {
+  list-style: none;
+  cursor: pointer;
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255,255,255,0.35);
+  background: transparent;
+}
+nav .nav-menu summary::-webkit-details-marker { display: none; }
+nav .nav-menu summary:focus { outline: none; }
+nav .nav-menu .nav-menu-icon {
+  width: 18px;
+  height: 2px;
+  background: #fff;
+  display: block;
+  box-shadow: 0 -6px 0 #fff, 0 6px 0 #fff;
+}
+nav .nav-menu-panel {
+  display: none;
+  position: absolute;
+  left: 0;
+  top: calc(100% + 8px);
+  min-width: 180px;
+  background: #30513d;
+  border: 1px solid rgba(255,255,255,0.22);
+  border-radius: 8px;
+  padding: 8px;
+  z-index: 2000;
+  box-shadow: 0 10px 26px rgba(0,0,0,0.25);
+}
+nav .nav-menu[open] .nav-menu-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+nav .nav-menu-panel a {
+  color: #fff;
+  text-decoration: none;
+  font-weight: 600;
+  padding: 6px 10px;
+  border-radius: 6px;
+  display: block;
+}
+nav .nav-menu-panel a:hover { background: rgba(255,255,255,0.12); }
+
+@media (max-width: 700px) {
+  nav .nav-left > a { display: none; }
+  nav .nav-menu { display: block; }
+}
+
 /* Hide scrollbars everywhere but keep scrolling */
 html, body {
   -ms-overflow-style: none; /* IE/Edge legacy */
