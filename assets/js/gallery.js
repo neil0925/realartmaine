@@ -389,24 +389,24 @@ IMAGE_LABELS[366] = "27-TSZ,2GF-chagrinedminnow-tags, stencil";
 IMAGE_LABELS[367] = "wilt-VC,2K69-chagrinedminnow-antistyle";
 IMAGE_LABELS[368] = "unidetified, writer-chagrinedminnow-character, hollow"; 
 IMAGE_LABELS[369] = "ducky-chagrinedminnow-antistyle, tags";
-IMAGE_LABELS[370] = "ducky-chagrinedminnow-antistyle, tags";
+IMAGE_LABELS[370] = "triangle-chagrinedminnow-antistyle, tags";
 IMAGE_LABELS[371] = "ducky-chagrinedminnow-antistyle, tags";
 IMAGE_LABELS[372] = "ducky-chagrinedminnow-antistyle, tags";
 IMAGE_LABELS[373] = "juek-LTB-chagrinedminnow-throwie, hollow";
 IMAGE_LABELS[374] = "grazi-DWT-chagrinedminnow-tags";
 IMAGE_LABELS[375] = "petco-5G,ICBM-chagrinedminnow-tags";
 IMAGE_LABELS[376] = "ducky-chagrinedminnow-antistyle, character, tags";
-IMAGE_LABELS[377] = "ducky-chagrinedminnow-antistyle, tags";
+IMAGE_LABELS[377] = "triangle-chagrinedminnow-antistyle, tags";
 IMAGE_LABELS[378] = "27, tabz-TSZ,2GF-chagrinedminnow-tags";
 IMAGE_LABELS[379] = "wake, rune-LTB,2K69-chagrinedminnow-tags";
 IMAGE_LABELS[380] = "kindbud-5G,SDH-chagrinedminnow-tags, antistyle";
-IMAGE_LABELS[381] = "ducky-chagrinedminnow-antistyle, tags";
+IMAGE_LABELS[381] = "triangle-chagrinedminnow-antistyle, tags";
 IMAGE_LABELS[382] = "scipio-2GF-chagrinedminnow-throwie, character, fillin";
-IMAGE_LABELS[383] = "ducky-chagrinedminnow-antistyle, tags";
-IMAGE_LABELS[384] = "ducky-chagrinedminnow-antistyle, tags";
+IMAGE_LABELS[383] = "triangle-chagrinedminnow-antistyle, tags";
+IMAGE_LABELS[384] = "truangle-chagrinedminnow-antistyle, tags";
 IMAGE_LABELS[385] = "catch, 27, wuhan, wilt-VC,2GF,OHK,TSZ,PTG,BNE-chagrinedminnow-tags, stencil";
-IMAGE_LABELS[386] = "ducky, 27-5G,TSZ,2GF-chagrinedminnow-stencil, antistyle, tags";
-IMAGE_LABELS[387] = "ducky-chagrinedminnow-antistyle, tags";
+IMAGE_LABELS[386] = "triangle, 27-5G,TSZ,2GF-chagrinedminnow-stencil, antistyle, tags";
+IMAGE_LABELS[387] = "triangle-chagrinedminnow-antistyle, tags";
 IMAGE_LABELS[388] = "27-TSZ,2GF-chagrinedminnow-stencil";
 IMAGE_LABELS[389] = "27-TSZ,2GF-chagrinedminnow-throwie, character, fillin";
 IMAGE_LABELS[390] = "doves-SLT,CFM-chagrinedminnow-piece, character";
@@ -684,6 +684,7 @@ const SYNONYM_GROUPS = [
   ['salud', 'saludpig', 'salud pig', 'pig'],
   ['CTS', 'TNL'],
   ['OY!', 'oh yes!', 'ohyes!'],
+  ['triangle', 'tri angle', 'cheese', 'cheesegrater', 'cheese grater', 'cheesegrater of death',]
 ];
 
 function buildSynonymMap(groups) {
