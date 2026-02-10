@@ -278,6 +278,94 @@ nav a:hover { transform: scale(1.06); }
 
 /* End of stylesheet */
 
+/* Custom fonts (font files live in /assets/GUI/) */
+@font-face {
+  font-family: "RAM-Font3";
+  src: url("/assets/GUI/font3.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "RAM-Font8";
+  src: url("/assets/GUI/font8.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "RAM-Font11";
+  src: url("/assets/GUI/font11.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --ram-font3: "RAM-Font3", Arial, Helvetica, sans-serif;
+  --ram-font8: "RAM-Font8", Arial, Helvetica, sans-serif;
+  --ram-font11: "RAM-Font11", Arial, Helvetica, sans-serif;
+}
+
+/* Nav spacing + fonts */
+nav .nav-left a {
+  font-family: var(--ram-font3);
+}
+nav .site-title {
+  font-family: var(--ram-font3);
+  padding: 6px 10px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+}
+nav .right-group .settings-dropdown {
+  margin: 0;
+}
+nav .right-group .gear-box {
+  padding: 6px 10px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+
+/* Gallery search + filters */
+.search-bar input,
+.search-bar select,
+.search-bar select option {
+  font-family: var(--ram-font8);
+}
+.search-bar input::placeholder {
+  font-family: var(--ram-font8);
+}
+
+/* Spotlight / modal text */
+.modal .caption,
+.modal .caption .caption-inner {
+  font-family: var(--ram-font8);
+}
+
+/* Home page intro text */
+.home-intro {
+  font-family: var(--ram-font8);
+}
+
+/* Leaderboard typography */
+.leaderboard h1 {
+  font-family: var(--ram-font3);
+}
+.leaderboard-table thead th {
+  font-family: var(--ram-font8);
+}
+.leaderboard-table tbody td.rank-col,
+.leaderboard-table tbody td.count-col {
+  font-family: var(--ram-font11);
+}
+.leaderboard-table tbody td.photog-col {
+  font-family: var(--ram-font11);
+}
+
 /* Nav fixes + mobile hamburger menu */
 nav .right-group { display: flex; align-items: center; gap: 12px; }
 nav .settings-dropdown {
