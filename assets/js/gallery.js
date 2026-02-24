@@ -2,7 +2,6 @@
    - sequential image loading (placeholder -> load -> fade-in)
    - interaction disabled until image fully loaded
    - precise masonry row calculation after each load
-   - ad insertion every 10 items
    - search filtering
 */
 
@@ -1035,34 +1034,6 @@ function showToyBlockedMessage() {
   gallery.appendChild(msgWrap);
   currentDisplayedList = [];
 }
-//what
-// Ad configuration: set publisherId to 'ca-pub-XXXXXXXXXXXX' to enable real AdSense.
-// Leave empty ('') to keep plain "Ad placeholder" boxes.
-const ADS_CONFIG = {
-  publisherId: '', // <-- set to your publisher id
-  adInterval: 25,  // insert ad every 25 images
-  // Enable real AdSense loading. Keep `false` when running under a strict
-  // Content-Security-Policy that disallows eval/new Function (common with
-  // some hosting providers). When `false` the script will show a local
-  // placeholder instead of attempting to load Google's script.
-  enableAds: false
-};
-
-// helper to ensure the AdSense loader script is present (only if publisherId provided)
-function ensureAdsLoader(publisherId) {
-  if (!publisherId) return;
-  // detect existing loader either by data-ad-client attribute or by src path
-  const existing = document.querySelector('script[data-ad-client], script[src*="pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"]');
-  if (existing) return;
-  const s = document.createElement('script');
-  s.async = true;
-  // use the same src + client query param and crossorigin attribute that AdSense provided
-  s.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=' + encodeURIComponent(publisherId);
-  s.crossOrigin = "anonymous";
-  // set data-ad-client for script detection consistency
-  s.setAttribute('data-ad-client', publisherId);
-  document.head.appendChild(s);
-}
 
 // ----------------- CHANGES START -----------------
 // missing helper used throughout the file — compute stable rendered height
@@ -1509,7 +1480,6 @@ async function loadImagesSequentially(list) {
   let createdCount = 0;
   let observer = null;
 
-  const AD_INTERVAL = Math.max(0, parseInt(ADS_CONFIG.adInterval || 0, 10));
   const INITIAL_CARD_BATCH = 48;
   const APPEND_BATCH_SIZE = 36;
   const APPEND_SCROLL_THRESHOLD_PX = 1400;
@@ -1524,20 +1494,6 @@ async function loadImagesSequentially(list) {
     const cols = Math.max(1, Math.floor((galleryWidth + gap) / (minCol + gap)));
     const columnWidth = Math.max(120, Math.floor((galleryWidth - (cols - 1) * gap) / cols));
     return Math.max(80, Math.round(columnWidth * DEFAULT_ASPECT));
-  }
-
-  function insertAdAfterCard(card) {
-    const rowHeight = parseInt(window.getComputedStyle(grid).getPropertyValue("grid-auto-rows") || "10");
-    const rowGap = parseInt(window.getComputedStyle(grid).getPropertyValue("gap") || "10");
-    const adMinH = 140;
-    const adRowSpan = Math.max(1, Math.ceil((adMinH + rowGap) / (rowHeight + rowGap)));
-
-    const ad = document.createElement("div");
-    ad.className = "ad-card";
-    ad.textContent = "Advertisment placeholder";
-    ad.style.gridRowEnd = `span ${adRowSpan}`;
-    if (card && card.parentNode) card.parentNode.insertBefore(ad, card.nextSibling);
-    else gallery.appendChild(ad);
   }
 
   function enqueueItem(item) {
@@ -1629,10 +1585,6 @@ async function loadImagesSequentially(list) {
 
     if (observer) observer.observe(card);
     else enqueueItem(item);
-
-    if (AD_INTERVAL > 0 && (index + 1) % AD_INTERVAL === 0) {
-      insertAdAfterCard(card);
-    }
   }
 
   function appendCards(count) {
@@ -1941,16 +1893,8 @@ function resizeAllMasonryItems() {
   const rowGap = parseInt(window.getComputedStyle(grid).getPropertyValue("gap") || "10");
 
   // batch DOM reads & writes in one loop to reduce layout thrash
-  const items = Array.from(document.querySelectorAll(".card, .ad-card"));
+  const items = Array.from(document.querySelectorAll(".card"));
   items.forEach(item => {
-    // handle ad-cards specially: compute its height and set row span (do not nullify)
-    if (item.classList.contains("ad-card")) {
-      const h = item.getBoundingClientRect().height || 140;
-      const adRowSpan = Math.max(1, Math.ceil((h + rowGap) / (rowHeight + rowGap)));
-      item.style.gridRowEnd = `span ${adRowSpan}`;
-      return;
-    }
-
     const wrap = item.querySelector(".image-wrap");
     const img = item.querySelector(".gallery-image");
     const err = item.querySelector(".loading-error");
@@ -1982,70 +1926,6 @@ function resizeAllMasonryItems() {
   });
 }
 
-// replace the previous ad-insertion logic with this block
-function maybeInsertAdAfter(card, index, gallery) {
-  // index is zero-based count of images inserted so far
-  const insertAfterCount = ADS_CONFIG.adInterval;
-  if (insertAfterCount <= 0) return;
-
-  // Insert an ad after every adInterval images
-  if ((index + 1) % insertAfterCount !== 0) return;
-
-  // compute grid row span if you use that logic elsewhere (fallback = 1)
-  const adRowSpan = 1;
-
-  const ad = document.createElement('div');
-  ad.className = 'ad-card';
-  ad.style.gridRowEnd = `span ${adRowSpan}`;
-
-  // Only attempt to load AdSense when publisherId is provided AND enableAds
-  // is explicitly enabled. Many Ad providers (including Google's loader)
-  // use constructs blocked by strict CSPs (eval/new Function). When CSP
-  // disallows eval, appending the remote script can trigger console errors
-  // even if it ultimately fails — guard against that by defaulting
-  // `enableAds` to false in development or strict environments.
-  if (ADS_CONFIG.publisherId && ADS_CONFIG.enableAds) {
-    // ensure loader present then build real AdSense container
-    ensureAdsLoader(ADS_CONFIG.publisherId);
-
-    const ins = document.createElement('ins');
-    ins.className = 'adsbygoogle';
-    ins.style.display = 'block';
-    // optional: set a specific slot by uncommenting and filling data-ad-slot
-    // ins.setAttribute('data-ad-slot', 'YOUR_AD_SLOT_ID');
-    ins.setAttribute('data-ad-format', 'auto');
-    ins.setAttribute('data-full-width-responsive', 'true');
-
-    ad.appendChild(ins);
-
-    // attempt to render the ad (will fail silently in dev/localhost)
-    try {
-      (window.adsbygoogle = window.adsbygoogle || []).push({});
-    } catch (e) {
-      // development environments often throw here; keep placeholder visible
-      console.warn('adsbygoogle push failed', e);
-      // keep a visible fallback label if rendering failed
-      const label = document.createElement('div');
-      label.className = 'ad-fallback-label';
-      label.textContent = 'Ad placeholder';
-      ad.appendChild(label);
-    }
-  } else {
-    // no enabled ads: keep the same visible placeholder as before
-    const label = document.createElement('div');
-    label.className = 'ad-fallback-label';
-    label.textContent = 'Ad placeholder';
-    ad.appendChild(label);
-  }
-
-  // insert into DOM after the related card (or at end)
-  if (card && card.parentNode) {
-    card.parentNode.insertBefore(ad, card.nextSibling);
-  } else {
-    gallery.appendChild(ad);
-  }
-}
-
 // start
 // On initial load, honor saved sort preference and load gallery accordingly
 document.addEventListener("DOMContentLoaded", () => {
@@ -2060,3 +1940,4 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 window.addEventListener("resize", () => requestAnimationFrame(resizeAllMasonryItems));
 window.addEventListener("load", resizeAllMasonryItems);
+
