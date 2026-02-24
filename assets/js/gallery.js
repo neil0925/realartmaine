@@ -755,14 +755,10 @@ const DEFAULT_ASPECT = 0.66;
 // Cache names
 const IMAGE_CACHE = 'realart-image-cache-v2';
 const GUI_CACHE = 'realart-gui-v1';
-// GUI assets to pre-cache for faster UI (icons, arrows, gear, mode toggles)
+// GUI assets to pre-cache for faster UI (icons, arrows, gear)
 const GUI_ASSETS = [
-  '/assets/GUI/home.png',
-  '/assets/GUI/gallery.png',
   '/assets/GUI/gear.png',
-  '/assets/GUI/arrow.png',
-  '/assets/GUI/DarkMode.png',
-  '/assets/GUI/LightMode.png'
+  '/assets/GUI/arrow.png'
 ];
 
 // Track created blob URLs so they can be revoked on unload
@@ -1280,8 +1276,6 @@ function openModal(meta) {
   caption.style.visibility = 'hidden';
   modal.appendChild(caption);
   // Add left and right navigation arrows using user's PNG icons
-  // declare observer variable in this scope so closeModal can disconnect it
-  let bodyClassObserver = null;
 
   leftArrow = document.createElement("button");
   leftArrow.className = "modal-arrow modal-arrow-left";
@@ -1341,24 +1335,9 @@ function openModal(meta) {
   };
   rightArrow.appendChild(rightImg);
 
-  // Update arrow icons according to dark-mode (white for dark, black for light)
-  function updateArrowIcons() {
-    const isDark = document.body.classList.contains('dark-mode');
-    // Per user request: in dark mode use original image (no invert).
-    // In light mode invert colors so the white arrow becomes dark.
-    const filter = isDark ? 'none' : 'invert(1)';
-    leftImg.style.filter = filter;
-    rightImg.style.filter = filter;
-  }
-  updateArrowIcons();
-
-  // Watch for class changes on body so icons update when mode toggles
-  bodyClassObserver = new MutationObserver((mutations) => {
-    for (const m of mutations) {
-      if (m.attributeName === 'class') updateArrowIcons();
-    }
-  });
-  bodyClassObserver.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+  // Keep modal arrows visible against the spotlight backdrop.
+  leftImg.style.filter = 'invert(1)';
+  rightImg.style.filter = 'invert(1)';
 
   modal.appendChild(leftArrow);
   modal.appendChild(rightArrow);
@@ -1402,9 +1381,6 @@ function openModal(meta) {
     const cards = document.querySelectorAll(".card");
     cards.forEach(card => card.classList.remove("highlighted"));
     
-    // disconnect the observer watching body class changes (if present)
-    try { if (typeof bodyClassObserver !== 'undefined' && bodyClassObserver && bodyClassObserver.disconnect) bodyClassObserver.disconnect(); } catch (e) {}
-
     if (backdrop.parentNode) {
       document.body.removeChild(backdrop);
     }

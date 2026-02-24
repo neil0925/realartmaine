@@ -882,7 +882,7 @@ footer hr { border:none; border-top:1px solid #aaa; margin:10px 0; }
   font-size: clamp(2.2rem, 5vw, 4.2rem);
   font-weight: 800;
   background: transparent;
-  color: #000; /* default for light mode */
+  color: #000;
   border-radius: 0;
   /* ensure normal wrapping behavior (avoid one-word-per-line) */
   white-space: normal;
@@ -953,7 +953,7 @@ footer hr { border:none; border-top:1px solid #aaa; margin:10px 0; }
   overflow: auto;
 }
 
-/* maintenance overlay uses light-theme background */
+/* maintenance overlay background */
 
 .maintenance-overlay .maintenance-banner {
   width: 100%;
