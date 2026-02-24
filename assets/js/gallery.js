@@ -824,6 +824,145 @@ window.addEventListener('unload', () => {
   try { __createdGuiBlobUrls.forEach(u => { try { URL.revokeObjectURL(u); } catch (e) {} }); } catch (e) {}
 });
 
+const CACHE_PIXEL_SAMPLE_COUNT = 3;
+
+function getImageSamplePixelDataFromCanvasSource(source, width, height, sampleCount) {
+  const safeWidth = Math.max(1, width || 1);
+  const safeHeight = Math.max(1, height || 1);
+  const take = Math.max(1, Math.min(sampleCount, safeWidth));
+  let canvas = null;
+
+  if (typeof OffscreenCanvas !== 'undefined') {
+    canvas = new OffscreenCanvas(safeWidth, safeHeight);
+  } else {
+    canvas = document.createElement('canvas');
+    canvas.width = safeWidth;
+    canvas.height = safeHeight;
+  }
+
+  const ctx = canvas.getContext('2d', { willReadFrequently: true });
+  if (!ctx) return null;
+
+  ctx.drawImage(source, 0, 0);
+  const data = ctx.getImageData(0, 0, take, 1).data;
+  return Array.from(data);
+}
+
+async function getImageSamplePixelDataFromBlob(blob, sampleCount) {
+  if (!blob) return null;
+
+  // Prefer createImageBitmap when available.
+  if (typeof createImageBitmap === 'function') {
+    try {
+      const bitmap = await createImageBitmap(blob);
+      try {
+        return getImageSamplePixelDataFromCanvasSource(
+          bitmap,
+          bitmap.width,
+          bitmap.height,
+          sampleCount
+        );
+      } finally {
+        try { if (bitmap && bitmap.close) bitmap.close(); } catch (e) {}
+      }
+    } catch (e) {
+      // fall through to Image-element path
+    }
+  }
+
+  // Fallback: decode via Image element and draw to canvas.
+  const blobUrl = URL.createObjectURL(blob);
+  try {
+    const img = await new Promise((resolve, reject) => {
+      const probe = new Image();
+      probe.onload = () => resolve(probe);
+      probe.onerror = reject;
+      probe.src = blobUrl;
+    });
+    return getImageSamplePixelDataFromCanvasSource(
+      img,
+      img.naturalWidth || img.width,
+      img.naturalHeight || img.height,
+      sampleCount
+    );
+  } catch (e) {
+    return null;
+  } finally {
+    try { URL.revokeObjectURL(blobUrl); } catch (e) {}
+  }
+}
+
+function samePixelArray(a, b) {
+  if (!Array.isArray(a) || !Array.isArray(b)) return false;
+  if (a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i++) {
+    if (a[i] !== b[i]) return false;
+  }
+  return true;
+}
+
+async function sameImageBySizeAndSamplePixels(cachedResp, onlineResp) {
+  if (!cachedResp || !onlineResp) return false;
+  const cachedBlob = await cachedResp.clone().blob();
+  const onlineBlob = await onlineResp.clone().blob();
+
+  if (cachedBlob.size !== onlineBlob.size) return false;
+
+  const cachedPixels = await getImageSamplePixelDataFromBlob(cachedBlob, CACHE_PIXEL_SAMPLE_COUNT);
+  const onlinePixels = await getImageSamplePixelDataFromBlob(onlineBlob, CACHE_PIXEL_SAMPLE_COUNT);
+  if (!cachedPixels || !onlinePixels) return false;
+
+  return samePixelArray(cachedPixels, onlinePixels);
+}
+
+async function getValidatedImageBlob(candidate) {
+  let cache = null;
+  let cachedResp = null;
+
+  if (typeof caches !== 'undefined' && caches.open) {
+    try {
+      cache = await caches.open(GALLERY_CACHE);
+      cachedResp = await cache.match(candidate);
+    } catch (e) {
+      cache = null;
+      cachedResp = null;
+    }
+  }
+
+  let onlineResp = null;
+  try {
+    onlineResp = await fetch(candidate, { method: 'GET', cache: 'no-store' });
+  } catch (e) {
+    onlineResp = null;
+  }
+
+  // If we have both cached and online, validate and either keep cached
+  // or replace with online when bytes/pixels differ.
+  if (cachedResp && cachedResp.ok && onlineResp && onlineResp.ok) {
+    const same = await sameImageBySizeAndSamplePixels(cachedResp, onlineResp);
+    if (same) {
+      return { blob: await cachedResp.blob(), source: 'cache' };
+    }
+
+    try { if (cache) await cache.delete(candidate); } catch (e) {}
+    try { if (cache) await cache.put(candidate, onlineResp.clone()); } catch (e) {}
+    return { blob: await onlineResp.blob(), source: 'network-refresh' };
+  }
+
+  // No cached entry but online exists.
+  if (onlineResp && onlineResp.ok) {
+    try { if (cache) await cache.put(candidate, onlineResp.clone()); } catch (e) {}
+    return { blob: await onlineResp.blob(), source: 'network' };
+  }
+
+  // Offline fallback.
+  if (cachedResp && cachedResp.ok) {
+    return { blob: await cachedResp.blob(), source: 'cache-offline' };
+  }
+
+  return null;
+}
+
 
 
 const TOY_BLACKLIST = [
@@ -1070,65 +1209,25 @@ function openModal(meta) {
     try { if (rightArrow) rightArrow.style.visibility = 'visible'; } catch (e) {}
   }
 
-  // Load modal image from Cache Storage when possible, falling back to
-  // network. This mirrors the gallery caching strategy so opening the
-  // spotlight uses locally cached images when available. Reveal modal
-  // content only after the image has been set and (preferably) decoded.
+  // Load modal image through the same cache validator used by gallery cards.
+  // If cache and online differ (size/pixels), the cached entry is replaced.
   (async () => {
     try {
       const candidate = meta && meta.src ? meta.src : null;
       if (!candidate) return;
+      const resolved = await getValidatedImageBlob(candidate);
+      if (!resolved || !resolved.blob) return;
 
-      // try cache first
-      if (typeof caches !== 'undefined' && caches.open) {
-        try {
-          const cache = await caches.open(GALLERY_CACHE);
-          const cached = await cache.match(candidate);
-          if (cached && cached.ok) {
-            const blob = await cached.blob();
-            const blobUrl = URL.createObjectURL(blob);
-            img.src = blobUrl;
-            try {
-              await img.decode();
-            } catch (e) {
-              // decoding failed; still reveal so browser can show fallback
-            }
-            try { URL.revokeObjectURL(blobUrl); } catch (e) {}
-            revealModalContent();
-            return;
-          }
-        } catch (e) {
-          // ignore cache errors and fall through to network fetch
-        }
-      }
-
-      // not cached: fetch from network and cache if possible
+      const blobUrl = URL.createObjectURL(resolved.blob);
+      img.src = blobUrl;
       try {
-        const resp = await fetch(candidate, { method: 'GET' });
-        if (resp && resp.ok) {
-          // attempt to cache a clone (ignore failures)
-          try {
-            if (typeof caches !== 'undefined' && caches.open) {
-              const cache = await caches.open(GALLERY_CACHE);
-              try { await cache.put(candidate, resp.clone()); } catch (e) {}
-            }
-          } catch (e) {}
-
-          const blob = await resp.blob();
-          const blobUrl = URL.createObjectURL(blob);
-          img.src = blobUrl;
-          try {
-            await img.decode();
-          } catch (e) {
-            // decoding failed; still reveal so browser can show fallback
-          }
-          try { URL.revokeObjectURL(blobUrl); } catch (e) {}
-          revealModalContent();
-          return;
-        }
+        await img.decode();
       } catch (e) {
-        // network failed; leave img.src unset so browser shows alt text
+        // decoding failed; still reveal so browser can show fallback
       }
+      try { URL.revokeObjectURL(blobUrl); } catch (e) {}
+      revealModalContent();
+      return;
     } catch (e) {
       // swallow any unexpected errors to avoid breaking modal
       console.warn('modal image load error', e);
@@ -1570,71 +1669,19 @@ function loadImageIntoCard(meta, card, wrap, placeholder, expectedLoadId) {
         tryNext();
       };
 
-      // start loading this candidate using Cache Storage when available to
-      // provide a persistent client-side cache across sessions. We attempt
-      // to read from the cache first; if not found, fetch from network and
-      // put a clone into the cache for future loads. This still avoids
-      // creating <img> requests that generate console 404 noise.
+      // Resolve this candidate through cache validation:
+      // compare cached image vs online image by size + first sampled pixels.
+      // Keep cached if equal, otherwise replace cached entry with the network copy.
       (async () => {
         try {
           if (expectedLoadId !== currentLoadId) return resolve(false);
-
-          // Try to serve from Cache Storage first
-          let cachedResp = null;
-          if (typeof caches !== 'undefined' && caches.open) {
-            try {
-              const cache = await caches.open(GALLERY_CACHE);
-              cachedResp = await cache.match(candidate);
-            } catch (e) {
-              // Cache operations can fail in some environments (private mode)
-              cachedResp = null;
-            }
-          }
-
-          if (cachedResp && cachedResp.ok) {
-            const blob = await cachedResp.blob();
-            if (expectedLoadId !== currentLoadId) return resolve(false);
-            const blobUrl = URL.createObjectURL(blob);
-            img.src = blobUrl;
-            img.decode().then(() => {
-              meta.src = candidate;
-              const finalH = getRenderedImageHeight(img, wrap.clientWidth) || parseInt(wrap.style.height) || 150;
-              wrap.style.height = `${finalH}px`;
-              img.classList.remove("hidden");
-              img.classList.add("fade-in");
-              if (placeholder && placeholder.parentNode === wrap) placeholder.innerHTML = "";
-              wrap.appendChild(img);
-              requestAnimationFrame(() => {
-                const rowSpan = Math.max(1, Math.ceil((finalH + rowGap) / (rowHeight + rowGap)));
-                card.style.gridRowEnd = `span ${rowSpan}`;
-                wrap.classList.add("loaded");
-                try { URL.revokeObjectURL(blobUrl); } catch (e) {}
-                resolve(true);
-              });
-            }).catch(() => {
-              try { URL.revokeObjectURL(blobUrl); } catch (e) {}
-              tryNext();
-            });
-            return;
-          }
-
-          // Not cached: fetch from network and cache the response if possible
-          const resp = await fetch(candidate, { method: 'GET' });
-          if (!resp || !resp.ok) {
-            // network miss -> try next candidate
+          const resolved = await getValidatedImageBlob(candidate);
+          if (!resolved || !resolved.blob) {
             tryNext();
             return;
           }
 
-          // attempt to cache a clone (ignore cache errors)
-          try {
-            if (typeof caches !== 'undefined' && caches.open) {
-              const cache = await caches.open(GALLERY_CACHE);
-              try { await cache.put(candidate, resp.clone()); } catch (e) { /* ignore cache put failures */ }
-            }
-          } catch (e) { /* ignore cache open failures */ }
-
-          const blob = await resp.blob();
+          const blob = resolved.blob;
           if (expectedLoadId !== currentLoadId) return resolve(false);
           const blobUrl = URL.createObjectURL(blob);
           img.src = blobUrl;
