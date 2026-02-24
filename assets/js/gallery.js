@@ -753,8 +753,9 @@ let currentDisplayedList = [];
 
 const DEFAULT_ASPECT = 0.66;
 
-// Cache name used for storing fetched gallery image responses (persistent)
-const GALLERY_CACHE = 'realart-gallery-v1';
+// Cache names
+const IMAGE_CACHE = 'realart-image-cache-v2';
+const GUI_CACHE = 'realart-gui-v1';
 // GUI assets to pre-cache for faster UI (icons, arrows, gear, mode toggles)
 const GUI_ASSETS = [
   '/assets/GUI/home.png',
@@ -768,11 +769,136 @@ const GUI_ASSETS = [
 // Track created blob URLs so they can be revoked on unload
 const __createdGuiBlobUrls = [];
 
-// Pre-cache GUI assets into the same GALLERY_CACHE (cache-first strategy)
+// Lightweight image revalidation (cache-first + background conditional checks).
+const IMAGE_REVALIDATE_TTL_MS = 6 * 60 * 60 * 1000; // 6 hours
+const IMAGE_REVALIDATE_CONCURRENCY = 2;
+const IMAGE_REVALIDATION_STATE_KEY = 'ram_image_revalidation_state_v1';
+const __imageLastValidatedAt = new Map();
+const __pendingImageRevalidations = new Set();
+const __queuedImageRevalidations = [];
+let __activeImageRevalidations = 0;
+
+function loadImageRevalidationState() {
+  try {
+    const raw = localStorage.getItem(IMAGE_REVALIDATION_STATE_KEY);
+    if (!raw) return;
+    const data = JSON.parse(raw);
+    if (!data || typeof data !== 'object') return;
+    const now = Date.now();
+    for (const key of Object.keys(data)) {
+      const ts = Number(data[key]);
+      if (!Number.isFinite(ts)) continue;
+      // prune very old state so storage stays small
+      if (now - ts > 30 * 24 * 60 * 60 * 1000) continue;
+      __imageLastValidatedAt.set(key, ts);
+    }
+  } catch (e) {
+    // ignore storage parse errors
+  }
+}
+
+function saveImageRevalidationState() {
+  try {
+    const now = Date.now();
+    const out = {};
+    __imageLastValidatedAt.forEach((ts, key) => {
+      if (now - ts <= 30 * 24 * 60 * 60 * 1000) out[key] = ts;
+    });
+    localStorage.setItem(IMAGE_REVALIDATION_STATE_KEY, JSON.stringify(out));
+  } catch (e) {
+    // ignore storage write errors
+  }
+}
+
+function markImageValidated(candidate) {
+  __imageLastValidatedAt.set(candidate, Date.now());
+  saveImageRevalidationState();
+}
+
+function needsImageRevalidation(candidate) {
+  const last = __imageLastValidatedAt.get(candidate) || 0;
+  return Date.now() - last >= IMAGE_REVALIDATE_TTL_MS;
+}
+
+function buildConditionalHeadersFromCached(cachedResp) {
+  const headers = {};
+  if (!cachedResp || !cachedResp.headers) return headers;
+  const etag = cachedResp.headers.get('etag');
+  const lastModified = cachedResp.headers.get('last-modified');
+  if (etag) headers['If-None-Match'] = etag;
+  if (lastModified) headers['If-Modified-Since'] = lastModified;
+  return headers;
+}
+
+async function revalidateCachedImage(candidate) {
+  if (typeof caches === 'undefined' || !caches.open) {
+    markImageValidated(candidate);
+    return;
+  }
+
+  try {
+    const cache = await caches.open(IMAGE_CACHE);
+    const cachedResp = await cache.match(candidate);
+    if (!cachedResp || !cachedResp.ok) {
+      markImageValidated(candidate);
+      return;
+    }
+
+    const headers = buildConditionalHeadersFromCached(cachedResp);
+    const netResp = await fetch(candidate, { method: 'GET', cache: 'no-store', headers });
+
+    // 304 means cached content is still valid.
+    if (netResp && netResp.status === 304) {
+      markImageValidated(candidate);
+      return;
+    }
+
+    // 200 means content may have changed; replace cache entry.
+    if (netResp && netResp.ok) {
+      try { await cache.put(candidate, netResp.clone()); } catch (e) {}
+      markImageValidated(candidate);
+      return;
+    }
+
+    // On any other status, keep existing cache and avoid retry storms.
+    markImageValidated(candidate);
+  } catch (e) {
+    // Network errors are expected offline; keep existing cache.
+    markImageValidated(candidate);
+  }
+}
+
+function drainImageRevalidationQueue() {
+  while (
+    __activeImageRevalidations < IMAGE_REVALIDATE_CONCURRENCY &&
+    __queuedImageRevalidations.length > 0
+  ) {
+    const candidate = __queuedImageRevalidations.shift();
+    __activeImageRevalidations++;
+    revalidateCachedImage(candidate)
+      .catch(() => {})
+      .finally(() => {
+        __activeImageRevalidations--;
+        __pendingImageRevalidations.delete(candidate);
+        drainImageRevalidationQueue();
+      });
+  }
+}
+
+function queueImageRevalidation(candidate) {
+  if (!candidate) return;
+  if (!needsImageRevalidation(candidate)) return;
+  if (__pendingImageRevalidations.has(candidate)) return;
+  __pendingImageRevalidations.add(candidate);
+  __queuedImageRevalidations.push(candidate);
+  drainImageRevalidationQueue();
+}
+
+// Pre-cache GUI assets (cache-first strategy)
 async function preCacheGuiAssets() {
   if (typeof caches === 'undefined' || !caches.open) return;
   try {
-    const cache = await caches.open(GALLERY_CACHE);
+    const cache = await caches.open(GUI_CACHE);
     for (const p of GUI_ASSETS) {
       try {
         const match = await cache.match(p);
@@ -794,7 +920,7 @@ async function preCacheGuiAssets() {
 async function replaceGuiImagesFromCache() {
   if (typeof caches === 'undefined' || !caches.open) return;
   try {
-    const cache = await caches.open(GALLERY_CACHE);
+    const cache = await caches.open(GUI_CACHE);
     const imgs = Array.from(document.querySelectorAll('img'));
     for (const img of imgs) {
       try {
@@ -824,104 +950,13 @@ window.addEventListener('unload', () => {
   try { __createdGuiBlobUrls.forEach(u => { try { URL.revokeObjectURL(u); } catch (e) {} }); } catch (e) {}
 });
 
-const CACHE_PIXEL_SAMPLE_COUNT = 3;
-
-function getImageSamplePixelDataFromCanvasSource(source, width, height, sampleCount) {
-  const safeWidth = Math.max(1, width || 1);
-  const safeHeight = Math.max(1, height || 1);
-  const take = Math.max(1, Math.min(sampleCount, safeWidth));
-  let canvas = null;
-
-  if (typeof OffscreenCanvas !== 'undefined') {
-    canvas = new OffscreenCanvas(safeWidth, safeHeight);
-  } else {
-    canvas = document.createElement('canvas');
-    canvas.width = safeWidth;
-    canvas.height = safeHeight;
-  }
-
-  const ctx = canvas.getContext('2d', { willReadFrequently: true });
-  if (!ctx) return null;
-
-  ctx.drawImage(source, 0, 0);
-  const data = ctx.getImageData(0, 0, take, 1).data;
-  return Array.from(data);
-}
-
-async function getImageSamplePixelDataFromBlob(blob, sampleCount) {
-  if (!blob) return null;
-
-  // Prefer createImageBitmap when available.
-  if (typeof createImageBitmap === 'function') {
-    try {
-      const bitmap = await createImageBitmap(blob);
-      try {
-        return getImageSamplePixelDataFromCanvasSource(
-          bitmap,
-          bitmap.width,
-          bitmap.height,
-          sampleCount
-        );
-      } finally {
-        try { if (bitmap && bitmap.close) bitmap.close(); } catch (e) {}
-      }
-    } catch (e) {
-      // fall through to Image-element path
-    }
-  }
-
-  // Fallback: decode via Image element and draw to canvas.
-  const blobUrl = URL.createObjectURL(blob);
-  try {
-    const img = await new Promise((resolve, reject) => {
-      const probe = new Image();
-      probe.onload = () => resolve(probe);
-      probe.onerror = reject;
-      probe.src = blobUrl;
-    });
-    return getImageSamplePixelDataFromCanvasSource(
-      img,
-      img.naturalWidth || img.width,
-      img.naturalHeight || img.height,
-      sampleCount
-    );
-  } catch (e) {
-    return null;
-  } finally {
-    try { URL.revokeObjectURL(blobUrl); } catch (e) {}
-  }
-}
-
-function samePixelArray(a, b) {
-  if (!Array.isArray(a) || !Array.isArray(b)) return false;
-  if (a.length !== b.length) return false;
-  for (let i = 0; i < a.length; i++) {
-    if (a[i] !== b[i]) return false;
-  }
-  return true;
-}
-
-async function sameImageBySizeAndSamplePixels(cachedResp, onlineResp) {
-  if (!cachedResp || !onlineResp) return false;
-  const cachedBlob = await cachedResp.clone().blob();
-  const onlineBlob = await onlineResp.clone().blob();
-
-  if (cachedBlob.size !== onlineBlob.size) return false;
-
-  const cachedPixels = await getImageSamplePixelDataFromBlob(cachedBlob, CACHE_PIXEL_SAMPLE_COUNT);
-  const onlinePixels = await getImageSamplePixelDataFromBlob(onlineBlob, CACHE_PIXEL_SAMPLE_COUNT);
-  if (!cachedPixels || !onlinePixels) return false;
-
-  return samePixelArray(cachedPixels, onlinePixels);
-}
-
 async function getValidatedImageBlob(candidate) {
   let cache = null;
   let cachedResp = null;
 
   if (typeof caches !== 'undefined' && caches.open) {
     try {
-      cache = await caches.open(GALLERY_CACHE);
+      cache = await caches.open(IMAGE_CACHE);
       cachedResp = await cache.match(candidate);
     } catch (e) {
       cache = null;
@@ -929,39 +964,28 @@ async function getValidatedImageBlob(candidate) {
     }
   }
 
-  let onlineResp = null;
-  try {
-    onlineResp = await fetch(candidate, { method: 'GET', cache: 'no-store' });
-  } catch (e) {
-    onlineResp = null;
-  }
-
-  // If we have both cached and online, validate and either keep cached
-  // or replace with online when bytes/pixels differ.
-  if (cachedResp && cachedResp.ok && onlineResp && onlineResp.ok) {
-    const same = await sameImageBySizeAndSamplePixels(cachedResp, onlineResp);
-    if (same) {
-      return { blob: await cachedResp.blob(), source: 'cache' };
-    }
-
-    try { if (cache) await cache.delete(candidate); } catch (e) {}
-    try { if (cache) await cache.put(candidate, onlineResp.clone()); } catch (e) {}
-    return { blob: await onlineResp.blob(), source: 'network-refresh' };
-  }
-
-  // No cached entry but online exists.
-  if (onlineResp && onlineResp.ok) {
-    try { if (cache) await cache.put(candidate, onlineResp.clone()); } catch (e) {}
-    return { blob: await onlineResp.blob(), source: 'network' };
-  }
-
-  // Offline fallback.
+  // Fast path: serve cached image immediately, then revalidate in the background.
   if (cachedResp && cachedResp.ok) {
-    return { blob: await cachedResp.blob(), source: 'cache-offline' };
+    queueImageRevalidation(candidate);
+    return { blob: await cachedResp.blob(), source: 'cache' };
+  }
+
+  // Cache miss: fetch from network and store.
+  try {
+    const onlineResp = await fetch(candidate, { method: 'GET', cache: 'no-store' });
+    if (onlineResp && onlineResp.ok) {
+      try { if (cache) await cache.put(candidate, onlineResp.clone()); } catch (e) {}
+      markImageValidated(candidate);
+      return { blob: await onlineResp.blob(), source: 'network' };
+    }
+  } catch (e) {
+    // network miss
   }
 
   return null;
 }
+
+loadImageRevalidationState();
 
 
 
@@ -1209,8 +1233,8 @@ function openModal(meta) {
     try { if (rightArrow) rightArrow.style.visibility = 'visible'; } catch (e) {}
   }
 
-  // Load modal image through the same cache validator used by gallery cards.
-  // If cache and online differ (size/pixels), the cached entry is replaced.
+  // Load modal image through the same cache helper used by gallery cards.
+  // Cached images are served immediately and refreshed in the background.
   (async () => {
     try {
       const candidate = meta && meta.src ? meta.src : null;
@@ -1669,9 +1693,8 @@ function loadImageIntoCard(meta, card, wrap, placeholder, expectedLoadId) {
         tryNext();
       };
 
-      // Resolve this candidate through cache validation:
-      // compare cached image vs online image by size + first sampled pixels.
-      // Keep cached if equal, otherwise replace cached entry with the network copy.
+      // Resolve this candidate through cache-first image loading.
+      // Any stale cached entry is refreshed asynchronously in the background.
       (async () => {
         try {
           if (expectedLoadId !== currentLoadId) return resolve(false);
