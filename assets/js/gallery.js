@@ -1513,8 +1513,9 @@ async function loadImagesSequentially(list) {
   const INITIAL_CARD_BATCH = 48;
   const APPEND_BATCH_SIZE = 36;
   const APPEND_SCROLL_THRESHOLD_PX = 1400;
-  const IMAGE_LOAD_CONCURRENCY = 5;
+  const IMAGE_LOAD_CONCURRENCY = 1;
   const IMAGE_OBSERVER_ROOT_MARGIN = "900px 0px";
+  let activePlaceholder = null;
 
   function computeDefaultCardHeight() {
     const gap = parseInt(window.getComputedStyle(grid).getPropertyValue("gap") || "10");
@@ -1542,7 +1543,16 @@ async function loadImagesSequentially(list) {
   function enqueueItem(item) {
     if (!item || item.loaded || item.loading || item.queued) return;
     item.queued = true;
-    loadQueue.push(item);
+    // Keep queue ordered by gallery index so loading is deterministic.
+    let inserted = false;
+    for (let i = 0; i < loadQueue.length; i++) {
+      if (loadQueue[i].index > item.index) {
+        loadQueue.splice(i, 0, item);
+        inserted = true;
+        break;
+      }
+    }
+    if (!inserted) loadQueue.push(item);
     pumpQueue();
   }
 
@@ -1553,7 +1563,13 @@ async function loadImagesSequentially(list) {
       if (!item || item.loaded || item.loading) continue;
 
       item.loading = true;
-      if (item.placeholder) item.placeholder.classList.add("active");
+      if (activePlaceholder && activePlaceholder !== item.placeholder) {
+        activePlaceholder.classList.remove("active");
+      }
+      if (item.placeholder) {
+        item.placeholder.classList.add("active");
+        activePlaceholder = item.placeholder;
+      }
       activeLoads++;
 
       loadImageIntoCard(item.meta, item.card, item.wrap, item.placeholder, myLoadId)
@@ -1565,6 +1581,7 @@ async function loadImagesSequentially(list) {
           item.loading = false;
           item.queued = false;
           if (item.placeholder) item.placeholder.classList.remove("active");
+          if (activePlaceholder === item.placeholder) activePlaceholder = null;
           try { if (observer && item.card) observer.unobserve(item.card); } catch (e) {}
           if (myLoadId === currentLoadId) pumpQueue();
         });
@@ -1665,7 +1682,7 @@ async function loadImagesSequentially(list) {
   appendNearBottomBatches();
 
   // Eager-load the first small chunk so the page feels immediate.
-  const eagerCount = Math.min(createdCount, IMAGE_LOAD_CONCURRENCY * 3);
+  const eagerCount = Math.min(createdCount, 1);
   for (let i = 0; i < eagerCount; i++) {
     if (cards[i]) enqueueItem(cards[i]);
   }
@@ -1674,6 +1691,8 @@ async function loadImagesSequentially(list) {
   __teardownLazyGalleryLoader = () => {
     try { window.removeEventListener("scroll", onScroll); } catch (e) {}
     try { if (observer) observer.disconnect(); } catch (e) {}
+    try { if (activePlaceholder) activePlaceholder.classList.remove("active"); } catch (e) {}
+    activePlaceholder = null;
     loadQueue.length = 0;
   };
 
