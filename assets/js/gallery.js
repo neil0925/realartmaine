@@ -1483,50 +1483,107 @@ function openModal(meta) {
   document.addEventListener("keydown", handleKeyboard);
 }
 
-/* Replace the existing loadImagesSequentially + loadImageWithPlaceholder logic
-   with a two-phase approach:
-   - Phase A: create and append all cards+placeholders (so the grid can form columns)
-   - Phase B: sequentially load each image into the already-appended card
-*/
+let __teardownLazyGalleryLoader = null;
 
-// load images one-by-one with placeholder
+// Build cards in batches and only load images when near the viewport.
 async function loadImagesSequentially(list) {
   if (!gallery) return;
-  // remember which list is currently being shown (used by modal navigation)
   currentDisplayedList = Array.isArray(list) ? list.slice() : [];
   const myLoadId = ++currentLoadId;
+
+  if (typeof __teardownLazyGalleryLoader === "function") {
+    try { __teardownLazyGalleryLoader(); } catch (e) {}
+  }
+  __teardownLazyGalleryLoader = null;
   gallery.innerHTML = "";
 
-  // read gallery metrics for column calculation
+  if (!Array.isArray(list) || list.length === 0) {
+    return;
+  }
+
   const grid = gallery;
-  const gap = parseInt(window.getComputedStyle(grid).getPropertyValue("gap") || "10");
-  const galleryWidth = Math.max(200, grid.clientWidth || document.documentElement.clientWidth);
-  // estimate number of columns based on min column width used in CSS (keep in sync)
-  const minCol = 180; // match CSS
-  const cols = Math.max(1, Math.floor((galleryWidth + gap) / (minCol + gap)));
-  const columnWidth = Math.max(120, Math.floor((galleryWidth - (cols - 1) * gap) / cols));
-
-  // Phase A: create all image cards+placeholders synchronously (NO ads here)
   const cards = [];
-  for (let i = 0; i < list.length; i++) {
-    if (myLoadId !== currentLoadId) return;
+  const cardToItem = new WeakMap();
+  const loadQueue = [];
+  let activeLoads = 0;
+  let createdCount = 0;
+  let observer = null;
 
-    const meta = parseFilename(list[i]);
+  const AD_INTERVAL = Math.max(0, parseInt(ADS_CONFIG.adInterval || 0, 10));
+  const INITIAL_CARD_BATCH = 48;
+  const APPEND_BATCH_SIZE = 36;
+  const APPEND_SCROLL_THRESHOLD_PX = 1400;
+  const IMAGE_LOAD_CONCURRENCY = 5;
+  const IMAGE_OBSERVER_ROOT_MARGIN = "900px 0px";
+
+  function computeDefaultCardHeight() {
+    const gap = parseInt(window.getComputedStyle(grid).getPropertyValue("gap") || "10");
+    const galleryWidth = Math.max(200, grid.clientWidth || document.documentElement.clientWidth);
+    const minCol = 180; // keep in sync with CSS
+    const cols = Math.max(1, Math.floor((galleryWidth + gap) / (minCol + gap)));
+    const columnWidth = Math.max(120, Math.floor((galleryWidth - (cols - 1) * gap) / cols));
+    return Math.max(80, Math.round(columnWidth * DEFAULT_ASPECT));
+  }
+
+  function insertAdAfterCard(card) {
+    const rowHeight = parseInt(window.getComputedStyle(grid).getPropertyValue("grid-auto-rows") || "10");
+    const rowGap = parseInt(window.getComputedStyle(grid).getPropertyValue("gap") || "10");
+    const adMinH = 140;
+    const adRowSpan = Math.max(1, Math.ceil((adMinH + rowGap) / (rowHeight + rowGap)));
+
+    const ad = document.createElement("div");
+    ad.className = "ad-card";
+    ad.textContent = "Advertisment placeholder";
+    ad.style.gridRowEnd = `span ${adRowSpan}`;
+    if (card && card.parentNode) card.parentNode.insertBefore(ad, card.nextSibling);
+    else gallery.appendChild(ad);
+  }
+
+  function enqueueItem(item) {
+    if (!item || item.loaded || item.loading || item.queued) return;
+    item.queued = true;
+    loadQueue.push(item);
+    pumpQueue();
+  }
+
+  function pumpQueue() {
+    if (myLoadId !== currentLoadId) return;
+    while (activeLoads < IMAGE_LOAD_CONCURRENCY && loadQueue.length > 0) {
+      const item = loadQueue.shift();
+      if (!item || item.loaded || item.loading) continue;
+
+      item.loading = true;
+      if (item.placeholder) item.placeholder.classList.add("active");
+      activeLoads++;
+
+      loadImageIntoCard(item.meta, item.card, item.wrap, item.placeholder, myLoadId)
+        .then((ok) => {
+          if (ok) item.loaded = true;
+        })
+        .finally(() => {
+          activeLoads--;
+          item.loading = false;
+          item.queued = false;
+          if (item.placeholder) item.placeholder.classList.remove("active");
+          try { if (observer && item.card) observer.unobserve(item.card); } catch (e) {}
+          if (myLoadId === currentLoadId) pumpQueue();
+        });
+    }
+  }
+
+  function createCardAt(index) {
+    const meta = parseFilename(list[index]);
 
     const card = document.createElement("div");
     card.className = "card";
 
     const wrap = document.createElement("div");
     wrap.className = "image-wrap";
-
-    // conservative placeholder height based on estimated column width
-    const defaultH = Math.max(80, Math.round(columnWidth * DEFAULT_ASPECT));
+    const defaultH = computeDefaultCardHeight();
     wrap.style.height = `${defaultH}px`;
 
-    // placeholder wrapper (CSS spinner, not an img)
     const placeholder = document.createElement("div");
     placeholder.className = "placeholder-box";
-
     const spinner = document.createElement("div");
     spinner.className = "spinner";
     placeholder.appendChild(spinner);
@@ -1535,72 +1592,92 @@ async function loadImagesSequentially(list) {
     card.appendChild(wrap);
     gallery.appendChild(card);
 
-    // set initial grid-row span so layout immediately forms columns
     const rowHeight = parseInt(window.getComputedStyle(grid).getPropertyValue("grid-auto-rows") || "10");
     const rowGap = parseInt(window.getComputedStyle(grid).getPropertyValue("gap") || "10");
     const initialRowSpan = Math.max(1, Math.ceil((defaultH + rowGap) / (rowHeight + rowGap)));
     card.style.gridRowEnd = `span ${initialRowSpan}`;
 
-    // keep structure and metadata for phase B
-    cards.push({ meta, card, wrap, placeholder });
+    const item = {
+      index,
+      meta,
+      card,
+      wrap,
+      placeholder,
+      loaded: false,
+      loading: false,
+      queued: false
+    };
+    cards[index] = item;
+    cardToItem.set(card, item);
+
+    if (observer) observer.observe(card);
+    else enqueueItem(item);
+
+    if (AD_INTERVAL > 0 && (index + 1) % AD_INTERVAL === 0) {
+      insertAdAfterCard(card);
+    }
   }
 
-  // Phase B: sequentially load real images into cards. If we run out of
-  // pre-created cards, create them on demand so the page grows as loading
-  // progresses (initial view still filled quickly).
-  let loadedCount = 0;
-  // mark the first placeholder active so single spinner shows
-  if (cards.length > 0 && cards[0].placeholder) cards[0].placeholder.classList.add("active");
-
-  for (let i = 0; i < list.length; i++) {
+  function appendCards(count) {
     if (myLoadId !== currentLoadId) return;
-
-    // create card on demand if it wasn't created in Phase A
-    if (!cards[i]) {
+    const target = Math.min(list.length, createdCount + count);
+    for (let i = createdCount; i < target; i++) {
       createCardAt(i);
     }
-
-    const { meta, card, wrap, placeholder } = cards[i];
-    const ok = await loadImageIntoCard(meta, card, wrap, placeholder, myLoadId);
-    if (myLoadId !== currentLoadId) return;
-
-    // ensure this placeholder is no longer active (spinner moves)
-    if (placeholder && placeholder.classList.contains("active")) {
-      placeholder.classList.remove("active");
-    }
-    // activate next placeholder (single spinner moves forward)
-    if (i + 1 < list.length && cards[i + 1] && cards[i + 1].placeholder) {
-      cards[i + 1].placeholder.classList.add("active");
-    }
-
-    // only count as "loaded" if ok was true (load succeeded or error handled)
-    loadedCount++;
-    // insert ad only when loadedCount hits the interval (e.g. every 25 loaded items)
-    const AD_INTERVAL = ADS_CONFIG.adInterval;
-    if (loadedCount > 0 && loadedCount % AD_INTERVAL === 0) {
-      // compute ad row span using same rowHeight/rowGap logic
-      const rowHeight = parseInt(window.getComputedStyle(grid).getPropertyValue("grid-auto-rows") || "10");
-      const rowGap = parseInt(window.getComputedStyle(grid).getPropertyValue("gap") || "10");
-      const adMinH = 140; // should match CSS min-height
-      const adRowSpan = Math.max(1, Math.ceil((adMinH + rowGap) / (rowHeight + rowGap)));
-
-      const ad = document.createElement("div");
-      ad.className = "ad-card";
-      ad.textContent = "Advertisment placeholder";
-      ad.style.gridRowEnd = `span ${adRowSpan}`;
-
-      // insert ad into DOM directly after the card for the loadedCount-th item
-      if (card && card.parentNode) {
-        card.parentNode.insertBefore(ad, card.nextSibling);
-      } else {
-        gallery.appendChild(ad);
-      }
-      // small local update; full recalculation will run at the end
-    }
+    createdCount = target;
   }
 
-  // final layout correction (one final pass)
-  if (myLoadId === currentLoadId) resizeAllMasonryItems();
+  function appendNearBottomBatches() {
+    if (myLoadId !== currentLoadId) return;
+    let appended = false;
+    while (createdCount < list.length) {
+      const scrollBottom = window.scrollY + window.innerHeight;
+      const docHeight = Math.max(
+        document.documentElement.scrollHeight || 0,
+        document.body.scrollHeight || 0
+      );
+      if (docHeight - scrollBottom > APPEND_SCROLL_THRESHOLD_PX) break;
+      const before = createdCount;
+      appendCards(APPEND_BATCH_SIZE);
+      if (createdCount === before) break;
+      appended = true;
+    }
+    if (appended) requestAnimationFrame(resizeAllMasonryItems);
+  }
+
+  const onScroll = () => appendNearBottomBatches();
+
+  if (typeof IntersectionObserver !== "undefined") {
+    observer = new IntersectionObserver(
+      (entries) => {
+        if (myLoadId !== currentLoadId) return;
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          const item = cardToItem.get(entry.target);
+          if (item) enqueueItem(item);
+        });
+      },
+      { root: null, rootMargin: IMAGE_OBSERVER_ROOT_MARGIN, threshold: 0.01 }
+    );
+  }
+
+  appendCards(INITIAL_CARD_BATCH);
+  appendNearBottomBatches();
+
+  // Eager-load the first small chunk so the page feels immediate.
+  const eagerCount = Math.min(createdCount, IMAGE_LOAD_CONCURRENCY * 3);
+  for (let i = 0; i < eagerCount; i++) {
+    if (cards[i]) enqueueItem(cards[i]);
+  }
+
+  window.addEventListener("scroll", onScroll, { passive: true });
+  __teardownLazyGalleryLoader = () => {
+    try { window.removeEventListener("scroll", onScroll); } catch (e) {}
+    try { if (observer) observer.disconnect(); } catch (e) {}
+    loadQueue.length = 0;
+  };
+
+  if (myLoadId === currentLoadId) requestAnimationFrame(resizeAllMasonryItems);
 }
 
 // new helper: load image into an existing card/wrap/placeholder
