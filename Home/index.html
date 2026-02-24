@@ -1,109 +1,212 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- Google tag (gtag.js) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-HZ2XXFNT02"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="upgrade-insecure-requests"
+    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    gtag('config', 'G-HZ2XXFNT02');
-  </script>
-  <title>Real Art Maine | Home</title>
-  <link rel="stylesheet" href="/assets/css/style.css">
-  <!-- Use single site logo as favicon -->
-  <link rel="icon" href="/assets/logo.png" type="image/png">
-  <style>
-    /* Prevent horizontal cutoff and remove selection/hover effects */
-    html, body { margin:0; padding:0; box-sizing:border-box; min-width:0; height:100%; }
-    body { min-height:100vh; display:flex; flex-direction:column; }
-    *, *:before, *:after { box-sizing:inherit; }
-    nav a { -webkit-tap-highlight-color: transparent; -webkit-user-select: none; user-select: none; transition: none; }
-    nav a:hover, nav a:active, nav a:focus { background: transparent; outline: none; }
-    /* Top navigation styling */
-    nav {
-      background: #30513d;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 8px 0;
-      box-sizing: border-box;
-    }
-    .nav-left { display:flex; gap:14px; align-items:center; }
-    .nav-left a { color:#fff; text-decoration:none; font-weight:600; padding:6px 10px; border-radius:6px; }
-    .site-title { color:#fff; font-weight:800; font-size:1.05rem; margin-left:0; }
-    .settings-dropdown { margin-left:8px; }
-    /* Stabilize gear icon so it doesn't move */
-    .gear-box { flex: 0 0 32px; display:flex; align-items:center; justify-content:center; }
-    .gear-box img { width:22px; height:22px; display:block; }
-    .right-group { display:flex; align-items:center; gap:12px; }
-    /* Make settings visually minimal */
-    .gear-box { background:transparent; border:0; padding:0; }
-    .gear-box img { width:22px; height:auto; display:block; filter:invert(1); }
-    .settings-dropdown .dropdown-content { background:transparent; box-shadow:none; border:0; padding:0; display:flex; flex-direction:column; gap:6px; }
-    /* Disable underline/hover animations on nav links */
-    .nav-left a { text-decoration:none !important; transition: none !important; }
-    .nav-left a::before, .nav-left a::after { display:none !important; }
+    <script
+      async
+      src="https://www.googletagmanager.com/gtag/js?id=G-HZ2XXFNT02"
+    ></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
+      gtag("config", "G-HZ2XXFNT02");
+    </script>
+    <title>Real Art Maine | Home</title>
+    <link rel="stylesheet" href="/assets/css/style.css" />
 
-    /* Banner: simple full-width responsive banner without negative margins */
-    .banner { width:100%; overflow:hidden; display:block; }
-    .banner img { width:100%; height:auto; display:block; }
-  </style>
-</head>
-<body>
-
-  <!-- Navigation -->
-  <nav>
-    <div class="nav-left">
-      <details class="nav-menu">
-        <summary class="nav-menu-toggle" aria-label="Menu">
-          <span class="nav-menu-icon"></span>
-        </summary>
-        <div class="nav-menu-panel" role="menu">
-          <a href="/Home" aria-label="Home">Home</a>
-          <a href="/Gallery" aria-label="Gallery">Gallery</a>
-          <a href="/TopFlickers" aria-label="Leaderboard">Leaderboard</a>
-        </div>
-      </details>
-      <a href="/Home" aria-label="Home">Home</a>
-      <a href="/Gallery" aria-label="Gallery">Gallery</a>
-      <a href="/TopFlickers" aria-label="Leaderboard">Leaderboard</a>
-    </div>
-
-    <div class="right-group">
-      <div class="settings-dropdown">
-        <div class="gear-box">
-          <img src="/assets/GUI/gear.png" alt="Settings" class="gear-icon" style="filter:invert(1);opacity:0.9;">
-        </div>
-        <div class="dropdown-content" style="background:transparent;"></div>
+    <link rel="icon" href="/assets/logo.png" type="image/png" />
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        min-width: 0;
+        height: 100%;
+      }
+      body {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+      *,
+      *:before,
+      *:after {
+        box-sizing: inherit;
+      }
+      nav a {
+        -webkit-tap-highlight-color: transparent;
+        -webkit-user-select: none;
+        user-select: none;
+        transition: none;
+      }
+      nav a:hover,
+      nav a:active,
+      nav a:focus {
+        background: transparent;
+        outline: none;
+      }
+      nav {
+        background: #30513d;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 8px 0;
+        box-sizing: border-box;
+      }
+      .nav-left {
+        display: flex;
+        gap: 14px;
+        align-items: center;
+      }
+      .nav-left a {
+        color: #fff;
+        text-decoration: none;
+        font-weight: 600;
+        padding: 6px 10px;
+        border-radius: 6px;
+      }
+      .site-title {
+        color: #fff;
+        font-weight: 800;
+        font-size: 1.05rem;
+        margin-left: 0;
+      }
+      .settings-dropdown {
+        margin-left: 8px;
+      }
+      .gear-box {
+        flex: 0 0 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .gear-box img {
+        width: 22px;
+        height: 22px;
+        display: block;
+      }
+      .right-group {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .gear-box {
+        background: transparent;
+        border: 0;
+        padding: 0;
+      }
+      .gear-box img {
+        width: 22px;
+        height: auto;
+        display: block;
+        filter: invert(1);
+      }
+      .settings-dropdown .dropdown-content {
+        background: transparent;
+        box-shadow: none;
+        border: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .nav-left a {
+        text-decoration: none !important;
+        transition: none !important;
+      }
+      .nav-left a::before,
+      .nav-left a::after {
+        display: none !important;
+      }
+      .banner {
+        width: 100%;
+        overflow: hidden;
+        display: block;
+      }
+      .banner img {
+        width: 100%;
+        height: auto;
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <nav>
+      <div class="nav-left">
+        <details class="nav-menu">
+          <summary class="nav-menu-toggle" aria-label="Menu">
+            <span class="nav-menu-icon"></span>
+          </summary>
+          <div class="nav-menu-panel" role="menu">
+            <a href="/Home" aria-label="Home">Home</a>
+            <a href="/Gallery" aria-label="Gallery">Gallery</a>
+            <a href="/TopFlickers" aria-label="Leaderboard">Leaderboard</a>
+          </div>
+        </details>
+        <a href="/Home" aria-label="Home">Home</a>
+        <a href="/Gallery" aria-label="Gallery">Gallery</a>
+        <a href="/TopFlickers" aria-label="Leaderboard">Leaderboard</a>
       </div>
 
-      <div class="site-title">RealArtMaine</div>
-    </div>
-  </nav>
+      <div class="right-group">
+        <div class="settings-dropdown">
+          <div class="gear-box">
+            <img
+              src="/assets/GUI/gear.png"
+              alt="Settings"
+              class="gear-icon"
+              style="filter: invert(1); opacity: 0.9"
+            />
+          </div>
+          <div class="dropdown-content" style="background: transparent"></div>
+        </div>
 
-  <main style="flex:1 1 auto;">
-  <!-- Banner using the image in /assets/GUI -->
-  <div class="banner" aria-hidden="true">
-    <img src="/assets/GUI/realartmainebanner.png" alt="Real Art Maine banner">
-  </div>
-    <p class="home-intro"><strong>Real Art Maine</strong> is dedicated to documenting graffiti and street art throughout Maine.</p>
-    <p class="home-intro">Explore our gallery to see tags, crews, and styles captured by photographers and artists from around the state.</p>
-  </main>
+        <div class="site-title">RealArtMaine</div>
+      </div>
+    </nav>
 
-  <footer>
-    <hr>
-    <p>
-      Disclaimer: All street art featured on this site is the property of the original artists. This website documents graffiti and street art for educational, archival, and journalistic purposes only. We do not condone, promote, or encourage illegal activity. All images are used for commentary and documentation; no copyright infringement is intended. Any commercial use of these images is prohibited without the express permission of the original artist.
-    </p>
-  </footer>
+    <main style="flex: 1 1 auto">
+      <div class="banner" aria-hidden="true">
+        <img
+          src="/assets/GUI/realartmainebanner.png"
+          alt="Real Art Maine banner"
+        />
+      </div>
+      <p class="home-intro">
+        <strong>Real Art Maine</strong> is dedicated to documenting graffiti and
+        street art throughout Maine.
+      </p>
+      <p class="home-intro">
+        Explore our gallery to see tags, crews, and styles captured by
+        photographers and artists from around the state.
+      </p>
+    </main>
 
-  <script src="/assets/js/maintenance.js"></script>
-  <script src="/assets/js/settings.js"></script>
-  <script src="/assets/js/background.js"></script>
-</body>
+    <footer>
+      <hr />
+      <p>
+        Disclaimer: All street art featured on this site is the property of the
+        original artists. This website documents graffiti and street art for
+        educational, archival, and journalistic purposes only. We do not
+        condone, promote, or encourage illegal activity. All images are used for
+        commentary and documentation; no copyright infringement is intended. Any
+        commercial use of these images is prohibited without the express
+        permission of the original artist.
+      </p>
+    </footer>
+
+    <script src="/assets/js/maintenance.js"></script>
+    <script src="/assets/js/settings.js"></script>
+    <script src="/assets/js/background.js"></script>
+  </body>
 </html>

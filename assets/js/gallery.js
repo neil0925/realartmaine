@@ -1,25 +1,6 @@
-/* gallery.js
-   - sequential image loading (placeholder -> load -> fade-in)
-   - interaction disabled until image fully loaded
-   - precise masonry row calculation after each load
-   - search filtering
-*/
-
-// ORIGINAL_IMAGES removed: image metadata is now sourced from `IMAGE_LABELS`.
-// We no longer rely on a long list of original filenames. metaList is
-// generated from `IMAGE_LABELS` (1-based) below.
-
-// IMAGE_LABELS: editable mapping for human-readable labels per numeric image.
-// The following block contains explicit 1-based assignments so you can
-// open this file and edit labels directly (e.g. `IMAGE_LABELS[1] = "..."`).
-// We generate defaults from the original filenames but you can override any
-// line by editing the string literal.
-const IMAGE_LABELS = [null]; // 1-based (IMAGE_LABELS[1] -> label for image 1)
-
-// ----- AUTO-GENERATED LABELS (editable) -----
-// You may change any right-hand string to a preferred, human-readable label.
-
-IMAGE_LABELS[1] = "catch, link, wake, hugo-OHK,PTG,LTB,5G,SHD,CRAFT-realartmaine-throwie, tag";
+const IMAGE_LABELS = [null];
+IMAGE_LABELS[1] =
+  "catch, link, wake, hugo-OHK,PTG,LTB,5G,SHD,CRAFT-realartmaine-throwie, tag";
 IMAGE_LABELS[2] = "same-SLT,TVT-realartmaine-tags";
 IMAGE_LABELS[3] = "same-SLT,TVT-realartmaine-piece, staightletter";
 IMAGE_LABELS[4] = "peck-SLF-realartmaine-throwie, bubble letter, hollow";
@@ -32,7 +13,8 @@ IMAGE_LABELS[10] = "SLT-SLT-realartmaine-paintroller";
 IMAGE_LABELS[11] = "pest-realartmaine-throwie, bubble letter, hollow";
 IMAGE_LABELS[12] = "rune-LTB,2K69-realartmaine-throwie, hollow, bubble letter";
 IMAGE_LABELS[13] = "5G-5G-chagrinedminnow-straightletter, antistyle";
-IMAGE_LABELS[14] = "kujoe, cats, link-5G,SDH,UK,CRAFT-realartmaine-antistyle, straightletter";
+IMAGE_LABELS[14] =
+  "kujoe, cats, link-5G,SDH,UK,CRAFT-realartmaine-antistyle, straightletter";
 IMAGE_LABELS[15] = "link-5G,CRAFT-realartmaine-antistyle, piece";
 IMAGE_LABELS[16] = "prizm, ruski, cats-realartmaine-paintroller";
 IMAGE_LABELS[17] = "some1-realartmaine-stencil";
@@ -44,14 +26,18 @@ IMAGE_LABELS[22] = "vroom-ZPLK-piece, character";
 IMAGE_LABELS[23] = "lufa-hex-ZPLK-tags, piece";
 IMAGE_LABELS[24] = "nare-az-ZPLK-piece, character";
 IMAGE_LABELS[25] = "wilt-2K69,VC-chagrinedminnow-blackbook";
-IMAGE_LABELS[26] = "spek, segway, 27, port, melts, yalts-FTS,TSZ,CIRCLET,YME,IMS-chagrinedminnow-tags, moniker";
+IMAGE_LABELS[26] =
+  "spek, segway, 27, port, melts, yalts-FTS,TSZ,CIRCLET,YME,IMS-chagrinedminnow-tags, moniker";
 IMAGE_LABELS[27] = "segway-FTS,TSZ-chagrinedminnow-throwie, hollow";
 IMAGE_LABELS[28] = "same, catch-SLT,PTG,BNE,OHK-realartmaine-tag";
-IMAGE_LABELS[29] = "same, 27, enya-SLT,TVT,TSZ,5G-chagrinedminnow-tags, stencil";
+IMAGE_LABELS[29] =
+  "same, 27, enya-SLT,TVT,TSZ,5G-chagrinedminnow-tags, stencil";
 IMAGE_LABELS[30] = "rune-LTB,2K69-chagrinedminnow-piece, antistyle";
-IMAGE_LABELS[31] = "rune, 27-LTB,2K69,TSZ,2GF-chagrinedminnow-throwie, fillin, antistyle";
+IMAGE_LABELS[31] =
+  "rune, 27-LTB,2K69,TSZ,2GF-chagrinedminnow-throwie, fillin, antistyle";
 IMAGE_LABELS[32] = "kujoe-5G,UK-chagrinedminnow-antistyle, piece";
-IMAGE_LABELS[33] = "kujoe, link-5G,UK,CRAFT,SDH-realartmaine-antistyle, straightletter";
+IMAGE_LABELS[33] =
+  "kujoe, link-5G,UK,CRAFT,SDH-realartmaine-antistyle, straightletter";
 IMAGE_LABELS[34] = "ojea3-HEX,OY!-chagrinedminnow-piece";
 IMAGE_LABELS[35] = "ojea3-HEX,OY!-chagrinedminnow-tags";
 IMAGE_LABELS[36] = "mobi-TSZ-chagrinedminnow-straightletter";
@@ -62,50 +48,64 @@ IMAGE_LABELS[40] = "jumz-TSZ-chagrinedminnow-throwie, fillin, stencil";
 IMAGE_LABELS[41] = "ichabod-YME,CIRLCET-chagrinedminnow-tag";
 IMAGE_LABELS[42] = "grazi, 27-DWT,TSZ,2GF-chagrinedminnow-tags";
 IMAGE_LABELS[43] = "gerv-YME-chagrinedminnow-piece";
-IMAGE_LABELS[44] = "feer, scipio-2GF-chagrinedminnow-piece, tags, antistyle, tag";
+IMAGE_LABELS[44] =
+  "feer, scipio-2GF-chagrinedminnow-piece, tags, antistyle, tag";
 IMAGE_LABELS[45] = "catch-PTG,OHK,BNE-chagrinedminnow-tags, throwie, fillin";
 IMAGE_LABELS[46] = "catch-BNE,PTG,OHK-chagrinedminnow-throwie, hollow";
-IMAGE_LABELS[47] = "catch, secret, 27-BNE,PTG,OHK,5G,TSZ-chagrinedminnow-antistyle, stencil, blackbook";
+IMAGE_LABELS[47] =
+  "catch, secret, 27-BNE,PTG,OHK,5G,TSZ-chagrinedminnow-antistyle, stencil, blackbook";
 IMAGE_LABELS[48] = "ankle-LTB,2K69-chagrinedminnow-throwie, fillin";
 IMAGE_LABELS[49] = "ankle-2K69,LTB-chagrinedminnow-tags";
 IMAGE_LABELS[50] = "LSE-LSE-chagrinedminnow-straightletter";
 IMAGE_LABELS[51] = "2GF-realartmaine-tag";
 IMAGE_LABELS[52] = "27-TSZ,2GF-realartmaine-throwie, antistyle";
 IMAGE_LABELS[53] = "ankle-LTB,2K69-realartmaine-tags";
-IMAGE_LABELS[54] = "ankle, ne1, symbol, spud-LTB, 2K69, CTS-realartmaine-throwie, straightletter, tags, tag, fillin";
+IMAGE_LABELS[54] =
+  "ankle, ne1, symbol, spud-LTB, 2K69, CTS-realartmaine-throwie, straightletter, tags, tag, fillin";
 IMAGE_LABELS[55] = "ankor-SFL-realartmaine-straightletter";
 IMAGE_LABELS[56] = "aura-OHK-realartmaine-straightletter, piece";
 IMAGE_LABELS[57] = "auto-CTS,TNL-realartmaine-tags, character";
 IMAGE_LABELS[58] = "bosh, doves-SLT-realartmaine-throwie, fillin, tags, tag";
 IMAGE_LABELS[59] = "catch-OHK,PTG,BNE-realartmaine-piece, antistyle";
-IMAGE_LABELS[60] = "catch, payze-PTG,OHK,BNE,IMS-realartmaine-straightletter, fillin";
-IMAGE_LABELS[61] = "catch, pyle-PTG,BNE,OHK-realartmaine-throwie, hollow, notmaine";
+IMAGE_LABELS[60] =
+  "catch, payze-PTG,OHK,BNE,IMS-realartmaine-straightletter, fillin";
+IMAGE_LABELS[61] =
+  "catch, pyle-PTG,BNE,OHK-realartmaine-throwie, hollow, notmaine";
 IMAGE_LABELS[62] = "chew-realartmaine-throwie, hollow";
 IMAGE_LABELS[63] = "digitalnail-realartmaine-stencil";
 IMAGE_LABELS[64] = "digitalnail-realartmaine-stencil";
-IMAGE_LABELS[65] = "wake, dean, link, auto, dove-LTB,CFM,SLT,5G,CTS,TNL,SDH,CRAFT-realartmaine-piece, antistyle, paintroller";
-IMAGE_LABELS[66] = "wake, rune, doves, same-SLT,LTB,TVT-realartmaine-throwie, piece, fillin, tags, tag";
+IMAGE_LABELS[65] =
+  "wake, dean, link, auto, dove-LTB,CFM,SLT,5G,CTS,TNL,SDH,CRAFT-realartmaine-piece, antistyle, paintroller";
+IMAGE_LABELS[66] =
+  "wake, rune, doves, same-SLT,LTB,TVT-realartmaine-throwie, piece, fillin, tags, tag";
 IMAGE_LABELS[67] = "27-2GF,TSZ-chagrinedminnow-stencil";
 IMAGE_LABELS[68] = "write-SFL-realartmaine-piece, straightletter";
-IMAGE_LABELS[69] = "yami, high8, wake, secret-5G,LTB,OHK-realartmaine-antistyle, tags, tag, pieces";
-IMAGE_LABELS[70] = "feer, kite, enzyme, loupe, auto-DWT,DPW,TNL,CTS-realartmaine-tags, piece, straightletter, antistyle";
+IMAGE_LABELS[69] =
+  "yami, high8, wake, secret-5G,LTB,OHK-realartmaine-antistyle, tags, tag, pieces";
+IMAGE_LABELS[70] =
+  "feer, kite, enzyme, loupe, auto-DWT,DPW,TNL,CTS-realartmaine-tags, piece, straightletter, antistyle";
 IMAGE_LABELS[71] = "gervs-YME-realartmaine-piece";
 IMAGE_LABELS[72] = "grazi-DWT-realartmaine-antistyle, throwie, hollow";
 IMAGE_LABELS[73] = "grazi-DWT-realartmaine-straightletter";
 IMAGE_LABELS[74] = "grazi-DWT-realartmaine-throwie, hollow";
 IMAGE_LABELS[75] = "grazi, some1-DWT-realartmaine-tags, stencil";
-IMAGE_LABELS[76] = "heart, knave, pout, ojea3, doves, merlin-CTS,TNL,HEX,OY!,CTS,SK8-realartmaine-throwie, fillin, straightletter, tags";
-IMAGE_LABELS[77] = "hiphop, ducky-realartmaine-antistyle, character, portlandbee";
+IMAGE_LABELS[76] =
+  "heart, knave, pout, ojea3, doves, merlin-CTS,TNL,HEX,OY!,CTS,SK8-realartmaine-throwie, fillin, straightletter, tags";
+IMAGE_LABELS[77] =
+  "hiphop, ducky-realartmaine-antistyle, character, portlandbee";
 IMAGE_LABELS[78] = "key-2K69-realartmaine-throwie, fillin";
 IMAGE_LABELS[79] = "solar-DNB-realartmaine-tags";
-IMAGE_LABELS[80] = "slug, pest, some1, vane, brik-PTG,SFL-realartmaine-stencil, tags, tag";
+IMAGE_LABELS[80] =
+  "slug, pest, some1, vane, brik-PTG,SFL-realartmaine-stencil, tags, tag";
 IMAGE_LABELS[81] = "some1-realartmaine-stencil";
 IMAGE_LABELS[82] = "some1-realartmaine-piece";
 IMAGE_LABELS[83] = "towel-FK-realartmaine-tags";
-IMAGE_LABELS[84] = "towel, sewer, salud, klerm, kindbud-FK,PTG,TNL,5G-realartmaine-tags, character";
+IMAGE_LABELS[84] =
+  "towel, sewer, salud, klerm, kindbud-FK,PTG,TNL,5G-realartmaine-tags, character";
 IMAGE_LABELS[85] = "wake-LTB-realartmaine-throwie, fillin";
 IMAGE_LABELS[86] = "27-TSZ,2GF-chagrinedminnow-paintroller";
-IMAGE_LABELS[87] = "jipso, alps, goal-PTG-realartmaine-paintroller, tags, tag, throwie, straightletter, fillin, character";
+IMAGE_LABELS[87] =
+  "jipso, alps, goal-PTG-realartmaine-paintroller, tags, tag, throwie, straightletter, fillin, character";
 IMAGE_LABELS[88] = "ducky-realartmaine-antistyle, paintroller";
 IMAGE_LABELS[89] = "enya-5G-realartmaine-antistyle";
 IMAGE_LABELS[90] = "enzyme-DPW-realartmaine-throwie, fillin";
@@ -113,37 +113,48 @@ IMAGE_LABELS[91] = "epser-UK,TMS-realartmaine-straightletter";
 IMAGE_LABELS[92] = "epser-UK,TMS-realartmaine-tag";
 IMAGE_LABELS[93] = "muska, piza-KYS-realartmaine-piece";
 IMAGE_LABELS[94] = "muska, piza-KYS-realartmaine-straightletter";
-IMAGE_LABELS[95] = "neptune, mobi-DNB,AWC,TSZ-realartmaine-tags, character, hollow";
+IMAGE_LABELS[95] =
+  "neptune, mobi-DNB,AWC,TSZ-realartmaine-tags, character, hollow";
 IMAGE_LABELS[96] = "notice-realartmaine-straightletter";
 IMAGE_LABELS[97] = "pigeon-realartmaine-character";
 IMAGE_LABELS[98] = "salud, senegra-PTG,OHK-realartmaine-tags";
-IMAGE_LABELS[99] = "same, ducky, yart-SLT,IMS,TVT,OHK-realartmaine-throwie, fillin, character, antistyle";
+IMAGE_LABELS[99] =
+  "same, ducky, yart-SLT,IMS,TVT,OHK-realartmaine-throwie, fillin, character, antistyle";
 IMAGE_LABELS[100] = "skipio, pyle-2GF,PTG,OHK,BNE-realartmaine-throwie, fillin";
 IMAGE_LABELS[101] = "soft, same-SLT,2K69-realartmaine-throwie, fillin";
 IMAGE_LABELS[102] = "some1-realartmaine-character, hollow";
-IMAGE_LABELS[103] = "suer, same-SLT,TVT,TMS-realartmaine-throwie, hollow, tags, tag";
+IMAGE_LABELS[103] =
+  "suer, same-SLT,TVT,TMS-realartmaine-throwie, hollow, tags, tag";
 IMAGE_LABELS[104] = "trak, hebrew-CTS,SDH,LTB,2K69-realartmaine-tags";
-IMAGE_LABELS[105] = "wake, ducky-LTB-realartmaine-throwie, hollow, character, antistyle";
-IMAGE_LABELS[106] = "mobi, grazi-DWT,TSZ-chagrinedminnow-straightletter, tags, tag";
-IMAGE_LABELS[107] = "spots, wilt, 27-VC,2K69,HKC-chagrinedminnow-blackbook, antistyle";
+IMAGE_LABELS[105] =
+  "wake, ducky-LTB-realartmaine-throwie, hollow, character, antistyle";
+IMAGE_LABELS[106] =
+  "mobi, grazi-DWT,TSZ-chagrinedminnow-straightletter, tags, tag";
+IMAGE_LABELS[107] =
+  "spots, wilt, 27-VC,2K69,HKC-chagrinedminnow-blackbook, antistyle";
 IMAGE_LABELS[108] = "hebrew-CTS,SDH-ZPLK-straightletter";
-IMAGE_LABELS[109] = "fish, symbol, grazi, spots, loupe-TNL,CTS,DWT,2K69,VC-ZPLK-piece, throwie, fillin, antistyle, tags, tag";
+IMAGE_LABELS[109] =
+  "fish, symbol, grazi, spots, loupe-TNL,CTS,DWT,2K69,VC-ZPLK-piece, throwie, fillin, antistyle, tags, tag";
 IMAGE_LABELS[110] = "catch, soepo-PTG,BNE,OHK-ZPLK-throwie, fillin";
 IMAGE_LABELS[111] = "ajna-SLT-ZPLK-piece";
 IMAGE_LABELS[112] = "ajna-SLT-ZPLK-piece, character";
-IMAGE_LABELS[113] = "aidan, grazi, loupe-CTS,TNL,DWT-ZPLK-straightletter, piece, fillin";
+IMAGE_LABELS[113] =
+  "aidan, grazi, loupe-CTS,TNL,DWT-ZPLK-straightletter, piece, fillin";
 IMAGE_LABELS[114] = "sloan-PTG,BNE-realartmaine-moniker, tag, character";
 IMAGE_LABELS[115] = "tabz, sloan-2gf,ptg,bne-realartmaine-hand style";
 IMAGE_LABELS[116] = "songy-realartmaine-straightletter, hollow";
 IMAGE_LABELS[117] = "salud-PTG,OHK-realartmaine-tags, character";
 IMAGE_LABELS[118] = "learn-YME,CIRCLET-realartmaine-piece";
 IMAGE_LABELS[119] = "iowa-3FK-realartmaine-tags";
-IMAGE_LABELS[120] = "enya, osha, auto, lego, sloan-PTG,BNE,CTS,TNL,5G-realartmaine-tags";
+IMAGE_LABELS[120] =
+  "enya, osha, auto, lego, sloan-PTG,BNE,CTS,TNL,5G-realartmaine-tags";
 IMAGE_LABELS[121] = "port-IMS-realartmaine-piece";
 IMAGE_LABELS[122] = "thex-SLT-realartmaine-piece";
 IMAGE_LABELS[123] = "uglyboy-5G-realartmaine-throwie, antistyle";
-IMAGE_LABELS[124] = "27, learn-YME,SLT,CIRCLET,2GF,TSZ,2GF-chagrinedminnow-piece, stencil";
-IMAGE_LABELS[125] = "27, mobi, vazor, segway-TSZ,2GF,AWC,FTS-chagrinedminnow-piece, straightletter, stencil";
+IMAGE_LABELS[124] =
+  "27, learn-YME,SLT,CIRCLET,2GF,TSZ,2GF-chagrinedminnow-piece, stencil";
+IMAGE_LABELS[125] =
+  "27, mobi, vazor, segway-TSZ,2GF,AWC,FTS-chagrinedminnow-piece, straightletter, stencil";
 IMAGE_LABELS[126] = "27, plato-HEX,TSZ,2GF-chagrinedminnow-tags";
 IMAGE_LABELS[127] = "lastsupper, bd, mobi, gask-VC,TSZ,PTG-realartmaine-tags";
 IMAGE_LABELS[128] = "iowa-3FK-realartmaine-tags";
@@ -153,7 +164,8 @@ IMAGE_LABELS[131] = "ducky-realartmaine-character, antistyle, portlandbee";
 IMAGE_LABELS[132] = "ducky-realartmaine-antistyle, paintroller";
 IMAGE_LABELS[133] = "solar-DNB-realartmaine-throwie, fillin";
 IMAGE_LABELS[134] = "solar-DNB-realartmaine-tags, tag, handstyle";
-IMAGE_LABELS[135] = "same, sped, borax-SLT,TVT,BTD,RTS-ericwhite-throwie, fillin, tags";
+IMAGE_LABELS[135] =
+  "same, sped, borax-SLT,TVT,BTD,RTS-ericwhite-throwie, fillin, tags";
 IMAGE_LABELS[136] = "catch-OHK,PTG,BNE-ericwhite-throwie, fillin";
 IMAGE_LABELS[137] = "trash, aura, gues-OHK, NGL, GSF-ericwhite-throwie, fillin";
 IMAGE_LABELS[138] = "tears-HEX-ericwhite-throwie, fillin";
@@ -164,34 +176,42 @@ IMAGE_LABELS[142] = "muska-KYS-ericwhite-throwie, fillin";
 IMAGE_LABELS[143] = "piza-KYS-ericwhite-throwie, fillin";
 IMAGE_LABELS[144] = "catch-OHK-ericwhite,PTG,BNE-straightletter";
 IMAGE_LABELS[145] = "st-ericwhite-throwie, fillin";
-IMAGE_LABELS[146] = "petco-5G,ICBM-Northeastmillinocket-throwie, filling, antistyle";
+IMAGE_LABELS[146] =
+  "petco-5G,ICBM-Northeastmillinocket-throwie, filling, antistyle";
 IMAGE_LABELS[147] = "tears-HEX-Northeastmillinocket-piece";
 IMAGE_LABELS[148] = "veg-YME, CIRCLET-Northeastmillinocket-piece";
 IMAGE_LABELS[149] = "ojea3-HEX-Northeastmillinocket-piece";
-IMAGE_LABELS[150] = "ajna, thex, kots-SLT,KOTS-Northeastmillinocket-piece, straightletter";
+IMAGE_LABELS[150] =
+  "ajna, thex, kots-SLT,KOTS-Northeastmillinocket-piece, straightletter";
 IMAGE_LABELS[151] = "port-IMS, OHK, SLT-Northeastmillinocket-piece";
 IMAGE_LABELS[152] = "wilt-VC, 2K69-Northeastmillinocket-antistyle";
 IMAGE_LABELS[153] = "rune-LTB, 2K69-Northeastmillinocket-throwie, fillin";
 IMAGE_LABELS[154] = "learn-YME, CIRCLET, SLF-Northeastmillinocket-piece";
 IMAGE_LABELS[155] = "atmo-Northeastmillinocket-straightletter";
 IMAGE_LABELS[156] = "rich-YME-Northeastmillinocket-piece";
-IMAGE_LABELS[157] = "dyms, ED15, link, enya-5G,2K69,SLT,SDH,CRAFT-Northeastmillinocket-piece, antistyle";
+IMAGE_LABELS[157] =
+  "dyms, ED15, link, enya-5G,2K69,SLT,SDH,CRAFT-Northeastmillinocket-piece, antistyle";
 IMAGE_LABELS[158] = "kots-KOTS-Northeastmillinocket-straightletter";
 IMAGE_LABELS[159] = "ajna-KOTS,SLT-Northeastmillinocket-piece,character";
-IMAGE_LABELS[160] = "catch, pyle-SLT,PTG,OHK,BNE-Northeastmillinocket-straightletter";
+IMAGE_LABELS[160] =
+  "catch, pyle-SLT,PTG,OHK,BNE-Northeastmillinocket-straightletter";
 IMAGE_LABELS[161] = "trak, rune-LTB,2K69-Northeastmillinocket-throwie, fillin";
-IMAGE_LABELS[162] = "anke, symbol-LTB,2K69,CTS,TNL-Northeastmillinocket-straightletter";
+IMAGE_LABELS[162] =
+  "anke, symbol-LTB,2K69,CTS,TNL-Northeastmillinocket-straightletter";
 IMAGE_LABELS[163] = "trak-LTB,2K69-Northeastmillinocket-throwie, fillin";
 IMAGE_LABELS[164] = "catch-OHK,PTG,BNE,SLT-Northeastmillinocket-piece";
 IMAGE_LABELS[165] = "link-5G,SDH,CRAFT-Northeastmillinocket-piece, antistyle";
 IMAGE_LABELS[166] = "wake, rune-LTB,2K69-Northeastmillinocket-throwie, fillin";
 IMAGE_LABELS[167] = "obee-Northeastmillinocket-throwie, fillin";
-IMAGE_LABELS[168] = "port, yart-IMS,OHK,SLT-Northeastmillinocket-piece, character";
+IMAGE_LABELS[168] =
+  "port, yart-IMS,OHK,SLT-Northeastmillinocket-piece, character";
 IMAGE_LABELS[169] = "lerk-SFL-Northeastmillinocket-piece";
 IMAGE_LABELS[170] = "kilo-Northeastmillinocket-piece";
 IMAGE_LABELS[171] = "trak-LTB,2K69-Northeastmillinocket-straightletter";
-IMAGE_LABELS[172] = "wilt-2K69,VC,HKC-Northeastmillinocket-antistyle, character";
-IMAGE_LABELS[173] = "ankle, dext-LTB,2K69-Northeastmillinocket-throwie, straightletter, paintroller";
+IMAGE_LABELS[172] =
+  "wilt-2K69,VC,HKC-Northeastmillinocket-antistyle, character";
+IMAGE_LABELS[173] =
+  "ankle, dext-LTB,2K69-Northeastmillinocket-throwie, straightletter, paintroller";
 IMAGE_LABELS[174] = "rune-LTB,2K69-Northeastmillinocket-throwie, paintroller";
 IMAGE_LABELS[175] = "ED15-2K69-Northeastmillinocket-antistyle, character";
 IMAGE_LABELS[176] = "avoid-Northeastmillinocket-piece";
@@ -210,17 +230,20 @@ IMAGE_LABELS[188] = "enzyme, paeday-DPW-meangirl-throwie, fillin";
 IMAGE_LABELS[189] = "ozek-MGI-meangirl-straightletter";
 IMAGE_LABELS[190] = "eons-OHK,SLT-meangirl-piece, character";
 IMAGE_LABELS[191] = "exit, port-OHK,IMS,SLT,MGI,DPW-meangirl-piece";
-IMAGE_LABELS[192] = "sword, hebrew-CTS,SDH,DPW-meangirl-antistyle, throwie, fillin";
+IMAGE_LABELS[192] =
+  "sword, hebrew-CTS,SDH,DPW-meangirl-antistyle, throwie, fillin";
 IMAGE_LABELS[193] = "exit-MGI,DPW-meangirl-straightletter";
 IMAGE_LABELS[194] = "snoe-VAC-meangirl-straightletter";
-IMAGE_LABELS[195] = "dsoe, enzyme, osha-PTG,DPW-meangirl-piece, throwie, fillin";
+IMAGE_LABELS[195] =
+  "dsoe, enzyme, osha-PTG,DPW-meangirl-piece, throwie, fillin";
 IMAGE_LABELS[196] = "ozek-MGI-meangirl-straightletter";
 IMAGE_LABELS[197] = "ozek-MGI-meangirl-straightletter";
 IMAGE_LABELS[198] = "teeth-RBH-meangirl-antistyle, hollow";
 IMAGE_LABELS[199] = "aura-OHK-meangirl-straightletter";
 IMAGE_LABELS[200] = "port-IMS,SLT,OHK-meangirl-piece";
 IMAGE_LABELS[201] = "ozek, enzyme-MGI,DPW-meangirl-straightletter";
-IMAGE_LABELS[202] = "halt, gue, enzyme-5G,DPW-meangirl-throwie, fillin, straightletter";
+IMAGE_LABELS[202] =
+  "halt, gue, enzyme-5G,DPW-meangirl-throwie, fillin, straightletter";
 IMAGE_LABELS[203] = "learn-YME,SFL,CIRCLET-meangirl-piece";
 IMAGE_LABELS[204] = "learn-SFL,YME,CIRCLET-meangirl-straightletter";
 IMAGE_LABELS[205] = "ozek-MGI-meangirl-throwie, fillin";
@@ -238,7 +261,8 @@ IMAGE_LABELS[216] = "lerk-TMS,SFL-meangirl-piece";
 IMAGE_LABELS[217] = "doves-SLT,CFM-meangirl-straightletter";
 IMAGE_LABELS[218] = "exit-MGI,DPW-meangirl-straightletter";
 IMAGE_LABELS[219] = "ozek-MGI-meangirl-straightletter";
-IMAGE_LABELS[220] = "ozek, burek, scipio-2GF,MGI-meangirl-piece, throwie, fillin";
+IMAGE_LABELS[220] =
+  "ozek, burek, scipio-2GF,MGI-meangirl-piece, throwie, fillin";
 IMAGE_LABELS[221] = "spazout-meangirl-straightletter";
 IMAGE_LABELS[222] = "grazi-DWT-meangirl-straightletter";
 IMAGE_LABELS[223] = "hebrew-CTS,SDH-meangirl-piece";
@@ -247,9 +271,11 @@ IMAGE_LABELS[225] = "catch-BNE,SLT,OHK,PTG-meangirl-straightletter";
 IMAGE_LABELS[226] = "ikue, tabz-2GF-meangirl-straightletter";
 IMAGE_LABELS[227] = "ozek-MGI-meangirl-straightletter";
 IMAGE_LABELS[228] = "ozek-MGI-meangirl-straightletter";
-IMAGE_LABELS[229] = "rune, write-SFL,LTB,2K69-meangirl-antistyle, straightletter";
+IMAGE_LABELS[229] =
+  "rune, write-SFL,LTB,2K69-meangirl-antistyle, straightletter";
 IMAGE_LABELS[230] = "ozek-MGI,TNV-meangirl-throwie, fillin";
-IMAGE_LABELS[231] = "plank, symbol-CTS,TNL-meangirl-antistyle, piece, character";
+IMAGE_LABELS[231] =
+  "plank, symbol-CTS,TNL-meangirl-antistyle, piece, character";
 IMAGE_LABELS[232] = "catch-OHK,SLT,BNE,PTG-meangirl-piece";
 IMAGE_LABELS[233] = "ozek-MGI,TNV-meangirl-straightletter";
 IMAGE_LABELS[234] = "link-5G,CRAFT-meangirl-throwie, fillin";
@@ -257,12 +283,15 @@ IMAGE_LABELS[235] = "seck-SLT-meangirl-piece";
 IMAGE_LABELS[236] = "grazi-DWT-meangirl-straightletter";
 IMAGE_LABELS[237] = "yart-IMS-meangirl-piece";
 IMAGE_LABELS[238] = "about-5G-meangirl-straightletter";
-IMAGE_LABELS[239] = "catch,doves,link-SLT,OHK,BNE,PTG,CFM,5G,CRAFT-meangirl-throwie, fillin";
+IMAGE_LABELS[239] =
+  "catch,doves,link-SLT,OHK,BNE,PTG,CFM,5G,CRAFT-meangirl-throwie, fillin";
 IMAGE_LABELS[240] = "dyms-SLT-meangirl-straightletter";
 IMAGE_LABELS[241] = "pyle, loupe-PTG,OHK,BNE,DWT-meangirl-straightletter";
 IMAGE_LABELS[242] = "ichabod-YME,CIRCLET-meangirl-blockbuster, character";
-IMAGE_LABELS[243] = "hebrew, catch, bosh-SLT,CTS,SDH,BNE,PTG,OHK-meangirl-piece, throwie, fillin";
-IMAGE_LABELS[244] = "rune-LTB,2K69-meangirl-straightletter, antistyle, hangover";
+IMAGE_LABELS[243] =
+  "hebrew, catch, bosh-SLT,CTS,SDH,BNE,PTG,OHK-meangirl-piece, throwie, fillin";
+IMAGE_LABELS[244] =
+  "rune-LTB,2K69-meangirl-straightletter, antistyle, hangover";
 IMAGE_LABELS[245] = "hebrew-CTS,SDH-meangirl-piece";
 IMAGE_LABELS[246] = "same-SLT,TVT-meangirl-throwie, fillin";
 IMAGE_LABELS[247] = "fegul, veg-YME-meangirl-piece, paintroller";
@@ -280,7 +309,8 @@ IMAGE_LABELS[258] = "enya, epser-TMS,5G-meangirl-antistyle";
 IMAGE_LABELS[259] = "enzyme-DPW-meangirl-piece";
 IMAGE_LABELS[260] = "uhal-MGI-meangirl-throwie";
 IMAGE_LABELS[261] = "xist, enzyme-DWT,MGI-meangirl-piece, character";
-IMAGE_LABELS[262] = "slaive, veg, same, wilt-VC,HKC,2K69,YME,SLT,TVT-meangirl-piece";
+IMAGE_LABELS[262] =
+  "slaive, veg, same, wilt-VC,HKC,2K69,YME,SLT,TVT-meangirl-piece";
 IMAGE_LABELS[263] = "veg, learn-YME,SFL,CIRCLET-meangirl-piece";
 IMAGE_LABELS[264] = "grazi-DWT-meangirl-throwie, fillin";
 IMAGE_LABELS[265] = "grazi-DWT-meangirl-straightletter";
@@ -298,9 +328,11 @@ IMAGE_LABELS[276] = "kindbud, kujoe-UK,SDH,5G-meangirl-antistyle";
 IMAGE_LABELS[277] = "enya-5G-Northeastmillinocket-antistyle";
 IMAGE_LABELS[278] = "updog, paeday-PTG,OHK-meangirl-antistyle";
 IMAGE_LABELS[279] = "mazzy13-meangirl-piece";
-IMAGE_LABELS[280] = "catch, halt, cargo, cevs, pyle, ojea3-5G,BNE,PTG,SLT,OHK,HEX,OY!-meangirl-piece, throwie, fillin";
+IMAGE_LABELS[280] =
+  "catch, halt, cargo, cevs, pyle, ojea3-5G,BNE,PTG,SLT,OHK,HEX,OY!-meangirl-piece, throwie, fillin";
 IMAGE_LABELS[281] = "ojea3-HEX,OY!-meangirl-piece, character";
-IMAGE_LABELS[282] = "arlo, grazi-DWT,5G,PPX,HBS-meangirl-antistyle, throwie, fillin";
+IMAGE_LABELS[282] =
+  "arlo, grazi-DWT,5G,PPX,HBS-meangirl-antistyle, throwie, fillin";
 IMAGE_LABELS[283] = "ozek, enzyme-DPW,MGI-meangirl-piece, character";
 IMAGE_LABELS[284] = "tears-HEX-meangirl-piece";
 IMAGE_LABELS[285] = "high8-OHK-meangirl-straightletter";
@@ -317,8 +349,10 @@ IMAGE_LABELS[295] = "hebrew, unidentified-CTS,SDH-tincan1-antistyle";
 IMAGE_LABELS[296] = "atmo-tincan1-straightletter";
 IMAGE_LABELS[297] = "lerk-TMS,SFL-tincan1-straightletter";
 IMAGE_LABELS[298] = "berm, grazi, ankle-DWT,YNE,LTB,2K69-tincan1-piece";
-IMAGE_LABELS[299] = "ruski, lrak, link-SFL,PFC,5G,SDH,CRAFT-tincan1-piece, paintroller";
-IMAGE_LABELS[300] = "ichabod, grazi-YME,CIRLCET,DWT-tincan1-blockbuster, paintroller";
+IMAGE_LABELS[299] =
+  "ruski, lrak, link-SFL,PFC,5G,SDH,CRAFT-tincan1-piece, paintroller";
+IMAGE_LABELS[300] =
+  "ichabod, grazi-YME,CIRLCET,DWT-tincan1-blockbuster, paintroller";
 IMAGE_LABELS[301] = "ojea3, obee-HEX,OY!-tincan1-piece, character";
 IMAGE_LABELS[302] = "ojea3, obee-HEX,OY!-tincan1-piece, character";
 IMAGE_LABELS[303] = "ehsk-tincan1-straightletter";
@@ -332,9 +366,11 @@ IMAGE_LABELS[310] = "doe-CFM-tincan1-piece";
 IMAGE_LABELS[311] = "therapy-YME-tincan1-tags";
 IMAGE_LABELS[312] = "kujoe, kindbud-5G,UK,SDH-tincan1-tags, antistyle";
 IMAGE_LABELS[313] = "koi-CTS-tincan1-tags";
-IMAGE_LABELS[314] = "enya, ojea3, 27, pigeon, kujoe-5G,UK,TSZ,2GF,HEX,OY!-tincan1-tags";
+IMAGE_LABELS[314] =
+  "enya, ojea3, 27, pigeon, kujoe-5G,UK,TSZ,2GF,HEX,OY!-tincan1-tags";
 IMAGE_LABELS[315] = "ankle-2K69,LTB-tincan1-straightletter";
-IMAGE_LABELS[316] = "rune, pout, pyle-PTG,BNE,OHK,2K69-tincan1-character, paintroller, antistyle";
+IMAGE_LABELS[316] =
+  "rune, pout, pyle-PTG,BNE,OHK,2K69-tincan1-character, paintroller, antistyle";
 IMAGE_LABELS[317] = "rune, itch, fore-LTB,2K69-tincan1-throwie";
 IMAGE_LABELS[318] = "mother-RNB-tincan1-tags, antistyle";
 IMAGE_LABELS[319] = "owell-CTS-tincan1-tags, antistyle";
@@ -353,22 +389,30 @@ IMAGE_LABELS[331] = "wilt-VC-realartmaine-tags";
 IMAGE_LABELS[332] = "doves-CFM,SLT-realartmaine-piece";
 IMAGE_LABELS[333] = "doves-CFM,SLT-realartmaine-tags";
 IMAGE_LABELS[334] = "enzyme-DPW-realartmaine-tags";
-IMAGE_LABELS[335] = "enzyme, epser, naut-DPW,UK,DWT,TMS-realartmaine-throwie, fillin";
+IMAGE_LABELS[335] =
+  "enzyme, epser, naut-DPW,UK,DWT,TMS-realartmaine-throwie, fillin";
 IMAGE_LABELS[336] = "goodluck-realartmaine-character, tags, moniker";
-IMAGE_LABELS[337] = "ojea3, halt-HEX,OY!,5G-realartmaine-straightletter, throwie, fillin";
+IMAGE_LABELS[337] =
+  "ojea3, halt-HEX,OY!,5G-realartmaine-straightletter, throwie, fillin";
 IMAGE_LABELS[338] = "same, ian-SLT,TVT,2K69-realartmaine-throwie, fillin";
-IMAGE_LABELS[339] = "catch, neptune-OHK,PTG,BNE,SLT,DNB-realartmaine-character, piece, fillin";
-IMAGE_LABELS[340] = "muul, catch, pyle, lerk-TMS,SFL,PTG,BNE,OHK,SLT-realartmaine-tags";
+IMAGE_LABELS[339] =
+  "catch, neptune-OHK,PTG,BNE,SLT,DNB-realartmaine-character, piece, fillin";
+IMAGE_LABELS[340] =
+  "muul, catch, pyle, lerk-TMS,SFL,PTG,BNE,OHK,SLT-realartmaine-tags";
 IMAGE_LABELS[341] = "osha, port-PTG,IMS,OHK,SLT-realartmaine-tags";
 IMAGE_LABELS[342] = "pout-realartmaine-tags, character";
 IMAGE_LABELS[343] = "catch-PTG-realartmaine-straightletter";
-IMAGE_LABELS[344] = "same, pout-SLT-realartmaine-straightletter, character, fillin";
-IMAGE_LABELS[345] = "slug, ian, lunr-PTG,2K69-realartmaine-paintroller, throwie, fillin, character, antistyle";
+IMAGE_LABELS[344] =
+  "same, pout-SLT-realartmaine-straightletter, character, fillin";
+IMAGE_LABELS[345] =
+  "slug, ian, lunr-PTG,2K69-realartmaine-paintroller, throwie, fillin, character, antistyle";
 IMAGE_LABELS[346] = "wake-LTB-realartmaine-throwie, fillin";
 IMAGE_LABELS[347] = "wake-LTB-realartmaine-throwie, fillin";
 IMAGE_LABELS[348] = "wake-LTB-realartmaine-throwie, fillin";
-IMAGE_LABELS[349] = "spot, same-SLT,2K69-realartmaine-straightletter, throwie, fillin";
-IMAGE_LABELS[350] = "same, spots, solar, ian-TVT,SLT,2K69,VC,DNB-realartmaine-straightletter, fillin, throwie";
+IMAGE_LABELS[349] =
+  "spot, same-SLT,2K69-realartmaine-straightletter, throwie, fillin";
+IMAGE_LABELS[350] =
+  "same, spots, solar, ian-TVT,SLT,2K69,VC,DNB-realartmaine-straightletter, fillin, throwie";
 IMAGE_LABELS[351] = "27-TSZ,2GF-chagrinedminnow-stencil";
 IMAGE_LABELS[352] = "27-TSZ,2GF-chagrinedminnow-stencil";
 IMAGE_LABELS[353] = "27-TSZ,2GF-chagrinedminnow-stencil";
@@ -377,16 +421,18 @@ IMAGE_LABELS[355] = "ichabod-YME,CIRCLET,SFL-chagrindedminnow-piece-character";
 IMAGE_LABELS[356] = "27-TSZ,2GF-chagrinedminnow-stencil";
 IMAGE_LABELS[357] = "petco-5G,ICBM-chagrinedminnow-tag";
 IMAGE_LABELS[358] = "rune-LTG,2K69-chagrinedminnow-tag";
-IMAGE_LABELS[359] = "wake, slept, 27, tabz, pyle, frog, wrong-LTB,TSZ,2GF,BNE,PTG,OHK,KYS,WKT-chagrinedminnow-tags, stencil";
+IMAGE_LABELS[359] =
+  "wake, slept, 27, tabz, pyle, frog, wrong-LTB,TSZ,2GF,BNE,PTG,OHK,KYS,WKT-chagrinedminnow-tags, stencil";
 IMAGE_LABELS[360] = "27-TSZ,2GF-chagrinedminnow-stencil";
 IMAGE_LABELS[361] = "27-TSZ,2GF-chagrinedminnow-throwie, fillin";
 IMAGE_LABELS[362] = "rune-LTB,2K69-chagrinedminnow-throwie, hollow";
 IMAGE_LABELS[363] = "rune-LTB,2K69-chagrinedminnow-throwie, hollow";
-IMAGE_LABELS[364] = "wake, rune-LTB,2K69-chagrinedminnow-throwie, straight, fillin";
+IMAGE_LABELS[364] =
+  "wake, rune-LTB,2K69-chagrinedminnow-throwie, straight, fillin";
 IMAGE_LABELS[365] = "wake, rune-LTB,2K69-chagrinedminnow-throwie, fillin";
 IMAGE_LABELS[366] = "27-TSZ,2GF-chagrinedminnow-tags, stencil";
 IMAGE_LABELS[367] = "wilt-VC,2K69-chagrinedminnow-antistyle";
-IMAGE_LABELS[368] = "unidetified, writer-chagrinedminnow-character, hollow"; 
+IMAGE_LABELS[368] = "unidetified, writer-chagrinedminnow-character, hollow";
 IMAGE_LABELS[369] = "ducky-chagrinedminnow-antistyle, tags";
 IMAGE_LABELS[370] = "triangle-chagrinedminnow-antistyle, tags";
 IMAGE_LABELS[371] = "ducky-chagrinedminnow-antistyle, tags";
@@ -403,8 +449,10 @@ IMAGE_LABELS[381] = "triangle-chagrinedminnow-antistyle, tags";
 IMAGE_LABELS[382] = "scipio-2GF-chagrinedminnow-throwie, character, fillin";
 IMAGE_LABELS[383] = "triangle-chagrinedminnow-antistyle, tags";
 IMAGE_LABELS[384] = "truangle-chagrinedminnow-antistyle, tags";
-IMAGE_LABELS[385] = "catch, 27, wuhan, wilt-VC,2GF,OHK,TSZ,PTG,BNE-chagrinedminnow-tags, stencil";
-IMAGE_LABELS[386] = "triangle, 27-5G,TSZ,2GF-chagrinedminnow-stencil, antistyle, tags";
+IMAGE_LABELS[385] =
+  "catch, 27, wuhan, wilt-VC,2GF,OHK,TSZ,PTG,BNE-chagrinedminnow-tags, stencil";
+IMAGE_LABELS[386] =
+  "triangle, 27-5G,TSZ,2GF-chagrinedminnow-stencil, antistyle, tags";
 IMAGE_LABELS[387] = "triangle-chagrinedminnow-antistyle, tags";
 IMAGE_LABELS[388] = "27-TSZ,2GF-chagrinedminnow-stencil";
 IMAGE_LABELS[389] = "27-TSZ,2GF-chagrinedminnow-throwie, character, fillin";
@@ -423,19 +471,29 @@ IMAGE_LABELS[401] = "27-TSZ,2GF-chagrinedminnow-tags";
 IMAGE_LABELS[402] = "27-TSZ,2GF-chagrinedminnow-throwie, antistyle, hollow";
 IMAGE_LABELS[403] = "kujoe-5G-chagrinedminnow-antistyle";
 IMAGE_LABELS[404] = "ankle-2K69,LTB-chagrinedminnow-throwie, fillin";
-IMAGE_LABELS[405] = "enzyme, auto-LSE,CTS,DPW-chagrinedminnow-antistyle, throwie, fillin";
+IMAGE_LABELS[405] =
+  "enzyme, auto-LSE,CTS,DPW-chagrinedminnow-antistyle, throwie, fillin";
 IMAGE_LABELS[406] = "catch-OHK,BNE,PTG,SLT-chagrinedminnow-blackbook";
 IMAGE_LABELS[407] = "rune, 27-TSZ,2GF,LTB,2K69-chagrinedminnow-tags";
-IMAGE_LABELS[408] = "catch, doves-OHK,SLT,PTG,BNE,CFM-realartmaine-throwie, fillin";
-IMAGE_LABELS[409] = "crone, ports, klerm, yem, lance-SLT,OHK,TNL,CTS,IMS-realartmaine-piece, paint roller";
-IMAGE_LABELS[410] = "catch, dea, eubes-OHK,PTG,BNE,SLT-realartmaine-throwie, fillin, straightletter";
-IMAGE_LABELS[411] = "huevo7, folie, knave-NBS,WFL-realartmaine-straightletter, piece";
-IMAGE_LABELS[412] = "owell, hebrew, halt, mayo-TLC,5G,SDH,CTS,TNL-realartmaine-piece, antistyle, paint roller";
-IMAGE_LABELS[413] = "same, catch, link, epser, obee-SLT,TVT,PTG,BNE,OHK,UK,TMS,SDH,CRAFT,5G,OY!-realartmaine-throwie, fillin";
-IMAGE_LABELS[414] = "reo, obee, catch, tabz, scipio-OHK,PTG,BNE,2GF,OY!,NB-realartmaine-straightletter, paintroller";
+IMAGE_LABELS[408] =
+  "catch, doves-OHK,SLT,PTG,BNE,CFM-realartmaine-throwie, fillin";
+IMAGE_LABELS[409] =
+  "crone, ports, klerm, yem, lance-SLT,OHK,TNL,CTS,IMS-realartmaine-piece, paint roller";
+IMAGE_LABELS[410] =
+  "catch, dea, eubes-OHK,PTG,BNE,SLT-realartmaine-throwie, fillin, straightletter";
+IMAGE_LABELS[411] =
+  "huevo7, folie, knave-NBS,WFL-realartmaine-straightletter, piece";
+IMAGE_LABELS[412] =
+  "owell, hebrew, halt, mayo-TLC,5G,SDH,CTS,TNL-realartmaine-piece, antistyle, paint roller";
+IMAGE_LABELS[413] =
+  "same, catch, link, epser, obee-SLT,TVT,PTG,BNE,OHK,UK,TMS,SDH,CRAFT,5G,OY!-realartmaine-throwie, fillin";
+IMAGE_LABELS[414] =
+  "reo, obee, catch, tabz, scipio-OHK,PTG,BNE,2GF,OY!,NB-realartmaine-straightletter, paintroller";
 IMAGE_LABELS[415] = "soul, jdin-realartmaine-throwie, fillins";
-IMAGE_LABELS[416] = "racket, vazo, uglyboy, ichabod-2GF,TSZ,AWC,SLF,5G-realartmaine-piece, paintroller, antistyle";
-IMAGE_LABELS[417] = "kindbud, doves, catch, obee-5G,SDH,SLT,CFM,OHK,BNE,PTG,OY!-realartmaine-piece, antistyle, tags";
+IMAGE_LABELS[416] =
+  "racket, vazo, uglyboy, ichabod-2GF,TSZ,AWC,SLF,5G-realartmaine-piece, paintroller, antistyle";
+IMAGE_LABELS[417] =
+  "kindbud, doves, catch, obee-5G,SDH,SLT,CFM,OHK,BNE,PTG,OY!-realartmaine-piece, antistyle, tags";
 IMAGE_LABELS[418] = "osha-PTG-realartmaine-tags";
 IMAGE_LABELS[419] = "hams, write-SFL,TFG-realartmaine-throwie, fillin, piece";
 IMAGE_LABELS[420] = "tears-HEX-realartmaine-piece";
@@ -444,9 +502,11 @@ IMAGE_LABELS[422] = "feer, neone-realartmaine-straightletter";
 IMAGE_LABELS[423] = "feer, vazo-TSZ,AWC-realartmaine-tags";
 IMAGE_LABELS[424] = "ojea3-HEX,OY!-realartmaine-throwie, hollow";
 IMAGE_LABELS[425] = "ek, felt-BDP-realartmaine-throwie";
-IMAGE_LABELS[426] = "catch, pest, doves, ozek, vazo-PTG,OHK,BNE,SLT,CFM,TSZ,AWC,MGI,DPW-realartmaine-tags";
+IMAGE_LABELS[426] =
+  "catch, pest, doves, ozek, vazo-PTG,OHK,BNE,SLT,CFM,TSZ,AWC,MGI,DPW-realartmaine-tags";
 IMAGE_LABELS[427] = "rune, racket-SFL,2K69,LTB-realartmaine-tags";
-IMAGE_LABELS[428] = "catch, link, doves-SLT,BNE,PTG,OHK,CFM,5G,CRAFT,SDH-realartmaine-throwie, fillin";
+IMAGE_LABELS[428] =
+  "catch, link, doves-SLT,BNE,PTG,OHK,CFM,5G,CRAFT,SDH-realartmaine-throwie, fillin";
 IMAGE_LABELS[429] = "rich-YME-realartmaine-piece, character";
 IMAGE_LABELS[430] = "wuhan, scipio-2GF-realartmaine-throwie, fillin";
 IMAGE_LABELS[431] = "eons-SLT,TVT,OHK-realartmaine-tags";
@@ -457,25 +517,36 @@ IMAGE_LABELS[435] = "foty, brane, feer-realartmaine-tags";
 IMAGE_LABELS[436] = "ojea3-HEX,OY!-realartmaine-throwie, fillin";
 IMAGE_LABELS[437] = "gerv-YME,SFL-realartmaine-piece";
 IMAGE_LABELS[438] = "lerk, write, racket-SFL,TMS-realartmaine-piece";
-IMAGE_LABELS[439] = "pyle, catch, petco-5G,ICBM,SLT,OHK,PTG,BNE-realartmaine-straightletter";
+IMAGE_LABELS[439] =
+  "pyle, catch, petco-5G,ICBM,SLT,OHK,PTG,BNE-realartmaine-straightletter";
 IMAGE_LABELS[440] = "rondo-PTG-realartmaine-tags";
 IMAGE_LABELS[441] = "ojea3-HEX,OY!-realartmaine-tags";
 IMAGE_LABELS[442] = "port, pyle-OHK,SLT,IMS,PTG,BNE-realartmaine-tags";
-IMAGE_LABELS[443] = "pyle, slug, user, wake-LTB,DNB,PTG,BNE,OHK-realartmaine-tags";
+IMAGE_LABELS[443] =
+  "pyle, slug, user, wake-LTB,DNB,PTG,BNE,OHK-realartmaine-tags";
 IMAGE_LABELS[444] = "pyle, tabz-2GF,PTG,BNE,OHK-realartmaine-tags";
 IMAGE_LABELS[445] = "same, chalk-PTG,SLT,RBH,TVT-realartmaine-throwie, fillin";
 IMAGE_LABELS[446] = "ojea3-HEX,OY!-realartmaine-throwie, fillin";
-IMAGE_LABELS[447] = "kindbud, unidentifiedwriter-5G,SDH-realartmaine-antistyle, piece";
-IMAGE_LABELS[448] = "object, uglyboy, petco, link-SDH,CRAFT,5G,ICBM-realartmaine-piece, antistyle, paint roller";
-IMAGE_LABELS[449] = "link, frany, enya, esko, argo-5G,SDH,CRAFT,TMS-realartmaine-piece, antistyle, paint roller";
-IMAGE_LABELS[450] = "petco, about, halt, learn, arab-AX,5G,YME,CIRCLET,SFL-realartmaine-piece, straightletter, antistyle";
-IMAGE_LABELS[451] = "jozi, salud, kg-PTG,EFC-realartmaine-piece, character, paintroller";
-IMAGE_LABELS[452] = "learn, unidentifiedwriters-YME,SFL,CIRLCET-realartmaine-piece";
-IMAGE_LABELS[453] = "zurk, turdl, learn-YME,CIRCLET,5G,SFL-realartmaine-piece, paint roller";
+IMAGE_LABELS[447] =
+  "kindbud, unidentifiedwriter-5G,SDH-realartmaine-antistyle, piece";
+IMAGE_LABELS[448] =
+  "object, uglyboy, petco, link-SDH,CRAFT,5G,ICBM-realartmaine-piece, antistyle, paint roller";
+IMAGE_LABELS[449] =
+  "link, frany, enya, esko, argo-5G,SDH,CRAFT,TMS-realartmaine-piece, antistyle, paint roller";
+IMAGE_LABELS[450] =
+  "petco, about, halt, learn, arab-AX,5G,YME,CIRCLET,SFL-realartmaine-piece, straightletter, antistyle";
+IMAGE_LABELS[451] =
+  "jozi, salud, kg-PTG,EFC-realartmaine-piece, character, paintroller";
+IMAGE_LABELS[452] =
+  "learn, unidentifiedwriters-YME,SFL,CIRLCET-realartmaine-piece";
+IMAGE_LABELS[453] =
+  "zurk, turdl, learn-YME,CIRCLET,5G,SFL-realartmaine-piece, paint roller";
 IMAGE_LABELS[454] = "fonse-WH-realartmaine-piece";
 IMAGE_LABELS[455] = "plank, symbol, auto, chalk-PTG,CTS,TNL-realartmaine-piece";
-IMAGE_LABELS[456] = "feer, epser, ojea3-SLT,UK,TMS,HEX,OY!-realartmaine-tags, straightletter";
-IMAGE_LABELS[457] = "epser, kots-SLT,UK,TMS-realartmaine-throwie, straightletter, character";
+IMAGE_LABELS[456] =
+  "feer, epser, ojea3-SLT,UK,TMS,HEX,OY!-realartmaine-tags, straightletter";
+IMAGE_LABELS[457] =
+  "epser, kots-SLT,UK,TMS-realartmaine-throwie, straightletter, character";
 IMAGE_LABELS[458] = "chape-realartmaine-striaghtletter";
 IMAGE_LABELS[459] = "songy-realartmaine-tags";
 IMAGE_LABELS[460] = "port-OHK,IMS,SLT-realartmaine-tags";
@@ -484,7 +555,8 @@ IMAGE_LABELS[462] = "ojea3, enzyme, tubby-HEX,OY!,DPW-realartmaine-tags";
 IMAGE_LABELS[463] = "enzyme, ojea3-HEX,OY!,DPW-realartmaine-tags";
 IMAGE_LABELS[464] = "racket-SFL,TMS,DPW-realartmaine-tags";
 IMAGE_LABELS[465] = "muul, aura, ohboy, tubby-OHK-realartmaine-tags";
-IMAGE_LABELS[466] = "doves, neone-SLT,CFM-realartmaine-throwie, fillin, straightletter";
+IMAGE_LABELS[466] =
+  "doves, neone-SLT,CFM-realartmaine-throwie, fillin, straightletter";
 IMAGE_LABELS[467] = "catch-OHK,PTG,BNE,SLT-realartmaine-straightletter";
 IMAGE_LABELS[468] = "exit, heart-DPW,MGI-tincan1-throwie, hollow";
 IMAGE_LABELS[469] = "enya-5G-tincan1-tags, antistyle";
@@ -499,9 +571,12 @@ IMAGE_LABELS[477] = "ajna-SLT-Northeastmillinocket-straightletter";
 IMAGE_LABELS[478] = "halt, ajna-SLT-Northeastmillinocket-piece, straightletter";
 IMAGE_LABELS[479] = "raket-SFL,TMS-Northeastmillinocket-straightletter";
 IMAGE_LABELS[480] = "thex-SLT-Northeastmillinocket-straightletter";
-IMAGE_LABELS[481] = "ojea3, unidentified-HEX, OY!-Northeastmillinocket-piece, character";
-IMAGE_LABELS[482] = "aura, pyle, unidentified-PTG,BNE,OHK-Northeastmillinocket-piece, throwie, fillin";
-IMAGE_LABELS[483] = "bike, catch, doe, goal, aura, petco, en-BNE,PTG,OHK,SLT,CFM,5G,ICBM,RTH-Northeastmillinocket-throwie, fillin, paintroller";
+IMAGE_LABELS[481] =
+  "ojea3, unidentified-HEX, OY!-Northeastmillinocket-piece, character";
+IMAGE_LABELS[482] =
+  "aura, pyle, unidentified-PTG,BNE,OHK-Northeastmillinocket-piece, throwie, fillin";
+IMAGE_LABELS[483] =
+  "bike, catch, doe, goal, aura, petco, en-BNE,PTG,OHK,SLT,CFM,5G,ICBM,RTH-Northeastmillinocket-throwie, fillin, paintroller";
 IMAGE_LABELS[484] = "enya-5G-realartmaine-frieghts, antistyle, straightletter";
 IMAGE_LABELS[485] = "fish-CTS,TNL-realartmaine-blockbuster";
 IMAGE_LABELS[486] = "muul-FNL-realartmaine-paintroller";
@@ -517,15 +592,19 @@ IMAGE_LABELS[495] = "slept-NF-realartmaine-throwie, hollow";
 IMAGE_LABELS[496] = "slept, wake, rune-NF,LTB,2K69-realartmaine-tags";
 IMAGE_LABELS[497] = "slept-NF-realartmaine-tags";
 IMAGE_LABELS[498] = "2gf-2GF-realartmaine-tags";
-IMAGE_LABELS[499] = "egirl, towel, wake, towel, gask-FK,LTB,OHK,PTG-realartmaine-tags";
-IMAGE_LABELS[500] = "egirl, salud, towel, wake, towel, gask-FK,LTB,OHK,PTG-realartmaine-character, tags";
-IMAGE_LABELS[501] = "kost, same-SLT,TVT,WKT-realartmaine-frieghts, piece, straightletter";
+IMAGE_LABELS[499] =
+  "egirl, towel, wake, towel, gask-FK,LTB,OHK,PTG-realartmaine-tags";
+IMAGE_LABELS[500] =
+  "egirl, salud, towel, wake, towel, gask-FK,LTB,OHK,PTG-realartmaine-character, tags";
+IMAGE_LABELS[501] =
+  "kost, same-SLT,TVT,WKT-realartmaine-frieghts, piece, straightletter";
 IMAGE_LABELS[502] = "spud, akoe-5G-realartmaine-throwie, frieghts";
 IMAGE_LABELS[503] = "like-SDH,CRAFT,5G-realartmaine-piece";
 IMAGE_LABELS[504] = "slug, brik, pest, songy-PTG-realartmaine-tags";
 IMAGE_LABELS[505] = "slept, wake, rune, muin-NF,LTB,2K69-realartmaine-tags";
 IMAGE_LABELS[506] = "suer-TMS-realartmaine-tags";
-IMAGE_LABELS[507] = "kesto, catch, wilt-OHK,BNE,PTG,SLT,VC,2K69-realartmaine-straightletter";
+IMAGE_LABELS[507] =
+  "kesto, catch, wilt-OHK,BNE,PTG,SLT,VC,2K69-realartmaine-straightletter";
 IMAGE_LABELS[508] = "2gf-2GF-realartmaine-tags";
 IMAGE_LABELS[509] = "5G-5G-realartmaine-straightletter";
 IMAGE_LABELS[510] = "argo, grazi, pest-DWT-realartmaine-tags";
@@ -554,28 +633,36 @@ IMAGE_LABELS[532] = "wake-LTB-realartmaine-throwie, hollow";
 IMAGE_LABELS[533] = "wilt-VC,2K69-realartmaine-tags, antistyle";
 IMAGE_LABELS[534] = "grazi, towel-DWT,FK-realartmaine-tags";
 IMAGE_LABELS[535] = "grazi-DWT-realartmaine-tags";
-IMAGE_LABELS[536] = "bestie, auto, braindamage-CTS,TNL-realartmaine-tags, antistyle";
+IMAGE_LABELS[536] =
+  "bestie, auto, braindamage-CTS,TNL-realartmaine-tags, antistyle";
 IMAGE_LABELS[537] = "unidentified-realartmaine-tags";
 IMAGE_LABELS[538] = "okzit-realartmaine-tags, antistyle";
 IMAGE_LABELS[539] = "sorcer-663-realartmaine-tags";
 IMAGE_LABELS[540] = "wake-LTB-realartmaine-tags";
 IMAGE_LABELS[541] = "goodluck-realartmaine-tags, character";
-IMAGE_LABELS[542] = "ojea3, wake, rune, catch-LTB,2K69,HEX,OHK,SLT,BNE,PTG-realartmaine-tags";
-IMAGE_LABELS[543] = "rune, epser, horny, ramen-UK,TMS,LTB,2K69-REALARTMAINE-throwie, fillin";
+IMAGE_LABELS[542] =
+  "ojea3, wake, rune, catch-LTB,2K69,HEX,OHK,SLT,BNE,PTG-realartmaine-tags";
+IMAGE_LABELS[543] =
+  "rune, epser, horny, ramen-UK,TMS,LTB,2K69-REALARTMAINE-throwie, fillin";
 IMAGE_LABELS[544] = "doves-CFM,SLT-realartmaine-tags";
 IMAGE_LABELS[545] = "enzyme-DPW-realartmaine-tags";
 IMAGE_LABELS[546] = "eons-OHK,SLT,TVT-realartmaine-tags";
-IMAGE_LABELS[547] = "wilt, notice, spykid-5G,2K69,VC-realartmaine-straightletter, tags, frieght";
+IMAGE_LABELS[547] =
+  "wilt, notice, spykid-5G,2K69,VC-realartmaine-straightletter, tags, frieght";
 IMAGE_LABELS[548] = "nvest,-KYS,5G-realartmaine-throwie, fillin";
 IMAGE_LABELS[549] = "enzyme-DPW-realartmaine-tags";
 IMAGE_LABELS[550] = "merlin-CTS,SK8-realartmaine-antistyle";
-IMAGE_LABELS[551] = "wilt, port-SLT,IMS,OHK,VC,2K69-realartmaine-throwie, fillin, antistyle";
-IMAGE_LABELS[552] = "sler, klerm, garst, pest, funkymel-CTS,TNL-realartmaine-tags, slaps";
-IMAGE_LABELS[553] = "merlin, secret, kindbud, horses-SDH,5G,SK8,CTS,TNL,OHK-realartmaine-tags";
+IMAGE_LABELS[551] =
+  "wilt, port-SLT,IMS,OHK,VC,2K69-realartmaine-throwie, fillin, antistyle";
+IMAGE_LABELS[552] =
+  "sler, klerm, garst, pest, funkymel-CTS,TNL-realartmaine-tags, slaps";
+IMAGE_LABELS[553] =
+  "merlin, secret, kindbud, horses-SDH,5G,SK8,CTS,TNL,OHK-realartmaine-tags";
 IMAGE_LABELS[554] = "bunt-realartmaine-tags";
 IMAGE_LABELS[555] = "sadie-MGI-realartmaine-tags";
 IMAGE_LABELS[556] = "5G-5G-realartmaine-tags, antistyle";
-IMAGE_LABELS[557] = "mobi, ducky-TSZ-realartmaine-throwie, fillin, antistyle, character";
+IMAGE_LABELS[557] =
+  "mobi, ducky-TSZ-realartmaine-throwie, fillin, antistyle, character";
 IMAGE_LABELS[558] = "ducky-realartmaine-character, antistyle";
 IMAGE_LABELS[559] = "doves-CFM,SLT-realartmaine-hollow, throwie";
 IMAGE_LABELS[560] = "nihil-realartmaine-tags";
@@ -594,10 +681,12 @@ IMAGE_LABELS[572] = "garst-realartmaine-tags";
 IMAGE_LABELS[573] = "grazi, lause-DWT-realartmaine-tags";
 IMAGE_LABELS[574] = "grazi-DWT-realartmaine-tags";
 IMAGE_LABELS[575] = "mother, pest-RNB-realartmaine-tags";
-IMAGE_LABELS[576] = "pest, crone, high8, veg, pyle-PTG,BNE,OHK,SLT,YME-realartmaine-tags, slaps";
+IMAGE_LABELS[576] =
+  "pest, crone, high8, veg, pyle-PTG,BNE,OHK,SLT,YME-realartmaine-tags, slaps";
 IMAGE_LABELS[577] = "catch-BNE,PTG,SLT,OHK-realartmaine-throwie, hollow";
 IMAGE_LABELS[578] = "catch-BNE,OHK,PTG,SLT-realartmaine-straightletter";
-IMAGE_LABELS[579] = "merlin, ducky, hiphop-SK8,CTS,TNL-realartmaine-antistyle, character";
+IMAGE_LABELS[579] =
+  "merlin, ducky, hiphop-SK8,CTS,TNL-realartmaine-antistyle, character";
 IMAGE_LABELS[580] = "marcy-HEX-realartmaine-tags";
 IMAGE_LABELS[581] = "grazi, ojea3-DWT,HEX,OY!-realartmaine-tags";
 IMAGE_LABELS[582] = "27-TSZ-chagrinedminnow-stencil";
@@ -608,9 +697,11 @@ IMAGE_LABELS[586] = "merlin-CTS,TNL,SK8-realartmaine-tags, antistyle";
 IMAGE_LABELS[587] = "lastsupper-realartmaine-tags, antistyle";
 IMAGE_LABELS[588] = "merlin-CTS,TNL,SK8-realartmaine-tags, antistyle";
 IMAGE_LABELS[589] = "some1, sorcer-663-realartmaine-tags, slaps";
-IMAGE_LABELS[590] = "learn, ichabod, 27-YNE,TSZ,2GF,CIRCLET-realartmaine-tags, slaps";
+IMAGE_LABELS[590] =
+  "learn, ichabod, 27-YNE,TSZ,2GF,CIRCLET-realartmaine-tags, slaps";
 IMAGE_LABELS[591] = "towel-FX-realartmaine-slaps";
-IMAGE_LABELS[592] = "klerm, uncle, qjoe, gask-PTG,5G,UK,TNL,CTS-realartmaine-tags";
+IMAGE_LABELS[592] =
+  "klerm, uncle, qjoe, gask-PTG,5G,UK,TNL,CTS-realartmaine-tags";
 IMAGE_LABELS[593] = "about-5G-realartmaine-tags";
 IMAGE_LABELS[594] = "marcy-HEX-realartmaine-tags";
 IMAGE_LABELS[595] = "reo, epser-SAO,TMS,UK-realartmaine-tags";
@@ -630,61 +721,51 @@ IMAGE_LABELS[608] = "updog-PTG-realartmaine-tags, antistyle";
 IMAGE_LABELS[609] = "loupe-DWT,AMC-realartmaine-tags, moniker";
 IMAGE_LABELS[610] = "pyle-PTG,BNE,SLT,OHK-realartmaine-tags";
 IMAGE_LABELS[611] = "about-5G-realartmaine-straightletter, hollow";
-IMAGE_LABELS[612] = "qjoe, trak, neptune, about, grazi-DNB,LTB,5G,UK,DWT-realartmaine-tags";
+IMAGE_LABELS[612] =
+  "qjoe, trak, neptune, about, grazi-DNB,LTB,5G,UK,DWT-realartmaine-tags";
 IMAGE_LABELS[613] = "dollhouse-realartmaine-tags";
 IMAGE_LABELS[614] = "pigeon-realartmaine-character, fillin";
 IMAGE_LABELS[615] = "rune-LTB,2K69-realartmaine-tags";
-IMAGE_LABELS[616] = "tears, rune, charm, 27-TSZ,2GF,2K69,LTB,HEX-realartmaine-tags";
+IMAGE_LABELS[616] =
+  "tears, rune, charm, 27-TSZ,2GF,2K69,LTB,HEX-realartmaine-tags";
 IMAGE_LABELS[617] = "ozek-MGI-realartmaine-throwie, hollow";
-IMAGE_LABELS[618] = "wake, juek, reo, neptune, 27, high8, enzyme, 2unidentified-LTB,SAO,DNB,2GF,TSZ,DPW-realartmaine-tags";
+IMAGE_LABELS[618] =
+  "wake, juek, reo, neptune, 27, high8, enzyme, 2unidentified-LTB,SAO,DNB,2GF,TSZ,DPW-realartmaine-tags";
 IMAGE_LABELS[619] = "unidentified-realartmaine-tags, antistyle";
 IMAGE_LABELS[620] = "about-5G-realartmaine-straightletter, hollow";
 IMAGE_LABELS[621] = "ojea3-OY!,HEX-realartmaine-straightletter";
 IMAGE_LABELS[622] = "catch-BNE,OHK,SLT,PTG-realartmaine-straightletter";
-IMAGE_LABELS[623] = "eons, doe, lause, 10shn-SLT,CFM,TVT,OHK-realartmaine-throwie, fillin";
+IMAGE_LABELS[623] =
+  "eons, doe, lause, 10shn-SLT,CFM,TVT,OHK-realartmaine-throwie, fillin";
 IMAGE_LABELS[624] = "rune-LTB,2K69-realartmaine-antistyle";
 IMAGE_LABELS[625] = "grazi-DWT-realartmaine-tags";
 IMAGE_LABELS[626] = "ozek-MGI-realartmaine-throwie, hollow";
 IMAGE_LABELS[627] = "doves-CFM-realartmaine-throwie, hollow";
-
-//hi
-
-// ----- END AUTO-GENERATED LABELS -----
-
-// Helper: get label for numeric index (1-based). Returns empty string if missing.
 function getLabelForIndex(index) {
-  if (!index || index < 1) return '';
-  return IMAGE_LABELS[index] || '';
+  if (!index || index < 1) return "";
+  return IMAGE_LABELS[index] || "";
 }
-// remove exact-duplicate paths while preserving first occurrence order
-
-// Build numeric mapping and metadata lookup from `IMAGE_LABELS`.
-// `IMAGE_LABELS` is 1-based; entries may be overridden by editing this file.
-// We set `orig` to the numeric path and only attempt numeric files as
-// candidates (no fallback to long original filenames).
-const metaList = (function() {
+const metaList = (function () {
   const list = [];
-  const total = (typeof IMAGE_LABELS !== 'undefined') ? Math.max(0, IMAGE_LABELS.length - 1) : 0;
+  const total =
+    typeof IMAGE_LABELS !== "undefined"
+      ? Math.max(0, IMAGE_LABELS.length - 1)
+      : 0;
   for (let idx = 0; idx < total; idx++) {
     const index = idx + 1;
-    const label = IMAGE_LABELS[index] || '';
+    const label = IMAGE_LABELS[index] || "";
     const nameNoExt = label || String(index);
-    // Image set is normalized to lowercase .jpg
-    const exts = ['.jpg'];
+    const exts = [".jpg"];
     const numericSrc = `/assets/images/${index}${exts[0]}`;
     const basename = `${index}${exts[0]}`;
-    const orig = numericSrc; // no original-filename fallback
-
-    const tokens = (label || '')
-      .replace(/[\W_]+/g, ' ')
+    const orig = numericSrc;
+    const tokens = (label || "")
+      .replace(/[\W_]+/g, " ")
       .trim()
       .toLowerCase()
       .split(/\s+/)
       .filter(Boolean);
-
-    // build candidates (single canonical extension)
-    const candidates = exts.map(e => `/assets/images/${index}${e}`);
-
+    const candidates = exts.map((e) => `/assets/images/${index}${e}`);
     list.push({
       index,
       orig,
@@ -694,80 +775,63 @@ const metaList = (function() {
       numericSrc,
       label,
       candidates,
-      tokens
+      tokens,
     });
   }
   return list;
 })();
-
-// metaBySrc maps both the numeric path and the original path to the same meta
 const metaBySrc = {};
-metaList.forEach(m => {
-  // register all candidate paths so lookups and fallbacks work regardless of extension/case
+metaList.forEach((m) => {
   if (Array.isArray(m.candidates)) {
-    m.candidates.forEach(c => { metaBySrc[c] = m; });
+    m.candidates.forEach((c) => {
+      metaBySrc[c] = m;
+    });
   }
-  // also map canonical numericSrc and orig for compatibility
   metaBySrc[m.numericSrc] = m;
   metaBySrc[m.orig] = m;
 });
-
-// Safe helper: get meta for a src (numeric or original)
 function getMetaForSrc(src) {
   if (!src) return null;
   return metaBySrc[src] || null;
 }
-
-// Helper to get tokens for a given src; falls back to a light parse if unknown
 function tokensForSrc(src) {
   const m = getMetaForSrc(src);
   if (m) return m.tokens;
-  // fallback: strip path and extension and tokenize
-  const base = (src || '').replace(/^.*\/(assets\/images\/)?/i, '');
-  const d = base.lastIndexOf('.');
+  const base = (src || "").replace(/^.*\/(assets\/images\/)?/i, "");
+  const d = base.lastIndexOf(".");
   const name = d >= 0 ? base.slice(0, d) : base;
-  return (name.replace(/[\W_]+/g, ' ').trim().toLowerCase().split(/\s+/).filter(Boolean));
+  return name
+    .replace(/[\W_]+/g, " ")
+    .trim()
+    .toLowerCase()
+    .split(/\s+/)
+    .filter(Boolean);
 }
-
-// <-- ADDITION: ensure DOM refs and load token exist before any function runs -->
 const gallery = document.getElementById("galleryContainer");
 const searchInput = document.getElementById("searchInput");
-// sort control (newest/oldest)
 const sortSelect = document.getElementById("sortSelect");
-const SORT_KEY = 'gallerySort';
-// load saved preference (safe localStorage access)
-let currentSort = 'newest';
+const SORT_KEY = "gallerySort";
+let currentSort = "newest";
 try {
-  const saved = (typeof localStorage !== 'undefined') ? localStorage.getItem(SORT_KEY) : null;
-  if (saved === 'newest' || saved === 'oldest') currentSort = saved;
+  const saved =
+    typeof localStorage !== "undefined" ? localStorage.getItem(SORT_KEY) : null;
+  if (saved === "newest" || saved === "oldest") currentSort = saved;
 } catch (e) {}
 if (sortSelect) {
-  try { sortSelect.value = currentSort; } catch (e) {}
+  try {
+    sortSelect.value = currentSort;
+  } catch (e) {}
 }
-// load-run token used to cancel obsolete loads
 let currentLoadId = 0;
-// the list currently displayed in the gallery (changes with search/filter)
 let currentDisplayedList = [];
-// <-- end addition -->
-
 const DEFAULT_ASPECT = 0.66;
-
-// Cache names
-const IMAGE_CACHE = 'realart-image-cache-v2';
-const GUI_CACHE = 'realart-gui-v1';
-// GUI assets to pre-cache for faster UI (icons, arrows, gear)
-const GUI_ASSETS = [
-  '/assets/GUI/gear.png',
-  '/assets/GUI/arrow.png'
-];
-
-// Track created blob URLs so they can be revoked on unload
+const IMAGE_CACHE = "realart-image-cache-v2";
+const GUI_CACHE = "realart-gui-v1";
+const GUI_ASSETS = ["/assets/GUI/gear.png", "/assets/GUI/arrow.png"];
 const __createdGuiBlobUrls = [];
-
-// Lightweight image revalidation (cache-first + background conditional checks).
-const IMAGE_REVALIDATE_TTL_MS = 6 * 60 * 60 * 1000; // 6 hours
+const IMAGE_REVALIDATE_TTL_MS = 6 * 60 * 60 * 1000;
 const IMAGE_REVALIDATE_CONCURRENCY = 2;
-const IMAGE_REVALIDATION_STATE_KEY = 'ram_image_revalidation_state_v1';
+const IMAGE_REVALIDATION_STATE_KEY = "ram_image_revalidation_state_v1";
 const __imageLastValidatedAt = new Map();
 const __pendingImageRevalidations = new Set();
 const __queuedImageRevalidations = [];
@@ -776,26 +840,21 @@ const __knownMissingImageCandidates = new Set();
 let __notFoundStreak = 0;
 let __disableNetworkImageFetches = false;
 const IMAGE_NOT_FOUND_STREAK_THRESHOLD = 20;
-
 function loadImageRevalidationState() {
   try {
     const raw = localStorage.getItem(IMAGE_REVALIDATION_STATE_KEY);
     if (!raw) return;
     const data = JSON.parse(raw);
-    if (!data || typeof data !== 'object') return;
+    if (!data || typeof data !== "object") return;
     const now = Date.now();
     for (const key of Object.keys(data)) {
       const ts = Number(data[key]);
       if (!Number.isFinite(ts)) continue;
-      // prune very old state so storage stays small
       if (now - ts > 30 * 24 * 60 * 60 * 1000) continue;
       __imageLastValidatedAt.set(key, ts);
     }
-  } catch (e) {
-    // ignore storage parse errors
-  }
+  } catch (e) {}
 }
-
 function saveImageRevalidationState() {
   try {
     const now = Date.now();
@@ -804,31 +863,25 @@ function saveImageRevalidationState() {
       if (now - ts <= 30 * 24 * 60 * 60 * 1000) out[key] = ts;
     });
     localStorage.setItem(IMAGE_REVALIDATION_STATE_KEY, JSON.stringify(out));
-  } catch (e) {
-    // ignore storage write errors
-  }
+  } catch (e) {}
 }
-
 function markImageValidated(candidate) {
   __imageLastValidatedAt.set(candidate, Date.now());
   saveImageRevalidationState();
 }
-
 function needsImageRevalidation(candidate) {
   const last = __imageLastValidatedAt.get(candidate) || 0;
   return Date.now() - last >= IMAGE_REVALIDATE_TTL_MS;
 }
-
 function buildConditionalHeadersFromCached(cachedResp) {
   const headers = {};
   if (!cachedResp || !cachedResp.headers) return headers;
-  const etag = cachedResp.headers.get('etag');
-  const lastModified = cachedResp.headers.get('last-modified');
-  if (etag) headers['If-None-Match'] = etag;
-  if (lastModified) headers['If-Modified-Since'] = lastModified;
+  const etag = cachedResp.headers.get("etag");
+  const lastModified = cachedResp.headers.get("last-modified");
+  if (etag) headers["If-None-Match"] = etag;
+  if (lastModified) headers["If-Modified-Since"] = lastModified;
   return headers;
 }
-
 async function revalidateCachedImage(candidate) {
   if (__knownMissingImageCandidates.has(candidate)) {
     markImageValidated(candidate);
@@ -838,12 +891,10 @@ async function revalidateCachedImage(candidate) {
     markImageValidated(candidate);
     return;
   }
-
-  if (typeof caches === 'undefined' || !caches.open) {
+  if (typeof caches === "undefined" || !caches.open) {
     markImageValidated(candidate);
     return;
   }
-
   try {
     const cache = await caches.open(IMAGE_CACHE);
     const cachedResp = await cache.match(candidate);
@@ -851,24 +902,24 @@ async function revalidateCachedImage(candidate) {
       markImageValidated(candidate);
       return;
     }
-
     const headers = buildConditionalHeadersFromCached(cachedResp);
-    const netResp = await fetch(candidate, { method: 'GET', cache: 'no-store', headers });
-
-    // 304 means cached content is still valid.
+    const netResp = await fetch(candidate, {
+      method: "GET",
+      cache: "no-store",
+      headers,
+    });
     if (netResp && netResp.status === 304) {
       markImageValidated(candidate);
       return;
     }
-
-    // 200 means content may have changed; replace cache entry.
     if (netResp && netResp.ok) {
-      try { await cache.put(candidate, netResp.clone()); } catch (e) {}
+      try {
+        await cache.put(candidate, netResp.clone());
+      } catch (e) {}
       __notFoundStreak = 0;
       markImageValidated(candidate);
       return;
     }
-
     if (netResp && netResp.status === 404) {
       __knownMissingImageCandidates.add(candidate);
       __notFoundStreak++;
@@ -878,15 +929,11 @@ async function revalidateCachedImage(candidate) {
       markImageValidated(candidate);
       return;
     }
-
-    // On any other status, keep existing cache and avoid retry storms.
     markImageValidated(candidate);
   } catch (e) {
-    // Network errors are expected offline; keep existing cache.
     markImageValidated(candidate);
   }
 }
-
 function drainImageRevalidationQueue() {
   while (
     __activeImageRevalidations < IMAGE_REVALIDATE_CONCURRENCY &&
@@ -903,7 +950,6 @@ function drainImageRevalidationQueue() {
       });
   }
 }
-
 function queueImageRevalidation(candidate) {
   if (!candidate) return;
   if (!needsImageRevalidation(candidate)) return;
@@ -912,42 +958,34 @@ function queueImageRevalidation(candidate) {
   __queuedImageRevalidations.push(candidate);
   drainImageRevalidationQueue();
 }
-
-// Pre-cache GUI assets (cache-first strategy)
 async function preCacheGuiAssets() {
-  if (typeof caches === 'undefined' || !caches.open) return;
+  if (typeof caches === "undefined" || !caches.open) return;
   try {
     const cache = await caches.open(GUI_CACHE);
     for (const p of GUI_ASSETS) {
       try {
         const match = await cache.match(p);
-        if (match && match.ok) continue; // already cached
-        const resp = await fetch(p, { method: 'GET' });
+        if (match && match.ok) continue;
+        const resp = await fetch(p, { method: "GET" });
         if (resp && resp.ok) {
-          try { await cache.put(p, resp.clone()); } catch (e) {}
+          try {
+            await cache.put(p, resp.clone());
+          } catch (e) {}
         }
-      } catch (e) {
-        // ignore individual failures
-      }
+      } catch (e) {}
     }
-  } catch (e) {
-    // ignore cache open errors
-  }
+  } catch (e) {}
 }
-
-// Replace on-page GUI <img> elements with blob URLs from Cache Storage when available
 async function replaceGuiImagesFromCache() {
-  if (typeof caches === 'undefined' || !caches.open) return;
+  if (typeof caches === "undefined" || !caches.open) return;
   try {
     const cache = await caches.open(GUI_CACHE);
-    const imgs = Array.from(document.querySelectorAll('img'));
+    const imgs = Array.from(document.querySelectorAll("img"));
     for (const img of imgs) {
       try {
-        const src = img.getAttribute('src') || img.src || '';
-        // only handle assets/GUI paths
-        if (!src.includes('/assets/GUI/')) continue;
-        // Normalize path (keep origin-less)
-        const path = src.replace(location.origin, '');
+        const src = img.getAttribute("src") || img.src || "";
+        if (!src.includes("/assets/GUI/")) continue;
+        const path = src.replace(location.origin, "");
         const cached = await cache.match(path);
         if (cached && cached.ok) {
           const blob = await cached.blob();
@@ -955,37 +993,33 @@ async function replaceGuiImagesFromCache() {
           __createdGuiBlobUrls.push(blobUrl);
           img.src = blobUrl;
         }
-      } catch (e) {
-        // ignore per-image errors
-      }
+      } catch (e) {}
     }
-  } catch (e) {
-    // ignore
-  }
+  } catch (e) {}
 }
-
-// Revoke created blob URLs on unload to free memory
-window.addEventListener('unload', () => {
-  try { __createdGuiBlobUrls.forEach(u => { try { URL.revokeObjectURL(u); } catch (e) {} }); } catch (e) {}
+window.addEventListener("unload", () => {
+  try {
+    __createdGuiBlobUrls.forEach((u) => {
+      try {
+        URL.revokeObjectURL(u);
+      } catch (e) {}
+    });
+  } catch (e) {}
 });
-
 function scheduleBlobUrlRevoke(blobUrl) {
   if (!blobUrl) return;
-  // Revoke a little later; immediate revocation can show broken-image overlays
-  // in some browsers even after decode() resolves.
   setTimeout(() => {
-    try { URL.revokeObjectURL(blobUrl); } catch (e) {}
+    try {
+      URL.revokeObjectURL(blobUrl);
+    } catch (e) {}
   }, 1200);
 }
-
 async function getValidatedImageBlob(candidate) {
   if (__knownMissingImageCandidates.has(candidate)) return null;
   if (__disableNetworkImageFetches) return null;
-
   let cache = null;
   let cachedResp = null;
-
-  if (typeof caches !== 'undefined' && caches.open) {
+  if (typeof caches !== "undefined" && caches.open) {
     try {
       cache = await caches.open(IMAGE_CACHE);
       cachedResp = await cache.match(candidate);
@@ -994,21 +1028,22 @@ async function getValidatedImageBlob(candidate) {
       cachedResp = null;
     }
   }
-
-  // Fast path: serve cached image immediately, then revalidate in the background.
   if (cachedResp && cachedResp.ok) {
     queueImageRevalidation(candidate);
-    return { blob: await cachedResp.blob(), source: 'cache' };
+    return { blob: await cachedResp.blob(), source: "cache" };
   }
-
-  // Cache miss: fetch from network and store.
   try {
-    const onlineResp = await fetch(candidate, { method: 'GET', cache: 'no-store' });
+    const onlineResp = await fetch(candidate, {
+      method: "GET",
+      cache: "no-store",
+    });
     if (onlineResp && onlineResp.ok) {
-      try { if (cache) await cache.put(candidate, onlineResp.clone()); } catch (e) {}
+      try {
+        if (cache) await cache.put(candidate, onlineResp.clone());
+      } catch (e) {}
       __notFoundStreak = 0;
       markImageValidated(candidate);
-      return { blob: await onlineResp.blob(), source: 'network' };
+      return { blob: await onlineResp.blob(), source: "network" };
     }
     if (onlineResp && onlineResp.status === 404) {
       __knownMissingImageCandidates.add(candidate);
@@ -1017,145 +1052,180 @@ async function getValidatedImageBlob(candidate) {
         __disableNetworkImageFetches = true;
       }
     }
-  } catch (e) {
-    // network miss
-  }
-
+  } catch (e) {}
   return null;
 }
-
 loadImageRevalidationState();
-
-
-
 const TOY_BLACKLIST = [
-  "arise", "cutie", "love", "lovey", "4kt", "fourkt", "sajak", "sajack", "freeze",
-  "ames", "ame", "chad", "token", "sour", "saint", "ecko", "echo", "cemo", "mohammed hoch", "mohammedhoch", 
-  "calcium", "cal", "moyo", "wd40"
-].map(s => s.toLowerCase());
-
-// Synonym groups: each sub-array contains equivalent terms that should be
-// considered interchangeable for search purposes. Add or edit groups here.
+  "arise",
+  "cutie",
+  "love",
+  "lovey",
+  "4kt",
+  "fourkt",
+  "sajak",
+  "sajack",
+  "freeze",
+  "ames",
+  "ame",
+  "chad",
+  "token",
+  "sour",
+  "saint",
+  "ecko",
+  "echo",
+  "cemo",
+  "mohammed hoch",
+  "mohammedhoch",
+  "calcium",
+  "cal",
+  "moyo",
+  "wd40",
+].map((s) => s.toLowerCase());
 const SYNONYM_GROUPS = [
-  ['throwie', 'bubble letter', 'throw', 'bubbleletter', 'throw up', 'throwups', 'throwup', 'throw ups'],
-  ['antistyle', 'anti style', 'anti', 'hipster graffiti', 'hipster graff', 'hipstergraff', 'hipstergraffiti'],
-  ['catch', 'cache'],
-  ['ducky', 'theportlandbee', 'the portland bee', 'bee'],
-  ['dove', 'doves'],
-  ['VC', 'HKC'],
-  ['salud', 'saludpig', 'salud pig', 'pig'],
-  ['CTS', 'TNL'],
-  ['OY!', 'oh yes!', 'ohyes!'],
-  ['triangle', 'tri angle', 'cheese', 'cheesegrater', 'cheese grater', 'cheesegrater of death',]
+  [
+    "throwie",
+    "bubble letter",
+    "throw",
+    "bubbleletter",
+    "throw up",
+    "throwups",
+    "throwup",
+    "throw ups",
+  ],
+  [
+    "antistyle",
+    "anti style",
+    "anti",
+    "hipster graffiti",
+    "hipster graff",
+    "hipstergraff",
+    "hipstergraffiti",
+  ],
+  ["catch", "cache"],
+  ["ducky", "theportlandbee", "the portland bee", "bee"],
+  ["dove", "doves"],
+  ["VC", "HKC"],
+  ["salud", "saludpig", "salud pig", "pig"],
+  ["CTS", "TNL"],
+  ["OY!", "oh yes!", "ohyes!"],
+  [
+    "triangle",
+    "tri angle",
+    "cheese",
+    "cheesegrater",
+    "cheese grater",
+    "cheesegrater of death",
+  ],
 ];
-
 function buildSynonymMap(groups) {
   const map = {};
   if (!Array.isArray(groups)) return map;
-  groups.forEach(group => {
-    // normalize each term
-    const normalized = group.map(g => (g || '').toString().trim().toLowerCase()).filter(Boolean);
+  groups.forEach((group) => {
+    const normalized = group
+      .map((g) => (g || "").toString().trim().toLowerCase())
+      .filter(Boolean);
     normalized.forEach((term) => {
-      // map each term to the other terms in the group (excluding itself)
-      map[term] = normalized.filter(t => t !== term);
+      map[term] = normalized.filter((t) => t !== term);
     });
   });
   return map;
 }
-
 const SYNONYM_MAP = buildSynonymMap(SYNONYM_GROUPS);
-
 function showToyBlockedMessage() {
   if (!gallery) return;
-  gallery.innerHTML = '';
-  const msgWrap = document.createElement('div');
-  msgWrap.className = 'toy-blocked';
+  gallery.innerHTML = "";
+  const msgWrap = document.createElement("div");
+  msgWrap.className = "toy-blocked";
   msgWrap.textContent = "Sorry, we don't let toys on our site.";
   gallery.appendChild(msgWrap);
   currentDisplayedList = [];
 }
-
-// ----------------- CHANGES START -----------------
-// missing helper used throughout the file — compute stable rendered height
 function getRenderedImageHeight(img, availableWidth) {
   if (!img) return 0;
-  const cw = (typeof availableWidth === "number" && availableWidth > 0) ? availableWidth : (img.clientWidth || 0);
+  const cw =
+    typeof availableWidth === "number" && availableWidth > 0
+      ? availableWidth
+      : img.clientWidth || 0;
   if (img.naturalWidth && img.naturalHeight && cw > 0) {
     return (cw * img.naturalHeight) / img.naturalWidth;
   }
-  const rect = img.getBoundingClientRect ? img.getBoundingClientRect() : { height: 0 };
+  const rect = img.getBoundingClientRect
+    ? img.getBoundingClientRect()
+    : { height: 0 };
   return rect.height || 0;
 }
-// ----------------- CHANGES END -----------------
-
-// helper: normalize token string
 function normToken(s) {
   return (s || "").toString().trim().toLowerCase();
 }
-
-// build a set of searchable tokens from parsed metadata
 function buildMetaTokens(meta) {
   const tokens = new Set();
-
-  // if metadata includes precomputed tokens (from IMAGE_LABELS / metaList), include them
   if (meta && Array.isArray(meta.tokens)) {
-    meta.tokens.forEach(t => { if (t) tokens.add(t); });
+    meta.tokens.forEach((t) => {
+      if (t) tokens.add(t);
+    });
   }
-
-  // tags and styles are arrays already (from parseFilename)
-  (meta.tags || []).forEach(t => {
-    const parts = t.split(/[\s,;]+/).map(normToken).filter(Boolean);
-    parts.forEach(p => tokens.add(p));
+  (meta.tags || []).forEach((t) => {
+    const parts = t
+      .split(/[\s,;]+/)
+      .map(normToken)
+      .filter(Boolean);
+    parts.forEach((p) => tokens.add(p));
   });
-  (meta.styles || []).forEach(s => {
-    const parts = s.split(/[\s,;]+/).map(normToken).filter(Boolean);
-    parts.forEach(p => tokens.add(p));
+  (meta.styles || []).forEach((s) => {
+    const parts = s
+      .split(/[\s,;]+/)
+      .map(normToken)
+      .filter(Boolean);
+    parts.forEach((p) => tokens.add(p));
   });
-
-  // crew (may contain commas/spaces)
   if (meta.crew) {
-    meta.crew.split(/[\s,;]+/).map(normToken).filter(Boolean).forEach(p => tokens.add(p));
+    meta.crew
+      .split(/[\s,;]+/)
+      .map(normToken)
+      .filter(Boolean)
+      .forEach((p) => tokens.add(p));
   }
-
-  // photographer (may contain commas/spaces)
   if (meta.photographer) {
-    meta.photographer.split(/[\s,;]+/).map(normToken).filter(Boolean).forEach(p => tokens.add(p));
+    meta.photographer
+      .split(/[\s,;]+/)
+      .map(normToken)
+      .filter(Boolean)
+      .forEach((p) => tokens.add(p));
   }
-
-  // also include rawBase words (helpful for some filenames)
-  (meta.rawBase || "").split(/[\s,;,_-]+/).map(normToken).filter(Boolean).forEach(p => tokens.add(p));
-
-  // Expand tokens with configured synonyms so metadata implicitly
-  // contains equivalent search terms. For example, if a meta token is
-  // "throwie" and SYNONYM_MAP maps "throwie" -> ["bubble", "throw"],
-  // those synonyms will be added to the token set.
+  (meta.rawBase || "")
+    .split(/[\s,;,_-]+/)
+    .map(normToken)
+    .filter(Boolean)
+    .forEach((p) => tokens.add(p));
   try {
     const current = Array.from(tokens);
-    current.forEach(t => {
+    current.forEach((t) => {
       if (t && SYNONYM_MAP && SYNONYM_MAP[t] && SYNONYM_MAP[t].length) {
-        SYNONYM_MAP[t].forEach(s => tokens.add(s));
+        SYNONYM_MAP[t].forEach((s) => tokens.add(s));
       }
     });
-  } catch (e) {
-    // defensive: if synonyms are missing or malfunctioning, silently continue
-  }
-
+  } catch (e) {}
   return tokens;
 }
-
-// parse filename to metadata
 function parseFilename(filename) {
-  // If we have a runtime metadata map for numeric srcs, return it directly
-  if (typeof metaBySrc !== 'undefined' && metaBySrc[filename]) {
+  if (typeof metaBySrc !== "undefined" && metaBySrc[filename]) {
     return metaBySrc[filename];
   }
-  const base = filename.split("/").pop().replace(/\.[^.]+$/, "");
-  const rawParts = base.split("-").map(p => p.trim());
+  const base = filename
+    .split("/")
+    .pop()
+    .replace(/\.[^.]+$/, "");
+  const rawParts = base.split("-").map((p) => p.trim());
   const stylesPart = rawParts.pop() || "";
   const components = rawParts;
-  const styles = stylesPart.split(",").map(s => s.trim().toLowerCase()).filter(Boolean);
-
-  let tag = "", crew = null, photographer = "";
+  const styles = stylesPart
+    .split(",")
+    .map((s) => s.trim().toLowerCase())
+    .filter(Boolean);
+  let tag = "",
+    crew = null,
+    photographer = "";
   if (components.length === 2) {
     [tag, photographer] = components;
   } else if (components.length === 3) {
@@ -1167,140 +1237,125 @@ function parseFilename(filename) {
       crew = components.slice(1, components.length - 1).join("-") || null;
     }
   }
-
-  const tags = tag.split(",").map(t => t.trim().toLowerCase()).filter(Boolean);
-
+  const tags = tag
+    .split(",")
+    .map((t) => t.trim().toLowerCase())
+    .filter(Boolean);
   return {
     src: filename,
     rawBase: base,
     tags,
     crew: crew ? crew.toLowerCase() : null,
     photographer: (photographer || "").toLowerCase(),
-    styles
+    styles,
   };
 }
-
-// Ensure `imagesList` is derived from the previously-built `metaList`.
-// `metaList` entries contain `numericSrc`, `orig`, `label`, and computed `tokens`.
-// We make the numeric src the default `meta.src`.
-const imagesList = metaList.map(m => {
-  // default to numeric src as the primary path
+const imagesList = metaList.map((m) => {
   m.src = m.numericSrc;
   m.rawBase = m.rawBase || m.nameNoExt;
-  m.candidates = m.candidates || m.candidates;  // already set in metaList
+  m.candidates = m.candidates || m.candidates;
   return m.numericSrc;
 });
-
-// modal viewer
 function openModal(meta) {
-  // Store body scroll position before opening modal
   const scrollY = window.scrollY;
   const scrollX = window.scrollX;
-  
   const backdrop = document.createElement("div");
   backdrop.className = "modal-backdrop";
-  
-  // Only close if clicking on backdrop, not on modal content
   backdrop.addEventListener("click", (e) => {
     if (e.target === backdrop) {
       closeModal();
     }
   });
-
   const modal = document.createElement("div");
   modal.className = "modal";
-
   const imgwrap = document.createElement("div");
   imgwrap.className = "modal-imgwrap";
-
   const img = document.createElement("img");
   img.alt = meta.rawBase;
   img.className = "modal-image";
-  // Hide the image initially; show a spinner until the image is fully decoded
-  img.style.visibility = 'hidden';
-  img.style.display = 'none';
-
-  // spinner shown inside the modal while loading
-  const modalSpinner = document.createElement('div');
-  modalSpinner.className = 'spinner modal-spinner';
-  // ensure spinner is visible (spinner class is hidden by default in some contexts)
-  modalSpinner.style.display = 'block';
-
-  // track whether modal content has been revealed
+  img.style.visibility = "hidden";
+  img.style.display = "none";
+  const modalSpinner = document.createElement("div");
+  modalSpinner.className = "spinner modal-spinner";
+  modalSpinner.style.display = "block";
   let modalLoaded = false;
-
-  // declare variables that will be assigned below so revealModalContent
-  // can safely reference them even if called from the async loader.
   let caption;
   let leftArrow;
   let rightArrow;
-
   function revealModalContent() {
     modalLoaded = true;
-    try { if (modalSpinner && modalSpinner.parentNode) modalSpinner.parentNode.removeChild(modalSpinner); } catch (e) {}
-    try { img.style.visibility = 'visible'; img.style.display = 'block'; } catch (e) {}
-    try { if (caption) caption.style.visibility = 'visible'; } catch (e) {}
-    try { if (leftArrow) leftArrow.style.visibility = 'visible'; } catch (e) {}
-    try { if (rightArrow) rightArrow.style.visibility = 'visible'; } catch (e) {}
+    try {
+      if (modalSpinner && modalSpinner.parentNode)
+        modalSpinner.parentNode.removeChild(modalSpinner);
+    } catch (e) {}
+    try {
+      img.style.visibility = "visible";
+      img.style.display = "block";
+    } catch (e) {}
+    try {
+      if (caption) caption.style.visibility = "visible";
+    } catch (e) {}
+    try {
+      if (leftArrow) leftArrow.style.visibility = "visible";
+    } catch (e) {}
+    try {
+      if (rightArrow) rightArrow.style.visibility = "visible";
+    } catch (e) {}
   }
-
-  // Load modal image through the same cache helper used by gallery cards.
-  // Cached images are served immediately and refreshed in the background.
   (async () => {
     try {
       const candidate = meta && meta.src ? meta.src : null;
       if (!candidate) return;
       const resolved = await getValidatedImageBlob(candidate);
       if (!resolved || !resolved.blob) return;
-
       const blobUrl = URL.createObjectURL(resolved.blob);
       img.src = blobUrl;
       try {
         await img.decode();
-      } catch (e) {
-        // decoding failed; still reveal so browser can show fallback
-      }
+      } catch (e) {}
       scheduleBlobUrlRevoke(blobUrl);
       revealModalContent();
       return;
     } catch (e) {
-      // swallow any unexpected errors to avoid breaking modal
-      console.warn('modal image load error', e);
+      console.warn("modal image load error", e);
     }
-    // Ensure modal UI is visible even if image failed to load (so user can navigate/close)
-    try { revealModalContent(); } catch (e) {}
+    try {
+      revealModalContent();
+    } catch (e) {}
   })();
-  // append spinner then image (image remains hidden until reveal)
   imgwrap.appendChild(modalSpinner);
   imgwrap.appendChild(img);
   modal.appendChild(imgwrap);
-
   caption = document.createElement("div");
   caption.className = "caption";
-
-  // Debug mode: when URL contains ?debug=true show full label and numeric index
   const isDebug = (() => {
-    try { return new URLSearchParams(window.location.search).get('debug') === 'true'; }
-    catch (e) { return false; }
+    try {
+      return (
+        new URLSearchParams(window.location.search).get("debug") === "true"
+      );
+    } catch (e) {
+      return false;
+    }
   })();
-
   if (isDebug) {
-    const full = (meta && (meta.label || meta.rawBase)) ? (meta.label || meta.rawBase) : '';
-    let idx = (meta && meta.index) ? meta.index : null;
+    const full =
+      meta && (meta.label || meta.rawBase) ? meta.label || meta.rawBase : "";
+    let idx = meta && meta.index ? meta.index : null;
     if (!idx && meta && (meta.numericSrc || meta.src)) {
       try {
-        const s = (meta.numericSrc || meta.src).split('/').pop();
+        const s = (meta.numericSrc || meta.src).split("/").pop();
         const m = s.match(/^(\d+)/);
         if (m) idx = parseInt(m[1], 10);
-      } catch (e) { idx = null; }
+      } catch (e) {
+        idx = null;
+      }
     }
-    caption.textContent = full + (idx ? ` (${idx})` : '');
+    caption.textContent = full + (idx ? ` (${idx})` : "");
   } else {
-    // Extract tags and photographer from the label for concise caption
-    let tagText = '';
-    let photographerText = '';
+    let tagText = "";
+    let photographerText = "";
     if (meta && meta.label) {
-      const dashParts = meta.label.split('-');
+      const dashParts = meta.label.split("-");
       if (dashParts.length > 0) tagText = dashParts[0].trim();
       let photographerIndex = -1;
       if (dashParts.length >= 4) photographerIndex = 2;
@@ -1311,153 +1366,139 @@ function openModal(meta) {
         photographerText = photoTokens[0];
       }
     }
-    let captionText = '';
+    let captionText = "";
     if (tagText) captionText = tagText;
-    if (photographerText) captionText += (captionText ? ' ' : '') + `flicked by ${photographerText}`;
-    caption.textContent = captionText || (meta && meta.rawBase) || '';
+    if (photographerText)
+      captionText +=
+        (captionText ? " " : "") + `flicked by ${photographerText}`;
+    caption.textContent = captionText || (meta && meta.rawBase) || "";
   }
-  // hide caption until modal image is ready
-  caption.style.visibility = 'hidden';
+  caption.style.visibility = "hidden";
   modal.appendChild(caption);
-  // Add left and right navigation arrows using user's PNG icons
-
   leftArrow = document.createElement("button");
   leftArrow.className = "modal-arrow modal-arrow-left";
   leftArrow.setAttribute("aria-label", "Previous image");
-  // hide until image has loaded
-  leftArrow.style.visibility = modalLoaded ? 'visible' : 'hidden';
-
+  leftArrow.style.visibility = modalLoaded ? "visible" : "hidden";
   const leftImg = document.createElement("img");
   leftImg.alt = "Previous";
   leftImg.style.width = "36px";
   leftImg.style.height = "36px";
   leftImg.style.objectFit = "contain";
   leftImg.style.pointerEvents = "none";
-  // left arrow should be flipped horizontally so a single right-facing
-  // image can be reused for both directions
   leftImg.style.transform = "scaleX(-1)";
-  leftImg.src = '/assets/GUI/arrow.png';
-  // if the PNG fails to load, fall back to a simple text arrow (no SVG).
+  leftImg.src = "/assets/GUI/arrow.png";
   leftImg.onerror = () => {
-    try { leftImg.onerror = null; } catch (e) {}
-    // Replace the image with a single-character arrow to avoid broken images.
+    try {
+      leftImg.onerror = null;
+    } catch (e) {}
     if (leftArrow) {
-      leftArrow.textContent = '‹';
-      // ensure any image is removed so styling remains consistent
-      try { leftImg.remove(); } catch (e) {}
+      leftArrow.textContent = "‹";
+      try {
+        leftImg.remove();
+      } catch (e) {}
     }
   };
   leftImg.onload = () => {
-    if (leftArrow && leftArrow.textContent) leftArrow.textContent = '';
+    if (leftArrow && leftArrow.textContent) leftArrow.textContent = "";
   };
   leftArrow.appendChild(leftImg);
-
   rightArrow = document.createElement("button");
   rightArrow.className = "modal-arrow modal-arrow-right";
   rightArrow.setAttribute("aria-label", "Next image");
-  // hide until image has loaded
-  rightArrow.style.visibility = modalLoaded ? 'visible' : 'hidden';
-
+  rightArrow.style.visibility = modalLoaded ? "visible" : "hidden";
   const rightImg = document.createElement("img");
   rightImg.alt = "Next";
   rightImg.style.width = "36px";
   rightImg.style.height = "36px";
   rightImg.style.objectFit = "contain";
   rightImg.style.pointerEvents = "none";
-  // right arrow uses the same right-facing image without flip
   rightImg.style.transform = "none";
-  rightImg.src = '/assets/GUI/arrow.png';
+  rightImg.src = "/assets/GUI/arrow.png";
   rightImg.onerror = () => {
-    try { rightImg.onerror = null; } catch (e) {}
+    try {
+      rightImg.onerror = null;
+    } catch (e) {}
     if (rightArrow) {
-      rightArrow.textContent = '›';
-      try { rightImg.remove(); } catch (e) {}
+      rightArrow.textContent = "›";
+      try {
+        rightImg.remove();
+      } catch (e) {}
     }
   };
   rightImg.onload = () => {
-    if (rightArrow && rightArrow.textContent) rightArrow.textContent = '';
+    if (rightArrow && rightArrow.textContent) rightArrow.textContent = "";
   };
   rightArrow.appendChild(rightImg);
-
-  // Keep modal arrows visible against the spotlight backdrop.
-  leftImg.style.filter = 'invert(1)';
-  rightImg.style.filter = 'invert(1)';
-
+  leftImg.style.filter = "invert(1)";
+  rightImg.style.filter = "invert(1)";
   modal.appendChild(leftArrow);
   modal.appendChild(rightArrow);
-
-  // Check if a modal already exists and remove it before adding the new one
   const existingBackdrop = document.querySelector(".modal-backdrop");
   if (existingBackdrop && existingBackdrop.parentNode) {
     document.body.removeChild(existingBackdrop);
   }
-
   backdrop.appendChild(modal);
   document.body.appendChild(backdrop);
-  
-  // Find current image index for navigation within the currently displayed list
-  // Fallback to global imagesList if for some reason currentDisplayedList is empty
-  const activeList = (Array.isArray(currentDisplayedList) && currentDisplayedList.length > 0) ? currentDisplayedList : imagesList;
+  const activeList =
+    Array.isArray(currentDisplayedList) && currentDisplayedList.length > 0
+      ? currentDisplayedList
+      : imagesList;
   let currentIndex = activeList.indexOf(meta.numericSrc);
   if (currentIndex < 0) {
-    // try matching by numeric index fallback (meta.numericSrc might differ in extension)
-    currentIndex = activeList.findIndex(s => {
-      try { return s && s.replace(/\.[^.]+$/, '') === (meta.numericSrc || '').replace(/\.[^.]+$/, ''); }
-      catch (e) { return false; }
+    currentIndex = activeList.findIndex((s) => {
+      try {
+        return (
+          s &&
+          s.replace(/\.[^.]+$/, "") ===
+            (meta.numericSrc || "").replace(/\.[^.]+$/, "")
+        );
+      } catch (e) {
+        return false;
+      }
     });
   }
-  
-  // Highlight the current card in the background gallery
   const highlightCard = () => {
     const cards = document.querySelectorAll(".card");
-    cards.forEach(card => card.classList.remove("highlighted"));
+    cards.forEach((card) => card.classList.remove("highlighted"));
     if (cards[currentIndex]) {
       cards[currentIndex].classList.add("highlighted");
-      // Scroll to keep the card visible
-      cards[currentIndex].scrollIntoView({ behavior: "auto", block: "nearest" });
+      cards[currentIndex].scrollIntoView({
+        behavior: "auto",
+        block: "nearest",
+      });
     }
   };
   highlightCard();
-  
-  // Close modal function
   const closeModal = () => {
-    // Remove highlight from all cards
     const cards = document.querySelectorAll(".card");
-    cards.forEach(card => card.classList.remove("highlighted"));
-    
+    cards.forEach((card) => card.classList.remove("highlighted"));
     if (backdrop.parentNode) {
       document.body.removeChild(backdrop);
     }
-    // Restore scroll position
     window.scrollTo(scrollX, scrollY);
     document.removeEventListener("keydown", handleKeyboard);
   };
-  
-  // Navigation function
   const navigateTo = (newIndex) => {
-    const listForNav = (Array.isArray(currentDisplayedList) && currentDisplayedList.length > 0) ? currentDisplayedList : imagesList;
+    const listForNav =
+      Array.isArray(currentDisplayedList) && currentDisplayedList.length > 0
+        ? currentDisplayedList
+        : imagesList;
     if (!Array.isArray(listForNav) || listForNav.length === 0) return;
-    const loopedIndex = ((newIndex % listForNav.length) + listForNav.length) % listForNav.length;
+    const loopedIndex =
+      ((newIndex % listForNav.length) + listForNav.length) % listForNav.length;
     const src = listForNav[loopedIndex];
     const newMeta = parseFilename(src);
-
-    // Close current modal and open the new one (prevents stacking)
     closeModal();
     openModal(newMeta);
   };
-  
-  // Arrow button click handlers
   leftArrow.addEventListener("click", (e) => {
     e.stopPropagation();
     navigateTo(currentIndex - 1);
   });
-  
   rightArrow.addEventListener("click", (e) => {
     e.stopPropagation();
     navigateTo(currentIndex + 1);
   });
-  
-  // Keyboard navigation (left/right arrow keys)
   const handleKeyboard = (e) => {
     if (e.key === "ArrowLeft") {
       e.preventDefault();
@@ -1470,28 +1511,23 @@ function openModal(meta) {
       closeModal();
     }
   };
-  
   document.addEventListener("keydown", handleKeyboard);
 }
-
 let __teardownLazyGalleryLoader = null;
-
-// Build cards in batches and only load images when near the viewport.
 async function loadImagesSequentially(list) {
   if (!gallery) return;
   currentDisplayedList = Array.isArray(list) ? list.slice() : [];
   const myLoadId = ++currentLoadId;
-
   if (typeof __teardownLazyGalleryLoader === "function") {
-    try { __teardownLazyGalleryLoader(); } catch (e) {}
+    try {
+      __teardownLazyGalleryLoader();
+    } catch (e) {}
   }
   __teardownLazyGalleryLoader = null;
   gallery.innerHTML = "";
-
   if (!Array.isArray(list) || list.length === 0) {
     return;
   }
-
   const grid = gallery;
   const cards = [];
   const cardToItem = new WeakMap();
@@ -1499,27 +1535,31 @@ async function loadImagesSequentially(list) {
   let activeLoads = 0;
   let createdCount = 0;
   let observer = null;
-
   const INITIAL_CARD_BATCH = 48;
   const APPEND_BATCH_SIZE = 36;
   const APPEND_SCROLL_THRESHOLD_PX = 1400;
   const IMAGE_LOAD_CONCURRENCY = 1;
   const IMAGE_OBSERVER_ROOT_MARGIN = "900px 0px";
   let activePlaceholder = null;
-
   function computeDefaultCardHeight() {
-    const gap = parseInt(window.getComputedStyle(grid).getPropertyValue("gap") || "10");
-    const galleryWidth = Math.max(200, grid.clientWidth || document.documentElement.clientWidth);
-    const minCol = 180; // keep in sync with CSS
+    const gap = parseInt(
+      window.getComputedStyle(grid).getPropertyValue("gap") || "10",
+    );
+    const galleryWidth = Math.max(
+      200,
+      grid.clientWidth || document.documentElement.clientWidth,
+    );
+    const minCol = 180;
     const cols = Math.max(1, Math.floor((galleryWidth + gap) / (minCol + gap)));
-    const columnWidth = Math.max(120, Math.floor((galleryWidth - (cols - 1) * gap) / cols));
+    const columnWidth = Math.max(
+      120,
+      Math.floor((galleryWidth - (cols - 1) * gap) / cols),
+    );
     return Math.max(80, Math.round(columnWidth * DEFAULT_ASPECT));
   }
-
   function enqueueItem(item) {
     if (!item || item.loaded || item.loading || item.queued) return;
     item.queued = true;
-    // Keep queue ordered by gallery index so loading is deterministic.
     let inserted = false;
     for (let i = 0; i < loadQueue.length; i++) {
       if (loadQueue[i].index > item.index) {
@@ -1531,13 +1571,11 @@ async function loadImagesSequentially(list) {
     if (!inserted) loadQueue.push(item);
     pumpQueue();
   }
-
   function pumpQueue() {
     if (myLoadId !== currentLoadId) return;
     while (activeLoads < IMAGE_LOAD_CONCURRENCY && loadQueue.length > 0) {
       const item = loadQueue.shift();
       if (!item || item.loaded || item.loading) continue;
-
       item.loading = true;
       if (activePlaceholder && activePlaceholder !== item.placeholder) {
         activePlaceholder.classList.remove("active");
@@ -1547,8 +1585,13 @@ async function loadImagesSequentially(list) {
         activePlaceholder = item.placeholder;
       }
       activeLoads++;
-
-      loadImageIntoCard(item.meta, item.card, item.wrap, item.placeholder, myLoadId)
+      loadImageIntoCard(
+        item.meta,
+        item.card,
+        item.wrap,
+        item.placeholder,
+        myLoadId,
+      )
         .then((ok) => {
           if (ok) item.loaded = true;
         })
@@ -1558,38 +1601,40 @@ async function loadImagesSequentially(list) {
           item.queued = false;
           if (item.placeholder) item.placeholder.classList.remove("active");
           if (activePlaceholder === item.placeholder) activePlaceholder = null;
-          try { if (observer && item.card) observer.unobserve(item.card); } catch (e) {}
+          try {
+            if (observer && item.card) observer.unobserve(item.card);
+          } catch (e) {}
           if (myLoadId === currentLoadId) pumpQueue();
         });
     }
   }
-
   function createCardAt(index) {
     const meta = parseFilename(list[index]);
-
     const card = document.createElement("div");
     card.className = "card";
-
     const wrap = document.createElement("div");
     wrap.className = "image-wrap";
     const defaultH = computeDefaultCardHeight();
     wrap.style.height = `${defaultH}px`;
-
     const placeholder = document.createElement("div");
     placeholder.className = "placeholder-box";
     const spinner = document.createElement("div");
     spinner.className = "spinner";
     placeholder.appendChild(spinner);
-
     wrap.appendChild(placeholder);
     card.appendChild(wrap);
     gallery.appendChild(card);
-
-    const rowHeight = parseInt(window.getComputedStyle(grid).getPropertyValue("grid-auto-rows") || "10");
-    const rowGap = parseInt(window.getComputedStyle(grid).getPropertyValue("gap") || "10");
-    const initialRowSpan = Math.max(1, Math.ceil((defaultH + rowGap) / (rowHeight + rowGap)));
+    const rowHeight = parseInt(
+      window.getComputedStyle(grid).getPropertyValue("grid-auto-rows") || "10",
+    );
+    const rowGap = parseInt(
+      window.getComputedStyle(grid).getPropertyValue("gap") || "10",
+    );
+    const initialRowSpan = Math.max(
+      1,
+      Math.ceil((defaultH + rowGap) / (rowHeight + rowGap)),
+    );
     card.style.gridRowEnd = `span ${initialRowSpan}`;
-
     const item = {
       index,
       meta,
@@ -1598,15 +1643,13 @@ async function loadImagesSequentially(list) {
       placeholder,
       loaded: false,
       loading: false,
-      queued: false
+      queued: false,
     };
     cards[index] = item;
     cardToItem.set(card, item);
-
     if (observer) observer.observe(card);
     else enqueueItem(item);
   }
-
   function appendCards(count) {
     if (myLoadId !== currentLoadId) return;
     const target = Math.min(list.length, createdCount + count);
@@ -1615,7 +1658,6 @@ async function loadImagesSequentially(list) {
     }
     createdCount = target;
   }
-
   function appendNearBottomBatches() {
     if (myLoadId !== currentLoadId) return;
     let appended = false;
@@ -1623,7 +1665,7 @@ async function loadImagesSequentially(list) {
       const scrollBottom = window.scrollY + window.innerHeight;
       const docHeight = Math.max(
         document.documentElement.scrollHeight || 0,
-        document.body.scrollHeight || 0
+        document.body.scrollHeight || 0,
       );
       if (docHeight - scrollBottom > APPEND_SCROLL_THRESHOLD_PX) break;
       const before = createdCount;
@@ -1633,9 +1675,7 @@ async function loadImagesSequentially(list) {
     }
     if (appended) requestAnimationFrame(resizeAllMasonryItems);
   }
-
   const onScroll = () => appendNearBottomBatches();
-
   if (typeof IntersectionObserver !== "undefined") {
     observer = new IntersectionObserver(
       (entries) => {
@@ -1646,55 +1686,57 @@ async function loadImagesSequentially(list) {
           if (item) enqueueItem(item);
         });
       },
-      { root: null, rootMargin: IMAGE_OBSERVER_ROOT_MARGIN, threshold: 0.01 }
+      { root: null, rootMargin: IMAGE_OBSERVER_ROOT_MARGIN, threshold: 0.01 },
     );
   }
-
   appendCards(INITIAL_CARD_BATCH);
   appendNearBottomBatches();
-
-  // Eager-load the first small chunk so the page feels immediate.
   const eagerCount = Math.min(createdCount, 1);
   for (let i = 0; i < eagerCount; i++) {
     if (cards[i]) enqueueItem(cards[i]);
   }
-
   window.addEventListener("scroll", onScroll, { passive: true });
   __teardownLazyGalleryLoader = () => {
-    try { window.removeEventListener("scroll", onScroll); } catch (e) {}
-    try { if (observer) observer.disconnect(); } catch (e) {}
-    try { if (activePlaceholder) activePlaceholder.classList.remove("active"); } catch (e) {}
+    try {
+      window.removeEventListener("scroll", onScroll);
+    } catch (e) {}
+    try {
+      if (observer) observer.disconnect();
+    } catch (e) {}
+    try {
+      if (activePlaceholder) activePlaceholder.classList.remove("active");
+    } catch (e) {}
     activePlaceholder = null;
     loadQueue.length = 0;
   };
-
   if (myLoadId === currentLoadId) requestAnimationFrame(resizeAllMasonryItems);
 }
-
-// new helper: load image into an existing card/wrap/placeholder
 function loadImageIntoCard(meta, card, wrap, placeholder, expectedLoadId) {
   return new Promise((resolve) => {
     if (expectedLoadId !== currentLoadId) {
       resolve(false);
       return;
     }
-
     const img = new Image();
     img.alt = meta.rawBase;
     img.className = "gallery-image hidden";
     img.draggable = false;
-
     const grid = document.querySelector(".gallery");
-    const rowHeight = parseInt(window.getComputedStyle(grid).getPropertyValue("grid-auto-rows") || "10");
-    const rowGap = parseInt(window.getComputedStyle(grid).getPropertyValue("gap") || "10");
-
-    // Try candidate paths sequentially.
-    const candidates = (meta && meta.candidates && meta.candidates.length) ? meta.candidates.slice() : [meta.src];
-
-    // attach click handler to wrap immediately (not waiting for image load)
-    const onWrapClick = (e) => { e.stopPropagation(); openModal(meta); };
+    const rowHeight = parseInt(
+      window.getComputedStyle(grid).getPropertyValue("grid-auto-rows") || "10",
+    );
+    const rowGap = parseInt(
+      window.getComputedStyle(grid).getPropertyValue("gap") || "10",
+    );
+    const candidates =
+      meta && meta.candidates && meta.candidates.length
+        ? meta.candidates.slice()
+        : [meta.src];
+    const onWrapClick = (e) => {
+      e.stopPropagation();
+      openModal(meta);
+    };
     wrap.addEventListener("click", onWrapClick);
-
     let attemptIndex = 0;
     function tryNext() {
       if (expectedLoadId !== currentLoadId) {
@@ -1703,51 +1745,45 @@ function loadImageIntoCard(meta, card, wrap, placeholder, expectedLoadId) {
         return;
       }
       if (attemptIndex >= candidates.length) {
-        // all attempts failed: keep the placeholder empty (no noisy per-image error text)
-        try { if (placeholder && placeholder.parentNode === wrap) placeholder.innerHTML = ""; } catch (e) {}
+        try {
+          if (placeholder && placeholder.parentNode === wrap)
+            placeholder.innerHTML = "";
+        } catch (e) {}
         resolve(true);
         return;
       }
-
       const candidate = candidates[attemptIndex++];
-      // replace handlers by assigning onload/onerror (avoids stacking handlers)
       img.onload = () => {
         if (expectedLoadId !== currentLoadId) {
           if (card.parentNode === gallery) gallery.removeChild(card);
           resolve(false);
           return;
         }
-
-        // successful: update meta.src to the working candidate so modals/open use it
         meta.src = candidate;
-
-        const finalH = getRenderedImageHeight(img, wrap.clientWidth) || parseInt(wrap.style.height) || 150;
+        const finalH =
+          getRenderedImageHeight(img, wrap.clientWidth) ||
+          parseInt(wrap.style.height) ||
+          150;
         wrap.style.height = `${finalH}px`;
-
         img.classList.remove("hidden");
         img.classList.add("fade-in");
-
-        // clear placeholder box contents (remove spinner) but keep the box
         if (placeholder && placeholder.parentNode === wrap) {
           placeholder.innerHTML = "";
         }
         wrap.appendChild(img);
-
         requestAnimationFrame(() => {
-          const rowSpan = Math.max(1, Math.ceil((finalH + rowGap) / (rowHeight + rowGap)));
+          const rowSpan = Math.max(
+            1,
+            Math.ceil((finalH + rowGap) / (rowHeight + rowGap)),
+          );
           card.style.gridRowEnd = `span ${rowSpan}`;
           wrap.classList.add("loaded");
           resolve(true);
         });
       };
-
       img.onerror = () => {
-        // try next candidate
         tryNext();
       };
-
-      // Resolve this candidate through cache-first image loading.
-      // Any stale cached entry is refreshed asynchronously in the background.
       (async () => {
         try {
           if (expectedLoadId !== currentLoadId) return resolve(false);
@@ -1756,193 +1792,181 @@ function loadImageIntoCard(meta, card, wrap, placeholder, expectedLoadId) {
             tryNext();
             return;
           }
-
           const blob = resolved.blob;
           if (expectedLoadId !== currentLoadId) return resolve(false);
           const blobUrl = URL.createObjectURL(blob);
           img.src = blobUrl;
-          img.decode().then(() => {
-            meta.src = candidate;
-            const finalH = getRenderedImageHeight(img, wrap.clientWidth) || parseInt(wrap.style.height) || 150;
-            wrap.style.height = `${finalH}px`;
-            img.classList.remove("hidden");
-            img.classList.add("fade-in");
-            if (placeholder && placeholder.parentNode === wrap) placeholder.innerHTML = "";
-            wrap.appendChild(img);
-            requestAnimationFrame(() => {
-              const rowSpan = Math.max(1, Math.ceil((finalH + rowGap) / (rowHeight + rowGap)));
-              card.style.gridRowEnd = `span ${rowSpan}`;
-              wrap.classList.add("loaded");
+          img
+            .decode()
+            .then(() => {
+              meta.src = candidate;
+              const finalH =
+                getRenderedImageHeight(img, wrap.clientWidth) ||
+                parseInt(wrap.style.height) ||
+                150;
+              wrap.style.height = `${finalH}px`;
+              img.classList.remove("hidden");
+              img.classList.add("fade-in");
+              if (placeholder && placeholder.parentNode === wrap)
+                placeholder.innerHTML = "";
+              wrap.appendChild(img);
+              requestAnimationFrame(() => {
+                const rowSpan = Math.max(
+                  1,
+                  Math.ceil((finalH + rowGap) / (rowHeight + rowGap)),
+                );
+                card.style.gridRowEnd = `span ${rowSpan}`;
+                wrap.classList.add("loaded");
+                scheduleBlobUrlRevoke(blobUrl);
+                resolve(true);
+              });
+            })
+            .catch(() => {
               scheduleBlobUrlRevoke(blobUrl);
-              resolve(true);
+              tryNext();
             });
-          }).catch(() => {
-            scheduleBlobUrlRevoke(blobUrl);
-            tryNext();
-          });
         } catch (e) {
-          // on any unexpected error, fall back to trying the next candidate
           tryNext();
         }
       })();
     }
-
-    // kick off attempts
     tryNext();
-
   });
 }
-
-// search/filter
 function filterGallery(q) {
   if (!gallery) return;
   q = (q || "").trim().toLowerCase();
-  // Determine active sort from the select (may be changed by UI)
   if (sortSelect) currentSort = sortSelect.value || currentSort;
-
   if (!q) {
-    // when no query, apply current sort to the full imagesList
     const all = imagesList.slice();
     all.sort((a, b) => {
       const ia = getNumericIndexFromSrc(a);
       const ib = getNumericIndexFromSrc(b);
-      return currentSort === 'newest' ? ib - ia : ia - ib;
+      return currentSort === "newest" ? ib - ia : ia - ib;
     });
     loadImagesSequentially(all);
     return;
   }
-
-  // Split the query into tokens (space/comma/semicolon separated) so we can
-  // perform strict token-level checks rather than substring matches.
-  const queryTokens = q.split(/[\s,;]+/).map(s => s.trim().toLowerCase()).filter(Boolean);
-
-  // Build an expanded token set that includes configured synonyms so a search
-  // for one term will also match equivalent terms in metadata (e.g. "cache"
-  // will match items tagged "catch").
+  const queryTokens = q
+    .split(/[\s,;]+/)
+    .map((s) => s.trim().toLowerCase())
+    .filter(Boolean);
   const expandedQueryTokens = new Set(queryTokens);
   try {
-    queryTokens.forEach(t => {
+    queryTokens.forEach((t) => {
       if (t && SYNONYM_MAP && SYNONYM_MAP[t] && SYNONYM_MAP[t].length) {
-        SYNONYM_MAP[t].forEach(s => expandedQueryTokens.add(s));
+        SYNONYM_MAP[t].forEach((s) => expandedQueryTokens.add(s));
       }
     });
-  } catch (e) {
-    // ignore synonym expansion errors
-  }
-
-  // If any token (original or expanded) exactly matches a toy blacklist term,
-  // short-circuit and show the polite blocked message.
+  } catch (e) {}
   for (const t of TOY_BLACKLIST) {
     if (queryTokens.includes(t) || expandedQueryTokens.has(t)) {
       showToyBlockedMessage();
       return;
     }
   }
-
-  const filtered = imagesList.filter(src => {
+  const filtered = imagesList.filter((src) => {
     const meta = parseFilename(src);
-    const metaTokens = buildMetaTokens(meta); // set of normalized tokens
-
-    // require that at least one expanded query token equals one of the meta tokens
-    // (strict token match). expandedQueryTokens includes synonyms so searches
-    // for related words will match the same images.
-    return Array.from(expandedQueryTokens).some(qt => metaTokens.has(qt));
+    const metaTokens = buildMetaTokens(meta);
+    return Array.from(expandedQueryTokens).some((qt) => metaTokens.has(qt));
   });
-
-  // sort filtered list by numeric index according to currentSort
   filtered.sort((a, b) => {
     const ia = getNumericIndexFromSrc(a);
     const ib = getNumericIndexFromSrc(b);
-    return currentSort === 'newest' ? ib - ia : ia - ib;
+    return currentSort === "newest" ? ib - ia : ia - ib;
   });
-
   loadImagesSequentially(filtered);
 }
-
 if (searchInput) {
   searchInput.addEventListener("input", (e) => filterGallery(e.target.value));
 }
-
-// helper: extract numeric index from a numericSrc or path (fallbacks robustly)
 function getNumericIndexFromSrc(src) {
   if (!src) return 0;
   try {
-    // if meta exists, prefer meta.index
-    if (typeof metaBySrc !== 'undefined' && metaBySrc[src] && typeof metaBySrc[src].index === 'number') return metaBySrc[src].index;
+    if (
+      typeof metaBySrc !== "undefined" &&
+      metaBySrc[src] &&
+      typeof metaBySrc[src].index === "number"
+    )
+      return metaBySrc[src].index;
   } catch (e) {}
-  // otherwise, extract leading number from filename
   try {
-    const base = src.replace(/^.*\/(assets\/images\/)?/, '');
+    const base = src.replace(/^.*\/(assets\/images\/)?/, "");
     const m = base.match(/(\d+)/);
     if (m && m[1]) return parseInt(m[1], 10) || 0;
   } catch (e) {}
   return 0;
 }
-
-// sort control listener: re-run current filter when changed
 if (sortSelect) {
-  sortSelect.addEventListener('change', () => {
+  sortSelect.addEventListener("change", () => {
     currentSort = sortSelect.value || currentSort;
-    try { localStorage.setItem(SORT_KEY, currentSort); } catch (e) {}
-    // re-run filter using existing input value
-    const q = (searchInput && searchInput.value) ? searchInput.value : '';
+    try {
+      localStorage.setItem(SORT_KEY, currentSort);
+    } catch (e) {}
+    const q = searchInput && searchInput.value ? searchInput.value : "";
     filterGallery(q);
   });
 }
-
-// masonry resize helper
 function resizeAllMasonryItems() {
   const grid = document.querySelector(".gallery");
   if (!grid) return;
-  const rowHeight = parseInt(window.getComputedStyle(grid).getPropertyValue("grid-auto-rows") || "10");
-  const rowGap = parseInt(window.getComputedStyle(grid).getPropertyValue("gap") || "10");
-
-  // batch DOM reads & writes in one loop to reduce layout thrash
+  const rowHeight = parseInt(
+    window.getComputedStyle(grid).getPropertyValue("grid-auto-rows") || "10",
+  );
+  const rowGap = parseInt(
+    window.getComputedStyle(grid).getPropertyValue("gap") || "10",
+  );
   const items = Array.from(document.querySelectorAll(".card"));
-  items.forEach(item => {
+  items.forEach((item) => {
     const wrap = item.querySelector(".image-wrap");
     const img = item.querySelector(".gallery-image");
     const err = item.querySelector(".loading-error");
-
     if (!wrap) {
-      // fallback: nothing to size
       item.style.gridRowEnd = null;
       return;
     }
-
-    // Determine height:
-    // - If image exists: use intrinsic-based rendered height
-    // - Else if error exists: use wrap's rendered height (it was set earlier or based on default)
-    // - Else fallback to current wrap height or default aspect ratio
     let height = 0;
     if (img) {
       const availW = wrap.clientWidth || item.clientWidth || 0;
-      height = getRenderedImageHeight(img, availW) || (availW * DEFAULT_ASPECT) || rowHeight;
+      height =
+        getRenderedImageHeight(img, availW) ||
+        availW * DEFAULT_ASPECT ||
+        rowHeight;
     } else if (err) {
       height = wrap.getBoundingClientRect().height || rowHeight;
     } else {
-      height = wrap.getBoundingClientRect().height || (wrap.clientWidth * DEFAULT_ASPECT) || rowHeight;
+      height =
+        wrap.getBoundingClientRect().height ||
+        wrap.clientWidth * DEFAULT_ASPECT ||
+        rowHeight;
     }
-
-    // apply height and row span
     wrap.style.height = `${height}px`;
-    const rowSpan = Math.max(1, Math.ceil((height + rowGap) / (rowHeight + rowGap)));
+    const rowSpan = Math.max(
+      1,
+      Math.ceil((height + rowGap) / (rowHeight + rowGap)),
+    );
     item.style.gridRowEnd = `span ${rowSpan}`;
   });
 }
-
-// start
-// On initial load, honor saved sort preference and load gallery accordingly
 document.addEventListener("DOMContentLoaded", () => {
   if (sortSelect) {
-    try { sortSelect.value = currentSort; } catch (e) {}
+    try {
+      sortSelect.value = currentSort;
+    } catch (e) {}
   }
-  // pre-cache GUI assets and replace any on-page GUI images from cache
-  try { preCacheGuiAssets().catch(()=>{}); } catch (e) {}
-  try { replaceGuiImagesFromCache().catch(()=>{}); } catch (e) {}
-  // trigger gallery load through filterGallery with empty query so sorting applies
-  try { filterGallery(''); } catch (e) { loadImagesSequentially(imagesList); }
+  try {
+    preCacheGuiAssets().catch(() => {});
+  } catch (e) {}
+  try {
+    replaceGuiImagesFromCache().catch(() => {});
+  } catch (e) {}
+  try {
+    filterGallery("");
+  } catch (e) {
+    loadImagesSequentially(imagesList);
+  }
 });
-window.addEventListener("resize", () => requestAnimationFrame(resizeAllMasonryItems));
+window.addEventListener("resize", () =>
+  requestAnimationFrame(resizeAllMasonryItems),
+);
 window.addEventListener("load", resizeAllMasonryItems);
-
