@@ -669,8 +669,8 @@ const metaList = (function() {
     const index = idx + 1;
     const label = IMAGE_LABELS[index] || '';
     const nameNoExt = label || String(index);
-    // try common extensions so files restored with different cases/extensions still load
-    const exts = ['.jpg', '.JPG', '.jpeg', '.JPEG', '.png', '.PNG', '.gif', '.GIF'];
+    // Image set is normalized to lowercase .jpg
+    const exts = ['.jpg'];
     const numericSrc = `/assets/images/${index}${exts[0]}`;
     const basename = `${index}${exts[0]}`;
     const orig = numericSrc; // no original-filename fallback
@@ -682,7 +682,7 @@ const metaList = (function() {
       .split(/\s+/)
       .filter(Boolean);
 
-    // build candidates with common extensions (prefer lowercase .jpg first)
+    // build candidates (single canonical extension)
     const candidates = exts.map(e => `/assets/images/${index}${e}`);
 
     list.push({
@@ -772,6 +772,10 @@ const __imageLastValidatedAt = new Map();
 const __pendingImageRevalidations = new Set();
 const __queuedImageRevalidations = [];
 let __activeImageRevalidations = 0;
+const __knownMissingImageCandidates = new Set();
+let __notFoundStreak = 0;
+let __disableNetworkImageFetches = false;
+const IMAGE_NOT_FOUND_STREAK_THRESHOLD = 20;
 
 function loadImageRevalidationState() {
   try {
@@ -826,6 +830,15 @@ function buildConditionalHeadersFromCached(cachedResp) {
 }
 
 async function revalidateCachedImage(candidate) {
+  if (__knownMissingImageCandidates.has(candidate)) {
+    markImageValidated(candidate);
+    return;
+  }
+  if (__disableNetworkImageFetches) {
+    markImageValidated(candidate);
+    return;
+  }
+
   if (typeof caches === 'undefined' || !caches.open) {
     markImageValidated(candidate);
     return;
@@ -851,6 +864,17 @@ async function revalidateCachedImage(candidate) {
     // 200 means content may have changed; replace cache entry.
     if (netResp && netResp.ok) {
       try { await cache.put(candidate, netResp.clone()); } catch (e) {}
+      __notFoundStreak = 0;
+      markImageValidated(candidate);
+      return;
+    }
+
+    if (netResp && netResp.status === 404) {
+      __knownMissingImageCandidates.add(candidate);
+      __notFoundStreak++;
+      if (__notFoundStreak >= IMAGE_NOT_FOUND_STREAK_THRESHOLD) {
+        __disableNetworkImageFetches = true;
+      }
       markImageValidated(candidate);
       return;
     }
@@ -945,7 +969,19 @@ window.addEventListener('unload', () => {
   try { __createdGuiBlobUrls.forEach(u => { try { URL.revokeObjectURL(u); } catch (e) {} }); } catch (e) {}
 });
 
+function scheduleBlobUrlRevoke(blobUrl) {
+  if (!blobUrl) return;
+  // Revoke a little later; immediate revocation can show broken-image overlays
+  // in some browsers even after decode() resolves.
+  setTimeout(() => {
+    try { URL.revokeObjectURL(blobUrl); } catch (e) {}
+  }, 1200);
+}
+
 async function getValidatedImageBlob(candidate) {
+  if (__knownMissingImageCandidates.has(candidate)) return null;
+  if (__disableNetworkImageFetches) return null;
+
   let cache = null;
   let cachedResp = null;
 
@@ -970,8 +1006,16 @@ async function getValidatedImageBlob(candidate) {
     const onlineResp = await fetch(candidate, { method: 'GET', cache: 'no-store' });
     if (onlineResp && onlineResp.ok) {
       try { if (cache) await cache.put(candidate, onlineResp.clone()); } catch (e) {}
+      __notFoundStreak = 0;
       markImageValidated(candidate);
       return { blob: await onlineResp.blob(), source: 'network' };
+    }
+    if (onlineResp && onlineResp.status === 404) {
+      __knownMissingImageCandidates.add(candidate);
+      __notFoundStreak++;
+      if (__notFoundStreak >= IMAGE_NOT_FOUND_STREAK_THRESHOLD) {
+        __disableNetworkImageFetches = true;
+      }
     }
   } catch (e) {
     // network miss
@@ -1216,7 +1260,7 @@ function openModal(meta) {
       } catch (e) {
         // decoding failed; still reveal so browser can show fallback
       }
-      try { URL.revokeObjectURL(blobUrl); } catch (e) {}
+      scheduleBlobUrlRevoke(blobUrl);
       revealModalContent();
       return;
     } catch (e) {
@@ -1644,7 +1688,7 @@ function loadImageIntoCard(meta, card, wrap, placeholder, expectedLoadId) {
     const rowHeight = parseInt(window.getComputedStyle(grid).getPropertyValue("grid-auto-rows") || "10");
     const rowGap = parseInt(window.getComputedStyle(grid).getPropertyValue("gap") || "10");
 
-    // Try candidate paths sequentially (numeric first, then original filename)
+    // Try candidate paths sequentially.
     const candidates = (meta && meta.candidates && meta.candidates.length) ? meta.candidates.slice() : [meta.src];
 
     // attach click handler to wrap immediately (not waiting for image load)
@@ -1659,23 +1703,8 @@ function loadImageIntoCard(meta, card, wrap, placeholder, expectedLoadId) {
         return;
       }
       if (attemptIndex >= candidates.length) {
-        // all attempts failed: show error inside placeholder
-        try {
-          const filename = (meta && meta.src) ? meta.src.split("/").pop() : "unknown";
-          const errEl = document.createElement("div");
-          errEl.className = "loading-error";
-          errEl.textContent = `Failed: ${filename}`;
-          if (placeholder && placeholder.parentNode === wrap) {
-            placeholder.innerHTML = "";
-            placeholder.appendChild(errEl);
-          } else {
-            wrap.appendChild(errEl);
-          }
-        } catch (e) {
-          if (placeholder && placeholder.parentNode === wrap) {
-            placeholder.textContent = "Failed to load";
-          }
-        }
+        // all attempts failed: keep the placeholder empty (no noisy per-image error text)
+        try { if (placeholder && placeholder.parentNode === wrap) placeholder.innerHTML = ""; } catch (e) {}
         resolve(true);
         return;
       }
@@ -1744,11 +1773,11 @@ function loadImageIntoCard(meta, card, wrap, placeholder, expectedLoadId) {
               const rowSpan = Math.max(1, Math.ceil((finalH + rowGap) / (rowHeight + rowGap)));
               card.style.gridRowEnd = `span ${rowSpan}`;
               wrap.classList.add("loaded");
-              try { URL.revokeObjectURL(blobUrl); } catch (e) {}
+              scheduleBlobUrlRevoke(blobUrl);
               resolve(true);
             });
           }).catch(() => {
-            try { URL.revokeObjectURL(blobUrl); } catch (e) {}
+            scheduleBlobUrlRevoke(blobUrl);
             tryNext();
           });
         } catch (e) {
