@@ -2,9 +2,14 @@
   const IMAGE_CACHE = "realart-image-cache-v2";
   const IMAGE_REVALIDATION_STATE_KEY = "ram_image_revalidation_state_v1";
   const SCROLL_TOP_PREF_KEY = "ram_scroll_top_button_enabled_v1";
+  const SAVE_LAST_LEADERBOARD_PREF_KEY = "ram_save_last_leaderboard_enabled_v1";
   const SCROLL_TOP_BUTTON_ID = "ram-scroll-top-button";
   const FONT_FAMILY = "var(--ram-font8, Arial, Helvetica, sans-serif)";
   const FRAME_TEXT = "#30513d";
+  const JUMP_TOP_HELP_TEXT =
+    "Lets users jump to the top of a page with a button when scrolling up";
+  const SAVE_LAST_LEADERBOARD_HELP_TEXT =
+    "Saves last leaderboard a user was on for the next time they visit the page instead of always bringing them to Top flickers by default";
   const CHECK_ICON = (function () {
     const svg =
       "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path d='M3 8.6L6.2 11.6L13 4.6' fill='none' stroke='" +
@@ -21,6 +26,14 @@
 
   function qs(sel, root) {
     return (root || document).querySelector(sel);
+  }
+
+  function getPageType() {
+    const path = String(window.location.pathname || "").toLowerCase();
+    if (path.includes("/gallery")) return "gallery";
+    if (path.includes("/leaderboard")) return "leaderboard";
+    if (path.includes("/home")) return "home";
+    return "other";
   }
 
   function createActionButton(text) {
@@ -49,7 +62,15 @@
     return btn;
   }
 
-  function createToggleRow(text, checked) {
+  function createToggleRow(text, checked, helpText) {
+    const wrapper = document.createElement("div");
+    Object.assign(wrapper.style, {
+      width: "100%",
+      display: "flex",
+      flexDirection: "column",
+      gap: "4px",
+    });
+
     const row = document.createElement("label");
     Object.assign(row.style, {
       width: "100%",
@@ -114,21 +135,107 @@
       checkbox.style.boxShadow = "none";
     });
 
-    const rightSpacer = document.createElement("span");
-    Object.assign(rightSpacer.style, {
+    let rightElement = document.createElement("span");
+    Object.assign(rightElement.style, {
       width: "16px",
       height: "16px",
       flex: "0 0 16px",
       pointerEvents: "none",
     });
-    rightSpacer.setAttribute("aria-hidden", "true");
+    rightElement.setAttribute("aria-hidden", "true");
+
+    let helpPanel = null;
+    if (helpText) {
+      const helpButton = document.createElement("button");
+      helpButton.type = "button";
+      helpButton.textContent = "?";
+      helpButton.setAttribute("aria-label", "About " + text);
+      helpButton.setAttribute("aria-expanded", "false");
+      Object.assign(helpButton.style, {
+        width: "16px",
+        height: "16px",
+        flex: "0 0 16px",
+        borderRadius: "3px",
+        border: "1.5px solid " + FRAME_TEXT,
+        background: "transparent",
+        color: FRAME_TEXT,
+        cursor: "pointer",
+        padding: "0",
+        margin: "0",
+        fontFamily: FONT_FAMILY,
+        fontSize: "0.74rem",
+        lineHeight: "1",
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+      });
+
+      helpPanel = document.createElement("button");
+      helpPanel.type = "button";
+      helpPanel.setAttribute("aria-label", "Toggle help for " + text);
+      Object.assign(helpPanel.style, {
+        width: "100%",
+        display: "none",
+        alignItems: "center",
+        gap: "6px",
+        border: "none",
+        borderRadius: "6px",
+        background: "transparent",
+        color: FRAME_TEXT,
+        cursor: "pointer",
+        padding: "0 10px 8px 10px",
+        margin: "0",
+        fontFamily: FONT_FAMILY,
+        fontSize: "0.78rem",
+        lineHeight: "1.2",
+        textAlign: "left",
+      });
+
+      const helpMarker = document.createElement("span");
+      helpMarker.textContent = "?";
+      Object.assign(helpMarker.style, {
+        width: "16px",
+        height: "16px",
+        flex: "0 0 16px",
+        borderRadius: "3px",
+        border: "1.5px solid " + FRAME_TEXT,
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        fontSize: "0.72rem",
+      });
+
+      const helpCopy = document.createElement("span");
+      helpCopy.textContent = helpText;
+      Object.assign(helpCopy.style, {
+        flex: "1 1 auto",
+      });
+
+      function toggleHelp(ev) {
+        if (ev) {
+          ev.preventDefault();
+          ev.stopPropagation();
+        }
+        const show = helpPanel.style.display === "none";
+        helpPanel.style.display = show ? "flex" : "none";
+        helpButton.setAttribute("aria-expanded", show ? "true" : "false");
+      }
+
+      helpButton.addEventListener("click", toggleHelp);
+      helpPanel.addEventListener("click", toggleHelp);
+      helpPanel.appendChild(helpMarker);
+      helpPanel.appendChild(helpCopy);
+      rightElement = helpButton;
+    }
 
     row.appendChild(checkbox);
     row.appendChild(labelText);
-    row.appendChild(rightSpacer);
+    row.appendChild(rightElement);
+    wrapper.appendChild(row);
+    if (helpPanel) wrapper.appendChild(helpPanel);
     repaintCheckbox();
 
-    return { row, checkbox };
+    return { row: wrapper, checkbox };
   }
 
   async function clearImageCacheOnly() {
@@ -177,6 +284,22 @@
   function saveScrollTopSetting(enabled) {
     try {
       localStorage.setItem(SCROLL_TOP_PREF_KEY, enabled ? "1" : "0");
+    } catch (e) {}
+  }
+
+  function getSaveLastLeaderboardSetting() {
+    try {
+      const raw = localStorage.getItem(SAVE_LAST_LEADERBOARD_PREF_KEY);
+      if (raw === null) return false;
+      return raw === "1";
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function saveLastLeaderboardSetting(enabled) {
+    try {
+      localStorage.setItem(SAVE_LAST_LEADERBOARD_PREF_KEY, enabled ? "1" : "0");
     } catch (e) {}
   }
 
@@ -363,6 +486,7 @@
 
   function createSettingsUI() {
     bindMobileNavMenuBehavior();
+    const pageType = getPageType();
 
     scrollTopEnabled = getScrollTopSetting();
     scrollTopButton = ensureScrollTopButton();
@@ -372,6 +496,14 @@
 
     const container = qs(".settings-dropdown");
     if (!container) return;
+    if (pageType === "home") {
+      container.style.display = "none";
+      return;
+    }
+    if (pageType !== "gallery" && pageType !== "leaderboard") {
+      container.style.display = "none";
+      return;
+    }
     if (container.dataset.settingsReady === "1") return;
 
     const toggleTarget =
@@ -406,11 +538,28 @@
 
     dropdown.innerHTML = "";
 
-    const jumpTopToggle = createToggleRow("Jump to top", scrollTopEnabled);
-    const clearCacheBtn = createActionButton("Clear cache");
-
+    const jumpTopToggle = createToggleRow(
+      "Jump to top",
+      scrollTopEnabled,
+      JUMP_TOP_HELP_TEXT,
+    );
     dropdown.appendChild(jumpTopToggle.row);
-    dropdown.appendChild(clearCacheBtn);
+
+    let saveLeaderboardToggle = null;
+    if (pageType === "leaderboard") {
+      saveLeaderboardToggle = createToggleRow(
+        "Save last leaderboard",
+        getSaveLastLeaderboardSetting(),
+        SAVE_LAST_LEADERBOARD_HELP_TEXT,
+      );
+      dropdown.appendChild(saveLeaderboardToggle.row);
+    }
+
+    let clearCacheBtn = null;
+    if (pageType === "gallery") {
+      clearCacheBtn = createActionButton("Clear cache");
+      dropdown.appendChild(clearCacheBtn);
+    }
 
     wireDropdown(container, toggleTarget, dropdown);
 
@@ -419,22 +568,30 @@
       applyScrollTopSetting(scrollTopEnabled);
     });
 
-    clearCacheBtn.addEventListener("click", async function () {
-      const ok = window.confirm("Delete cached gallery images for this site?");
-      if (!ok) return;
-      try {
-        const removed = await clearImageCacheOnly();
-        updateButtonTemporarily(
-          clearCacheBtn,
-          "Cleared " + removed + " cached images",
-          2600,
-        );
-      } catch (err) {
-        alert(
-          err && err.message ? err.message : "Failed to clear image cache.",
-        );
-      }
-    });
+    if (saveLeaderboardToggle) {
+      saveLeaderboardToggle.checkbox.addEventListener("change", function () {
+        saveLastLeaderboardSetting(!!saveLeaderboardToggle.checkbox.checked);
+      });
+    }
+
+    if (clearCacheBtn) {
+      clearCacheBtn.addEventListener("click", async function () {
+        const ok = window.confirm("Delete cached gallery images for this site?");
+        if (!ok) return;
+        try {
+          const removed = await clearImageCacheOnly();
+          updateButtonTemporarily(
+            clearCacheBtn,
+            "Cleared " + removed + " cached images",
+            2600,
+          );
+        } catch (err) {
+          alert(
+            err && err.message ? err.message : "Failed to clear image cache.",
+          );
+        }
+      });
+    }
 
     container.dataset.settingsReady = "1";
   }

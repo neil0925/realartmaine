@@ -1471,3 +1471,58 @@ img {
   -webkit-user-drag: none;
   user-drag: none;
 }
+.search-bar select,
+#sortSelect,
+#leaderboardViewSelect,
+.leaderboard-controls select {
+  color: #30513d !important;
+  border: 1px solid rgba(48, 81, 61, 0.4) !important;
+  box-shadow: none !important;
+  background-color: transparent !important;
+  background-image: url("/assets/GUI/tile.png") !important;
+  background-repeat: repeat !important;
+  background-size: 400px 400px !important;
+}
+.search-bar select:hover,
+.search-bar select:focus,
+#sortSelect:hover,
+#sortSelect:focus,
+#leaderboardViewSelect:hover,
+#leaderboardViewSelect:focus,
+.leaderboard-controls select:hover,
+.leaderboard-controls select:focus {
+  border: 1px solid rgba(48, 81, 61, 0.4) !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+.search-bar select option,
+#sortSelect option,
+#leaderboardViewSelect option,
+.leaderboard-controls select option {
+  color: #30513d;
+  background-color: transparent !important;
+  background-image: url("/assets/GUI/tile.png") !important;
+  background-repeat: repeat !important;
+  background-size: 400px 400px !important;
+}
+.dropdown-content {
+  border: 1px solid rgba(48, 81, 61, 0.4) !important;
+}
+.search-bar select option:hover,
+.search-bar select option:focus,
+.search-bar select option:checked,
+#sortSelect option:hover,
+#sortSelect option:focus,
+#sortSelect option:checked,
+#leaderboardViewSelect option:hover,
+#leaderboardViewSelect option:focus,
+#leaderboardViewSelect option:checked,
+.leaderboard-controls select option:hover,
+.leaderboard-controls select option:focus,
+.leaderboard-controls select option:checked {
+  color: #30513d !important;
+  background-color: transparent !important;
+  background-image: url("/assets/GUI/tile.png") !important;
+  background-repeat: repeat !important;
+  background-size: 400px 400px !important;
+}
