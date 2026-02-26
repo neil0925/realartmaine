@@ -528,7 +528,7 @@ footer hr {
   max-height: calc(100vh - 48px);
   padding: 16px;
   border-radius: 8px;
-  gap: 8px;
+  gap: 0;
   box-shadow: 0 14px 36px rgba(0, 0, 0, 0.55);
   display: flex;
   flex-direction: column;
@@ -1159,7 +1159,7 @@ footer hr {
   max-height: calc(100vh - 48px);
   padding: 16px;
   border-radius: 8px;
-  gap: 8px;
+  gap: 0;
   box-shadow: 0 14px 36px rgba(0, 0, 0, 0.55);
   display: flex;
   flex-direction: column;
@@ -1172,20 +1172,6 @@ footer hr {
   background-position: center;
   color: #30513d;
 }
-.modal::before {
-  content: "";
-  position: absolute;
-  inset: 16px;
-  background: #fff;
-  border-radius: 6px;
-  box-shadow: none;
-  pointer-events: none;
-  z-index: 0;
-}
-.modal > * {
-  position: relative;
-  z-index: 1;
-}
 .card.highlighted {
   outline: 3px solid #4a90e2;
   outline-offset: 2px;
@@ -1197,11 +1183,9 @@ footer hr {
   color: inherit;
 }
 .modal .caption {
-  margin: 0 -16px 8px -16px;
+  margin: 0 -16px;
   padding: 12px 16px;
-  background-image: url("/assets/GUI/tile.png");
-  background-repeat: repeat;
-  background-size: 400px 400px;
+  background: transparent;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -1213,6 +1197,22 @@ footer hr {
   border-radius: 6px;
   color: #30513d;
   font-weight: 600;
+}
+.modal.modal-loading {
+  background: transparent;
+  box-shadow: none;
+}
+.modal.modal-loading .caption {
+  visibility: hidden;
+}
+.modal.modal-loading .modal-imgwrap {
+  background: transparent;
+  min-height: min(58vh, 520px);
+}
+.modal.modal-loading .modal-spinner {
+  width: 62px;
+  height: 62px;
+  border-width: 5px;
 }
 .modal-arrow {
   position: fixed;
@@ -1279,12 +1279,14 @@ footer hr {
   }
 }
 .modal-imgwrap {
-  padding: 0;
+  margin: 0 -16px;
+  padding: 16px;
   display: flex;
   justify-content: center;
   align-items: center;
   max-height: calc(100vh - 220px);
   overflow: hidden;
+  background: transparent;
 }
 .modal img,
 .modal .modal-image {

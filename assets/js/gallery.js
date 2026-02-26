@@ -1239,128 +1239,39 @@ const imagesList = metaList.map((m) => {
   return m.numericSrc;
 });
 function openModal(meta) {
-  const scrollY = window.scrollY;
-  const scrollX = window.scrollX;
   const backdrop = document.createElement("div");
   backdrop.className = "modal-backdrop";
-  backdrop.addEventListener("click", (e) => {
-    if (e.target === backdrop) {
-      closeModal();
-    }
-  });
+
   const modal = document.createElement("div");
   modal.className = "modal";
+
   const imgwrap = document.createElement("div");
   imgwrap.className = "modal-imgwrap";
+
   const img = document.createElement("img");
   img.alt = meta.rawBase;
   img.className = "modal-image";
   img.style.visibility = "hidden";
   img.style.display = "none";
+
   const modalSpinner = document.createElement("div");
   modalSpinner.className = "spinner modal-spinner";
   modalSpinner.style.display = "block";
-  let modalLoaded = false;
-  let caption;
-  let leftArrow;
-  let rightArrow;
-  function revealModalContent() {
-    modalLoaded = true;
-    try {
-      if (modalSpinner && modalSpinner.parentNode)
-        modalSpinner.parentNode.removeChild(modalSpinner);
-    } catch (e) {}
-    try {
-      img.style.visibility = "visible";
-      img.style.display = "block";
-    } catch (e) {}
-    try {
-      if (caption) caption.style.visibility = "visible";
-    } catch (e) {}
-    try {
-      if (leftArrow) leftArrow.style.visibility = "visible";
-    } catch (e) {}
-    try {
-      if (rightArrow) rightArrow.style.visibility = "visible";
-    } catch (e) {}
-  }
-  (async () => {
-    try {
-      const candidate = meta && meta.src ? meta.src : null;
-      if (!candidate) return;
-      const resolved = await getValidatedImageBlob(candidate);
-      if (!resolved || !resolved.blob) return;
-      const blobUrl = URL.createObjectURL(resolved.blob);
-      img.src = blobUrl;
-      try {
-        await img.decode();
-      } catch (e) {}
-      scheduleBlobUrlRevoke(blobUrl);
-      revealModalContent();
-      return;
-    } catch (e) {
-      console.warn("modal image load error", e);
-    }
-    try {
-      revealModalContent();
-    } catch (e) {}
-  })();
+
   imgwrap.appendChild(modalSpinner);
   imgwrap.appendChild(img);
   modal.appendChild(imgwrap);
-  caption = document.createElement("div");
+
+  const caption = document.createElement("div");
   caption.className = "caption";
-  const isDebug = (() => {
-    try {
-      return (
-        new URLSearchParams(window.location.search).get("debug") === "true"
-      );
-    } catch (e) {
-      return false;
-    }
-  })();
-  if (isDebug) {
-    const full =
-      meta && (meta.label || meta.rawBase) ? meta.label || meta.rawBase : "";
-    let idx = meta && meta.index ? meta.index : null;
-    if (!idx && meta && (meta.numericSrc || meta.src)) {
-      try {
-        const s = (meta.numericSrc || meta.src).split("/").pop();
-        const m = s.match(/^(\d+)/);
-        if (m) idx = parseInt(m[1], 10);
-      } catch (e) {
-        idx = null;
-      }
-    }
-    caption.textContent = full + (idx ? ` (${idx})` : "");
-  } else {
-    let tagText = "";
-    let photographerText = "";
-    if (meta && meta.label) {
-      const dashParts = meta.label.split("-");
-      if (dashParts.length > 0) tagText = dashParts[0].trim();
-      let photographerIndex = -1;
-      if (dashParts.length >= 4) photographerIndex = 2;
-      else if (dashParts.length >= 3) photographerIndex = 1;
-      if (photographerIndex >= 0 && dashParts[photographerIndex]) {
-        const photoStr = dashParts[photographerIndex].trim();
-        const photoTokens = photoStr.split(/[\s,]+/);
-        photographerText = photoTokens[0];
-      }
-    }
-    let captionText = "";
-    if (tagText) captionText = tagText;
-    if (photographerText)
-      captionText +=
-        (captionText ? " " : "") + `flicked by ${photographerText}`;
-    caption.textContent = captionText || (meta && meta.rawBase) || "";
-  }
   caption.style.visibility = "hidden";
   modal.appendChild(caption);
-  leftArrow = document.createElement("button");
+
+  const leftArrow = document.createElement("button");
   leftArrow.className = "modal-arrow modal-arrow-left";
   leftArrow.setAttribute("aria-label", "Previous image");
-  leftArrow.style.visibility = modalLoaded ? "visible" : "hidden";
+  leftArrow.style.visibility = "visible";
+
   const leftImg = document.createElement("img");
   leftImg.alt = "Previous";
   leftImg.style.width = "36px";
@@ -1373,21 +1284,21 @@ function openModal(meta) {
     try {
       leftImg.onerror = null;
     } catch (e) {}
-    if (leftArrow) {
-      leftArrow.textContent = "‹";
-      try {
-        leftImg.remove();
-      } catch (e) {}
-    }
+    leftArrow.textContent = "<";
+    try {
+      leftImg.remove();
+    } catch (e) {}
   };
   leftImg.onload = () => {
     if (leftArrow && leftArrow.textContent) leftArrow.textContent = "";
   };
   leftArrow.appendChild(leftImg);
-  rightArrow = document.createElement("button");
+
+  const rightArrow = document.createElement("button");
   rightArrow.className = "modal-arrow modal-arrow-right";
   rightArrow.setAttribute("aria-label", "Next image");
-  rightArrow.style.visibility = modalLoaded ? "visible" : "hidden";
+  rightArrow.style.visibility = "visible";
+
   const rightImg = document.createElement("img");
   rightImg.alt = "Next";
   rightImg.style.width = "36px";
@@ -1400,87 +1311,280 @@ function openModal(meta) {
     try {
       rightImg.onerror = null;
     } catch (e) {}
-    if (rightArrow) {
-      rightArrow.textContent = "›";
-      try {
-        rightImg.remove();
-      } catch (e) {}
-    }
+    rightArrow.textContent = ">";
+    try {
+      rightImg.remove();
+    } catch (e) {}
   };
   rightImg.onload = () => {
     if (rightArrow && rightArrow.textContent) rightArrow.textContent = "";
   };
   rightArrow.appendChild(rightImg);
+
   leftImg.style.filter = "invert(1)";
   rightImg.style.filter = "invert(1)";
+
   modal.appendChild(leftArrow);
   modal.appendChild(rightArrow);
+
   const existingBackdrop = document.querySelector(".modal-backdrop");
   if (existingBackdrop && existingBackdrop.parentNode) {
     document.body.removeChild(existingBackdrop);
   }
+
   backdrop.appendChild(modal);
   document.body.appendChild(backdrop);
-  const activeList =
+
+  const isDebug = (() => {
+    try {
+      return (
+        new URLSearchParams(window.location.search).get("debug") === "true"
+      );
+    } catch (e) {
+      return false;
+    }
+  })();
+
+  const resolveActiveList = () =>
     Array.isArray(currentDisplayedList) && currentDisplayedList.length > 0
       ? currentDisplayedList
       : imagesList;
-  let currentIndex = activeList.indexOf(meta.numericSrc);
-  if (currentIndex < 0) {
-    currentIndex = activeList.findIndex((s) => {
-      try {
-        return (
-          s &&
-          s.replace(/\.[^.]+$/, "") ===
-            (meta.numericSrc || "").replace(/\.[^.]+$/, "")
-        );
-      } catch (e) {
-        return false;
+
+  const resolveIndexForMeta = (targetMeta, list) => {
+    if (!targetMeta || !Array.isArray(list) || list.length === 0) return -1;
+
+    const targetSrc = targetMeta.numericSrc || targetMeta.src || "";
+    let idx = targetSrc ? list.indexOf(targetSrc) : -1;
+    if (idx >= 0) return idx;
+
+    if (targetSrc) {
+      idx = list.findIndex((s) => {
+        try {
+          return (
+            s && s.replace(/\.[^.]+$/, "") === targetSrc.replace(/\.[^.]+$/, "")
+          );
+        } catch (e) {
+          return false;
+        }
+      });
+      if (idx >= 0) return idx;
+    }
+
+    if (typeof targetMeta.index === "number" && targetMeta.index > 0) {
+      idx = list.findIndex(
+        (s) => getNumericIndexFromSrc(s) === targetMeta.index,
+      );
+      if (idx >= 0) return idx;
+    }
+
+    return -1;
+  };
+
+  const setCaptionFromMeta = (targetMeta) => {
+    if (isDebug) {
+      const full =
+        targetMeta && (targetMeta.label || targetMeta.rawBase)
+          ? targetMeta.label || targetMeta.rawBase
+          : "";
+      let idx = targetMeta && targetMeta.index ? targetMeta.index : null;
+      if (!idx && targetMeta && (targetMeta.numericSrc || targetMeta.src)) {
+        try {
+          const s = (targetMeta.numericSrc || targetMeta.src).split("/").pop();
+          const m = s.match(/^(\d+)/);
+          if (m) idx = parseInt(m[1], 10);
+        } catch (e) {
+          idx = null;
+        }
       }
-    });
-  }
+      caption.textContent = full + (idx ? ` (${idx})` : "");
+      return;
+    }
+
+    let tagText = "";
+    let photographerText = "";
+
+    if (targetMeta && targetMeta.label) {
+      const dashParts = targetMeta.label.split("-");
+      if (dashParts.length > 0) tagText = dashParts[0].trim();
+
+      let photographerIndex = -1;
+      if (dashParts.length >= 4) photographerIndex = 2;
+      else if (dashParts.length >= 3) photographerIndex = 1;
+
+      if (photographerIndex >= 0 && dashParts[photographerIndex]) {
+        const photoStr = dashParts[photographerIndex].trim();
+        const photoTokens = photoStr.split(/[\s,]+/);
+        photographerText = photoTokens[0];
+      }
+    }
+
+    let captionText = "";
+    if (tagText) captionText = tagText;
+    if (photographerText) {
+      captionText +=
+        (captionText ? " " : "") + `flicked by ${photographerText}`;
+    }
+
+    caption.textContent =
+      captionText || (targetMeta && targetMeta.rawBase) || "";
+  };
+
+  let activeList = resolveActiveList();
+  let currentIndex = resolveIndexForMeta(meta, activeList);
+  let modalLoadToken = 0;
+
   const highlightCard = () => {
     const cards = document.querySelectorAll(".card");
     cards.forEach((card) => card.classList.remove("highlighted"));
-    if (cards[currentIndex]) {
-      cards[currentIndex].classList.add("highlighted");
-      cards[currentIndex].scrollIntoView({
+
+    if (
+      typeof __ensureGalleryCardForIndex === "function" &&
+      currentIndex >= 0
+    ) {
+      try {
+        __ensureGalleryCardForIndex(currentIndex);
+      } catch (e) {}
+    }
+
+    let targetCard =
+      currentIndex >= 0
+        ? document.querySelector(`.card[data-list-index="${currentIndex}"]`)
+        : null;
+
+    if (!targetCard && currentIndex >= 0) {
+      const candidates = Array.from(
+        document.querySelectorAll(".card[data-list-index]"),
+      );
+      let best = null;
+      let bestDist = Number.POSITIVE_INFINITY;
+      for (const card of candidates) {
+        const idx = Number(card.dataset.listIndex);
+        if (!Number.isFinite(idx)) continue;
+        const dist = Math.abs(idx - currentIndex);
+        if (dist < bestDist) {
+          best = card;
+          bestDist = dist;
+        }
+      }
+      targetCard = best;
+    }
+
+    if (targetCard) {
+      targetCard.classList.add("highlighted");
+      targetCard.scrollIntoView({
         behavior: "auto",
         block: "nearest",
       });
     }
   };
-  highlightCard();
+
+  const setLoadingState = () => {
+    modal.classList.add("modal-loading");
+    img.style.visibility = "hidden";
+    img.style.display = "none";
+    caption.style.visibility = "hidden";
+    if (!imgwrap.contains(modalSpinner)) imgwrap.appendChild(modalSpinner);
+  };
+
+  const clearLoadingState = () => {
+    modal.classList.remove("modal-loading");
+    try {
+      if (modalSpinner.parentNode === imgwrap)
+        imgwrap.removeChild(modalSpinner);
+    } catch (e) {}
+  };
+
+  const loadModalMeta = async (targetMeta, targetIndex) => {
+    const requestId = ++modalLoadToken;
+    meta = targetMeta;
+    if (typeof targetIndex === "number") currentIndex = targetIndex;
+
+    setCaptionFromMeta(meta);
+    highlightCard();
+    setLoadingState();
+
+    const candidates =
+      meta && meta.candidates && meta.candidates.length
+        ? meta.candidates.slice()
+        : [meta && meta.src ? meta.src : null].filter(Boolean);
+
+    let chosenCandidate = null;
+    let chosenBlob = null;
+
+    for (const candidate of candidates) {
+      const resolved = await getValidatedImageBlob(candidate);
+      if (resolved && resolved.blob) {
+        chosenCandidate = candidate;
+        chosenBlob = resolved.blob;
+        break;
+      }
+    }
+
+    if (requestId !== modalLoadToken) return;
+
+    if (!chosenBlob) {
+      clearLoadingState();
+      caption.style.visibility = "visible";
+      return;
+    }
+
+    const blobUrl = URL.createObjectURL(chosenBlob);
+    img.src = blobUrl;
+    try {
+      await img.decode();
+    } catch (e) {}
+
+    if (requestId !== modalLoadToken) {
+      scheduleBlobUrlRevoke(blobUrl);
+      return;
+    }
+
+    if (chosenCandidate) meta.src = chosenCandidate;
+    scheduleBlobUrlRevoke(blobUrl);
+    clearLoadingState();
+    img.style.visibility = "visible";
+    img.style.display = "block";
+    caption.style.visibility = "visible";
+  };
+
   const closeModal = () => {
+    modalLoadToken++;
     const cards = document.querySelectorAll(".card");
     cards.forEach((card) => card.classList.remove("highlighted"));
     if (backdrop.parentNode) {
       document.body.removeChild(backdrop);
     }
-    window.scrollTo(scrollX, scrollY);
     document.removeEventListener("keydown", handleKeyboard);
   };
+
+  backdrop.addEventListener("click", (e) => {
+    if (e.target === backdrop) {
+      closeModal();
+    }
+  });
+
   const navigateTo = (newIndex) => {
-    const listForNav =
-      Array.isArray(currentDisplayedList) && currentDisplayedList.length > 0
-        ? currentDisplayedList
-        : imagesList;
+    activeList = resolveActiveList();
+    const listForNav = activeList;
     if (!Array.isArray(listForNav) || listForNav.length === 0) return;
+
     const loopedIndex =
       ((newIndex % listForNav.length) + listForNav.length) % listForNav.length;
     const src = listForNav[loopedIndex];
     const newMeta = parseFilename(src);
-    closeModal();
-    openModal(newMeta);
+    loadModalMeta(newMeta, loopedIndex).catch(() => {});
   };
+
   leftArrow.addEventListener("click", (e) => {
     e.stopPropagation();
     navigateTo(currentIndex - 1);
   });
+
   rightArrow.addEventListener("click", (e) => {
     e.stopPropagation();
     navigateTo(currentIndex + 1);
   });
+
   const handleKeyboard = (e) => {
     if (e.key === "ArrowLeft") {
       e.preventDefault();
@@ -1493,9 +1597,18 @@ function openModal(meta) {
       closeModal();
     }
   };
+
   document.addEventListener("keydown", handleKeyboard);
+
+  if (currentIndex < 0 && Array.isArray(activeList) && activeList.length > 0) {
+    currentIndex = 0;
+    meta = parseFilename(activeList[0]);
+  }
+
+  loadModalMeta(meta, currentIndex).catch(() => {});
 }
 let __teardownLazyGalleryLoader = null;
+let __ensureGalleryCardForIndex = null;
 async function loadImagesSequentially(list) {
   if (!gallery) return;
   currentDisplayedList = Array.isArray(list) ? list.slice() : [];
@@ -1506,6 +1619,7 @@ async function loadImagesSequentially(list) {
     } catch (e) {}
   }
   __teardownLazyGalleryLoader = null;
+  __ensureGalleryCardForIndex = null;
   gallery.innerHTML = "";
   if (!Array.isArray(list) || list.length === 0) {
     return;
@@ -1523,6 +1637,31 @@ async function loadImagesSequentially(list) {
   const IMAGE_LOAD_CONCURRENCY = 1;
   const IMAGE_OBSERVER_ROOT_MARGIN = "900px 0px";
   let activePlaceholder = null;
+  const queueSpinner = document.createElement("div");
+  queueSpinner.className = "spinner";
+  queueSpinner.style.display = "block";
+
+  function moveQueueSpinner(nextPlaceholder) {
+    if (!nextPlaceholder) return;
+    if (activePlaceholder && activePlaceholder !== nextPlaceholder) {
+      activePlaceholder.classList.remove("active");
+    }
+    nextPlaceholder.classList.add("active");
+    if (queueSpinner.parentNode !== nextPlaceholder) {
+      nextPlaceholder.appendChild(queueSpinner);
+    }
+    activePlaceholder = nextPlaceholder;
+  }
+
+  function clearQueueSpinner() {
+    if (activePlaceholder) activePlaceholder.classList.remove("active");
+    activePlaceholder = null;
+    try {
+      if (queueSpinner.parentNode)
+        queueSpinner.parentNode.removeChild(queueSpinner);
+    } catch (e) {}
+  }
+
   function computeDefaultCardHeight() {
     const gap = parseInt(
       window.getComputedStyle(grid).getPropertyValue("gap") || "10",
@@ -1559,13 +1698,7 @@ async function loadImagesSequentially(list) {
       const item = loadQueue.shift();
       if (!item || item.loaded || item.loading) continue;
       item.loading = true;
-      if (activePlaceholder && activePlaceholder !== item.placeholder) {
-        activePlaceholder.classList.remove("active");
-      }
-      if (item.placeholder) {
-        item.placeholder.classList.add("active");
-        activePlaceholder = item.placeholder;
-      }
+      moveQueueSpinner(item.placeholder);
       activeLoads++;
       loadImageIntoCard(
         item.meta,
@@ -1581,12 +1714,16 @@ async function loadImagesSequentially(list) {
           activeLoads--;
           item.loading = false;
           item.queued = false;
-          if (item.placeholder) item.placeholder.classList.remove("active");
-          if (activePlaceholder === item.placeholder) activePlaceholder = null;
           try {
             if (observer && item.card) observer.unobserve(item.card);
           } catch (e) {}
-          if (myLoadId === currentLoadId) pumpQueue();
+          if (myLoadId === currentLoadId) {
+            pumpQueue();
+            if (activeLoads === 0 && loadQueue.length === 0)
+              clearQueueSpinner();
+          } else {
+            clearQueueSpinner();
+          }
         });
     }
   }
@@ -1594,15 +1731,13 @@ async function loadImagesSequentially(list) {
     const meta = parseFilename(list[index]);
     const card = document.createElement("div");
     card.className = "card";
+    card.dataset.listIndex = String(index);
     const wrap = document.createElement("div");
     wrap.className = "image-wrap";
     const defaultH = computeDefaultCardHeight();
     wrap.style.height = `${defaultH}px`;
     const placeholder = document.createElement("div");
     placeholder.className = "placeholder-box";
-    const spinner = document.createElement("div");
-    spinner.className = "spinner";
-    placeholder.appendChild(spinner);
     wrap.appendChild(placeholder);
     card.appendChild(wrap);
     gallery.appendChild(card);
@@ -1640,6 +1775,14 @@ async function loadImagesSequentially(list) {
     }
     createdCount = target;
   }
+  __ensureGalleryCardForIndex = (targetIndex) => {
+    if (myLoadId !== currentLoadId) return;
+    const idx = Number(targetIndex);
+    if (!Number.isFinite(idx) || idx < 0) return;
+    if (idx < createdCount) return;
+    appendCards(idx - createdCount + 1);
+    requestAnimationFrame(resizeAllMasonryItems);
+  };
   function appendNearBottomBatches() {
     if (myLoadId !== currentLoadId) return;
     let appended = false;
@@ -1685,10 +1828,8 @@ async function loadImagesSequentially(list) {
     try {
       if (observer) observer.disconnect();
     } catch (e) {}
-    try {
-      if (activePlaceholder) activePlaceholder.classList.remove("active");
-    } catch (e) {}
-    activePlaceholder = null;
+    clearQueueSpinner();
+    __ensureGalleryCardForIndex = null;
     loadQueue.length = 0;
   };
   if (myLoadId === currentLoadId) requestAnimationFrame(resizeAllMasonryItems);
@@ -1753,9 +1894,6 @@ function loadImageIntoCard(meta, card, wrap, placeholder, expectedLoadId) {
         wrap.style.height = `${finalH}px`;
         img.classList.remove("hidden");
         img.classList.add("fade-in");
-        if (placeholder && placeholder.parentNode === wrap) {
-          placeholder.innerHTML = "";
-        }
         wrap.appendChild(img);
         requestAnimationFrame(() => {
           const rowSpan = Math.max(
@@ -1793,8 +1931,6 @@ function loadImageIntoCard(meta, card, wrap, placeholder, expectedLoadId) {
               wrap.style.height = `${finalH}px`;
               img.classList.remove("hidden");
               img.classList.add("fade-in");
-              if (placeholder && placeholder.parentNode === wrap)
-                placeholder.innerHTML = "";
               wrap.appendChild(img);
               requestAnimationFrame(() => {
                 const rowSpan = Math.max(
