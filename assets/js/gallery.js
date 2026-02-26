@@ -755,7 +755,7 @@ const metaList = (function () {
     const index = idx + 1;
     const label = IMAGE_LABELS[index] || "";
     const nameNoExt = label || String(index);
-    const exts = [".jpg"];
+    const exts = [".jpg", ".JPG", ".jpeg", ".JPEG"];
     const numericSrc = `/assets/images/${index}${exts[0]}`;
     const basename = `${index}${exts[0]}`;
     const orig = numericSrc;
@@ -837,9 +837,6 @@ const __pendingImageRevalidations = new Set();
 const __queuedImageRevalidations = [];
 let __activeImageRevalidations = 0;
 const __knownMissingImageCandidates = new Set();
-let __notFoundStreak = 0;
-let __disableNetworkImageFetches = false;
-const IMAGE_NOT_FOUND_STREAK_THRESHOLD = 20;
 function loadImageRevalidationState() {
   try {
     const raw = localStorage.getItem(IMAGE_REVALIDATION_STATE_KEY);
@@ -887,10 +884,6 @@ async function revalidateCachedImage(candidate) {
     markImageValidated(candidate);
     return;
   }
-  if (__disableNetworkImageFetches) {
-    markImageValidated(candidate);
-    return;
-  }
   if (typeof caches === "undefined" || !caches.open) {
     markImageValidated(candidate);
     return;
@@ -916,16 +909,11 @@ async function revalidateCachedImage(candidate) {
       try {
         await cache.put(candidate, netResp.clone());
       } catch (e) {}
-      __notFoundStreak = 0;
       markImageValidated(candidate);
       return;
     }
     if (netResp && netResp.status === 404) {
       __knownMissingImageCandidates.add(candidate);
-      __notFoundStreak++;
-      if (__notFoundStreak >= IMAGE_NOT_FOUND_STREAK_THRESHOLD) {
-        __disableNetworkImageFetches = true;
-      }
       markImageValidated(candidate);
       return;
     }
@@ -1016,7 +1004,6 @@ function scheduleBlobUrlRevoke(blobUrl) {
 }
 async function getValidatedImageBlob(candidate) {
   if (__knownMissingImageCandidates.has(candidate)) return null;
-  if (__disableNetworkImageFetches) return null;
   let cache = null;
   let cachedResp = null;
   if (typeof caches !== "undefined" && caches.open) {
@@ -1041,16 +1028,11 @@ async function getValidatedImageBlob(candidate) {
       try {
         if (cache) await cache.put(candidate, onlineResp.clone());
       } catch (e) {}
-      __notFoundStreak = 0;
       markImageValidated(candidate);
       return { blob: await onlineResp.blob(), source: "network" };
     }
     if (onlineResp && onlineResp.status === 404) {
       __knownMissingImageCandidates.add(candidate);
-      __notFoundStreak++;
-      if (__notFoundStreak >= IMAGE_NOT_FOUND_STREAK_THRESHOLD) {
-        __disableNetworkImageFetches = true;
-      }
     }
   } catch (e) {}
   return null;
@@ -1746,8 +1728,12 @@ function loadImageIntoCard(meta, card, wrap, placeholder, expectedLoadId) {
       }
       if (attemptIndex >= candidates.length) {
         try {
-          if (placeholder && placeholder.parentNode === wrap)
+          if (card.parentNode === gallery) {
+            gallery.removeChild(card);
+            requestAnimationFrame(resizeAllMasonryItems);
+          } else if (placeholder && placeholder.parentNode === wrap) {
             placeholder.innerHTML = "";
+          }
         } catch (e) {}
         resolve(true);
         return;
