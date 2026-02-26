@@ -802,7 +802,7 @@ nav .right-group .gear-box {
 nav .right-group {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 nav .settings-dropdown {
   position: relative;
@@ -881,6 +881,7 @@ nav .nav-menu-panel a:hover {
   }
   nav .nav-menu {
     display: block;
+    margin-left: 10px;
   }
 }
 html,
@@ -1436,4 +1437,37 @@ footer hr {
   display: block;
   margin: 20px auto;
   background: #fff;
+}
+nav .nav-left,
+nav .nav-left a,
+nav .site-title,
+nav .nav-menu-toggle,
+nav .nav-menu-icon,
+nav .nav-menu-panel a,
+nav .settings-dropdown,
+nav .gear-box,
+nav .gear-icon,
+.search-bar select,
+.search-bar select option,
+.search-bar input::placeholder,
+.search-bar input::-webkit-input-placeholder,
+.search-bar input::-moz-placeholder,
+.search-bar input:-ms-input-placeholder,
+.leaderboard h1,
+.leaderboard-table thead,
+.banner,
+.banner img,
+.gallery-image,
+.image-wrap img,
+.modal-arrow,
+.modal-arrow img {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+img {
+  -webkit-user-drag: none;
+  user-drag: none;
 }
