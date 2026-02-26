@@ -152,7 +152,7 @@ document.addEventListener("DOMContentLoaded", () => {
     html += '<p style="opacity:.6">Debug mode enabled</p>';
   }
   if (!list.length) {
-    html += "<p>No Top Flickers found.</p>";
+    html += "<p>No leaderboard entries found.</p>";
   } else {
     html += `
       <div class="table-wrap">
