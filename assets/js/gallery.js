@@ -748,6 +748,14 @@ IMAGE_LABELS[631] = "gask-PTG-americanaccents-piece";
 IMAGE_LABELS[632] = "gask-PTG-americanaccents-piece";
 IMAGE_LABELS[633] = "gask, obee-OY!,PTG-americanaccents-piece";
 IMAGE_LABELS[634] = "gask-PTG-americanaccents-blockbuster";
+IMAGE_LABELS[635] = "recer-ENS-americanaccents-straightletter";
+IMAGE_LABELS[636] = "rune-LTB,2K69-Northeastmillinocket-throwie, fillin";
+IMAGE_LABELS[637] = "wilt-2K69,VC-Northeastmillinocket-piece, antistyle";
+IMAGE_LABELS[638] = "wilt-2K69,VC-Northeastmillinocket-piece, antistyle";
+IMAGE_LABELS[639] = "rune-LTB,2K69-Northeastmillinocket-straightletter, hollow";
+IMAGE_LABELS[640] = "cosmo-Northeastmillinocket-piece, wildstyle";
+IMAGE_LABELS[641] = "rune, wilt-LTB,2K69,VC-Northeastmillinocket-piece, antistyle";
+IMAGE_LABELS[642] = "wilt-2K69,VC-Northeastmillinocket-piece, antistyle";
 function getLabelForIndex(index) {
   if (!index || index < 1) return "";
   return IMAGE_LABELS[index] || "";
