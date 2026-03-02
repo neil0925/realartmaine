@@ -725,8 +725,8 @@ nav a:hover {
   }
 }
 @font-face {
-  font-family: "RAM-Font3";
-  src: url("/assets/GUI/font3.ttf") format("truetype");
+  font-family: "RAM-Font12";
+  src: url("/assets/GUI/font12.ttf") format("truetype");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
@@ -746,15 +746,15 @@ nav a:hover {
   font-display: swap;
 }
 :root {
-  --ram-font3: "RAM-Font3", Arial, Helvetica, sans-serif;
+  --ram-font12: "RAM-Font12", Arial, Helvetica, sans-serif;
   --ram-font8: "RAM-Font8", Arial, Helvetica, sans-serif;
   --ram-font11: "RAM-Font11", Arial, Helvetica, sans-serif;
 }
 nav .nav-left a {
-  font-family: var(--ram-font3);
+  font-family: var(--ram-font12);
 }
 nav .site-title {
-  font-family: var(--ram-font3);
+  font-family: var(--ram-font12);
   padding: 6px 10px;
   border-radius: 6px;
   display: inline-flex;
@@ -787,7 +787,7 @@ nav .right-group .gear-box {
   font-family: var(--ram-font8);
 }
 .leaderboard h1 {
-  font-family: var(--ram-font3);
+  font-family: var(--ram-font12);
 }
 .leaderboard-table thead th {
   font-family: var(--ram-font8);
