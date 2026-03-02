@@ -45,7 +45,7 @@ IMAGE_LABELS[37] = "lerk, link, obee-5G,OY!-chagrinedminnow-piece, paintroller";
 IMAGE_LABELS[38] = "lerk, 27-2GF-chagrinedminnow-tags, stencil";
 IMAGE_LABELS[39] = "kindbud-5G,SDH-chagrinedminnow-antistyle, piece";
 IMAGE_LABELS[40] = "jumz-TSZ-chagrinedminnow-throwie, fillin, stencil";
-IMAGE_LABELS[41] = "ichabod-YME,CIRLCET-chagrinedminnow-tag";
+IMAGE_LABELS[41] = "ichabod-YME,CIRCLET-chagrinedminnow-tag";
 IMAGE_LABELS[42] = "grazi, 27-DWT,TSZ,2GF-chagrinedminnow-tags";
 IMAGE_LABELS[43] = "gerv-YME-chagrinedminnow-piece";
 IMAGE_LABELS[44] =
@@ -301,7 +301,7 @@ IMAGE_LABELS[250] = "link, rydon-5G,CRAFT,KYS-meangirl-piece,throwie,fillin";
 IMAGE_LABELS[251] = "enzyme-DPW-meangirl-straightletter";
 IMAGE_LABELS[252] = "kost-WKT,OHK,SLT-meangirl-piece";
 IMAGE_LABELS[253] = "kindbud-5G,SDH-meangirl-antistyle";
-IMAGE_LABELS[254] = "learn-SFL,YME,CIRLCET-meangirl-piece";
+IMAGE_LABELS[254] = "learn-SFL,YME,CIRCLET-meangirl-piece";
 IMAGE_LABELS[255] = "ankle-2K69,LTB-meangirl-straightletter";
 IMAGE_LABELS[256] = "port-IMS,OHK,SLT-meangirl-straightletter";
 IMAGE_LABELS[257] = "petco, paeday-5G,ICBM-meangirl-antistyle";
@@ -352,7 +352,7 @@ IMAGE_LABELS[298] = "berm, grazi, ankle-DWT,YNE,LTB,2K69-tincan1-piece";
 IMAGE_LABELS[299] =
   "ruski, lrak, link-SFL,PFC,5G,SDH,CRAFT-tincan1-piece, paintroller";
 IMAGE_LABELS[300] =
-  "ichabod, grazi-YME,CIRLCET,DWT-tincan1-blockbuster, paintroller";
+  "ichabod, grazi-YME,CIRCLET,DWT-tincan1-blockbuster, paintroller";
 IMAGE_LABELS[301] = "ojea3, obee-HEX,OY!-tincan1-piece, character";
 IMAGE_LABELS[302] = "ojea3, obee-HEX,OY!-tincan1-piece, character";
 IMAGE_LABELS[303] = "ehsk-tincan1-straightletter";
@@ -465,7 +465,7 @@ IMAGE_LABELS[395] = "link-5G,CRAFT,SDH-chagrinedminnow-tags";
 IMAGE_LABELS[396] = "WOOF-DFT-chagrinedminnow-tags";
 IMAGE_LABELS[397] = "27-TSZ,2GF-chagrinedminnow-tags";
 IMAGE_LABELS[398] = "27-TSZ,2GF-chagrinedminnow-throwie, antistyle, hollow";
-IMAGE_LABELS[399] = "ichabod-YME,CIRLCET,SFL-chagrinedminnow-tags";
+IMAGE_LABELS[399] = "ichabod-YME,CIRCLET,SFL-chagrinedminnow-tags";
 IMAGE_LABELS[400] = "rune, 27-LTB,2K69,TSZ,2GF-chagrinedminnow-tags";
 IMAGE_LABELS[401] = "27-TSZ,2GF-chagrinedminnow-tags";
 IMAGE_LABELS[402] = "27-TSZ,2GF-chagrinedminnow-throwie, antistyle, hollow";
@@ -538,7 +538,7 @@ IMAGE_LABELS[450] =
 IMAGE_LABELS[451] =
   "jozi, salud, kg-PTG,EFC-realartmaine-piece, character, paintroller";
 IMAGE_LABELS[452] =
-  "learn, unidentifiedwriters-YME,SFL,CIRLCET-realartmaine-piece";
+  "learn, unidentifiedwriters-YME,SFL,CIRCLET-realartmaine-piece";
 IMAGE_LABELS[453] =
   "zurk, turdl, learn-YME,CIRCLET,5G,SFL-realartmaine-piece, paint roller";
 IMAGE_LABELS[454] = "fonse-WH-realartmaine-piece";
