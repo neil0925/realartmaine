@@ -758,8 +758,7 @@ IMAGE_LABELS[641] = "rune, wilt-LTB,2K69,VC-Northeastmillinocket-piece, antistyl
 IMAGE_LABELS[642] = "wilt-2K69,VC-Northeastmillinocket-piece, antistyle";
 IMAGE_LABELS[643] = "wilt, unidentified-2K69,VC-thesaltysardine9-throwie, antistyle, hollow";
 IMAGE_LABELS[644] = "catch-OHK,PTG,BNE,SLT-thesaltysardine9-straightletter";
-IMAGE_LABELS[645] = 
-  "catch, high8, iowa, grazi-3FK,DWT,OHK,BNE,PTG,SLT-thesaltysardine9-straightletter, throwie, fillin";
+IMAGE_LABELS[645] = "catch, high8, iowa, grazi-3FK,DWT,OHK,BNE,PTG,SLT-thesaltysardine9-straightletter, throwie, fillin";
 IMAGE_LABELS[646] = "ichabod-YME,CIRLCET-thesaltysardine9-blockbuster";
 IMAGE_LABELS[647] = "boub-AX,RB-thesaltysardine9-throwie, fillin";
 IMAGE_LABELS[648] = "esko, link, lerk-TMS,5G,AX,CRAFT,SFL,SDH-thesaltysardine9-throwie, fillin";
@@ -789,6 +788,7 @@ IMAGE_LABELS[671] = "segway-FTS-realartmaine-tags";
 IMAGE_LABELS[672] = "neptune, segway-DNB,TSZ,FTS-realartmaine-tags";
 IMAGE_LABELS[673] = "BD-VC-realartmaine-throwie, fillin";
 IMAGE_LABELS[674] = "solar, flea-DNB-realartmaine-tags";
+
 function getLabelForIndex(index) {
   if (!index || index < 1) return "";
   return String(IMAGE_LABELS[index] || "").trim();
