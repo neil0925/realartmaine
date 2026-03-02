@@ -1,6 +1,6 @@
 const IMAGE_LABELS = [null];
 IMAGE_LABELS[1] =
-  "catch, link, wake, hugo-OHK,PTG,LTB,5G,SHD,CRAFT-realartmaine-throwie, tag";
+  "catch, link, wake, hugo-OHK,PTG,LTB,5G,SDh,CRAFT-realartmaine-throwie, tag";
 IMAGE_LABELS[2] = "same-SLT,TVT-realartmaine-tags";
 IMAGE_LABELS[3] = "same-SLT,TVT-realartmaine-piece, staightletter";
 IMAGE_LABELS[4] = "peck-SLF-realartmaine-throwie, bubble letter, hollow";
@@ -398,7 +398,7 @@ IMAGE_LABELS[338] = "same, ian-SLT,TVT,2K69-realartmaine-throwie, fillin";
 IMAGE_LABELS[339] =
   "catch, neptune-OHK,PTG,BNE,SLT,DNB-realartmaine-character, piece, fillin";
 IMAGE_LABELS[340] =
-  "muul, catch, pyle, lerk-TMS,SFL,PTG,BNE,OHK,SLT-realartmaine-tags";
+  "muul, catch, pyle, lerk-FNL,TMS,SFL,PTG,BNE,OHK,SLT-realartmaine-tags";
 IMAGE_LABELS[341] = "osha, port-PTG,IMS,OHK,SLT-realartmaine-tags";
 IMAGE_LABELS[342] = "pout-realartmaine-tags, character";
 IMAGE_LABELS[343] = "catch-PTG-realartmaine-straightletter";
@@ -417,10 +417,10 @@ IMAGE_LABELS[351] = "27-TSZ,2GF-chagrinedminnow-stencil";
 IMAGE_LABELS[352] = "27-TSZ,2GF-chagrinedminnow-stencil";
 IMAGE_LABELS[353] = "27-TSZ,2GF-chagrinedminnow-stencil";
 IMAGE_LABELS[354] = "27-TSZ,2GF-chagrinedminnow-stencil";
-IMAGE_LABELS[355] = "ichabod-YME,CIRCLET,SFL-chagrindedminnow-piece, character";
+IMAGE_LABELS[355] = "ichabod-YME,CIRCLET,SFL-chagrinedminnow-piece, character";
 IMAGE_LABELS[356] = "27-TSZ,2GF-chagrinedminnow-stencil";
 IMAGE_LABELS[357] = "petco-5G,ICBM-chagrinedminnow-tag";
-IMAGE_LABELS[358] = "rune-LTG,2K69-chagrinedminnow-tag";
+IMAGE_LABELS[358] = "rune-LTB,2K69-chagrinedminnow-tag";
 IMAGE_LABELS[359] =
   "wake, slept, 27, tabz, pyle, frog, wrong-LTB,TSZ,2GF,BNE,PTG,OHK,KYS,WKT-chagrinedminnow-tags, stencil";
 IMAGE_LABELS[360] = "27-TSZ,2GF-chagrinedminnow-stencil";
@@ -554,7 +554,7 @@ IMAGE_LABELS[461] = "tears-HEX-realartmaine-straightletter";
 IMAGE_LABELS[462] = "ojea3, enzyme, tubby-HEX,OY!,DPW-realartmaine-tags";
 IMAGE_LABELS[463] = "enzyme, ojea3-HEX,OY!,DPW-realartmaine-tags";
 IMAGE_LABELS[464] = "racket-SFL,TMS,DPW-realartmaine-tags";
-IMAGE_LABELS[465] = "muul, aura, ohboy, tubby-OHK-realartmaine-tags";
+IMAGE_LABELS[465] = "muul, aura, ohboy, tubby-FNL,OHK-realartmaine-tags";
 IMAGE_LABELS[466] =
   "doves, neone-SLT,CFM-realartmaine-throwie, fillin, straightletter";
 IMAGE_LABELS[467] = "catch-OHK,PTG,BNE,SLT-realartmaine-straightletter";
@@ -691,7 +691,7 @@ IMAGE_LABELS[580] = "marcy-HEX-realartmaine-tags";
 IMAGE_LABELS[581] = "grazi, ojea3-DWT,HEX,OY!-realartmaine-tags";
 IMAGE_LABELS[582] = "27-TSZ-chagrinedminnow-stencil";
 IMAGE_LABELS[583] = "deepbreath, grazi-DWT-realartmaine-tags";
-IMAGE_LABELS[584] = "ichabod-YME,CICLET-ZPLK-tags, moniker, character";
+IMAGE_LABELS[584] = "ichabod-YME,CIRCLET-ZPLK-tags, moniker, character";
 IMAGE_LABELS[585] = "catch-BNE,PTG,OHK,SLT-realartmaine-throwie, fillin";
 IMAGE_LABELS[586] = "merlin-CTS,TNL,SK8-realartmaine-tags, antistyle";
 IMAGE_LABELS[587] = "lastsupper-realartmaine-tags, antistyle";
