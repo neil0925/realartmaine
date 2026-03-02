@@ -767,12 +767,10 @@ IMAGE_LABELS[649] = "ankle-LTB,2K69-thesaltysardine9-straightletter, frieghts";
 IMAGE_LABELS[650] = "plolite, ekiper-FSH,KFA-thesaltysardine9-piece, paintroller";
 IMAGE_LABELS[651] = "kusch, esko-5G,TMS,IMS-thesaltysardine9-straightletter";
 IMAGE_LABELS[652] = "uewrp-PSH-thesaltysardine9-piece";
-IMAGE_LABELS[653] = 
-  "27, ojea3, spiral, plato, grazi, loupe, lazy, crone-RTH,FL,HEX,DWT,OY!,TSZ,2GF,5G,AMP-realartmaine-tags, stickers";
+IMAGE_LABELS[653] = "27, ojea3, spiral, plato, grazi, loupe, lazy, crone-RTH,FL,HEX,DWT,OY!,TSZ,2GF,5G,AMP-realartmaine-tags, stickers";
 IMAGE_LABELS[654] = "flea, solar, tabz, grazi, mayo, unidentified-TLC,DNB,2GF,DWT-realartmaine-tags";
 IMAGE_LABELS[655] = "argo-realartmaine-tags";
-IMAGE_LABELS[656] = 
-  "EZPZ, same, dyms, flea, wake, kost, refer, enzyme-SLT,TVT,CFM,LTB,OHK,BNE,DPW,DNB-realartmaine-straightletter";
+IMAGE_LABELS[656] = "EZPZ, same, dyms, flea, wake, kost, refer, enzyme-SLT,TVT,CFM,LTB,OHK,BNE,DPW,DNB-realartmaine-straightletter";
 IMAGE_LABELS[657] = "rezindue-realartmaine-throwie, fillin";
 IMAGE_LABELS[658] = "rezindue-realartmaine-tags";
 IMAGE_LABELS[659] = "flea-DNB-realartmaine-tags";
@@ -784,8 +782,7 @@ IMAGE_LABELS[664] = "dyms, same, kost-SLT,TVT,CFM,OHK,BNE-realartmaine-tags";
 IMAGE_LABELS[665] = "flea-DNB-realartmaine-throwie, fillin";
 IMAGE_LABELS[666] = "enzyme-DPW-realartmaine-tags";
 IMAGE_LABELS[667] = "dyms, same-SLT,CFM,TVT-realartmaine-straightletter";
-IMAGE_LABELS[668] = 
-  "munch, dyms, about, user, flea-5G,DNB,CFM,SLT-realartmaine-throwie, fillin";
+IMAGE_LABELS[668] = "munch, dyms, about, user, flea-5G,DNB,CFM,SLT-realartmaine-throwie, fillin";
 IMAGE_LABELS[669] = "wilt-2K69,VC-realartmaine-tags, antistyle";
 IMAGE_LABELS[670] = "merlin-CTS,TNL,SK8-realartmaine-tags, antistyle";
 IMAGE_LABELS[671] = "segway-FTS-realartmaine-tags";
