@@ -767,9 +767,32 @@ IMAGE_LABELS[649] = "ankle-LTB,2K69-thesaltysardine9-straightletter, frieghts";
 IMAGE_LABELS[650] = "plolite, ekiper-FSH,KFA-thesaltysardine9-piece, paintroller";
 IMAGE_LABELS[651] = "kusch, esko-5G,TMS,IMS-thesaltysardine9-straightletter";
 IMAGE_LABELS[652] = "uewrp-PSH-thesaltysardine9-piece";
+IMAGE_LABELS[653] = "";
+IMAGE_LABELS[654] = "";
+IMAGE_LABELS[655] = "";
+IMAGE_LABELS[656] = "";
+IMAGE_LABELS[657] = "";
+IMAGE_LABELS[658] = "";
+IMAGE_LABELS[659] = "";
+IMAGE_LABELS[660] = "";
+IMAGE_LABELS[661] = "";
+IMAGE_LABELS[662] = "";
+IMAGE_LABELS[663] = "SLT-SLT-realartmaine-throwie, fillin";
+IMAGE_LABELS[664] = "";
+IMAGE_LABELS[665] = "";
+IMAGE_LABELS[666] = "";
+IMAGE_LABELS[667] = "";
+IMAGE_LABELS[668] = "";
+IMAGE_LABELS[669] = "";
+IMAGE_LABELS[670] = "";
+IMAGE_LABELS[671] = "";
+IMAGE_LABELS[672] = "";
+IMAGE_LABELS[673] = "";
+IMAGE_LABELS[674] = "";
+
 function getLabelForIndex(index) {
   if (!index || index < 1) return "";
-  return IMAGE_LABELS[index] || "";
+  return String(IMAGE_LABELS[index] || "").trim();
 }
 const metaList = (function () {
   const list = [];
@@ -779,7 +802,8 @@ const metaList = (function () {
       : 0;
   for (let idx = 0; idx < total; idx++) {
     const index = idx + 1;
-    const label = IMAGE_LABELS[index] || "";
+    const label = String(IMAGE_LABELS[index] || "").trim();
+    if (!label) continue;
     const nameNoExt = label || String(index);
     const exts = [".jpg", ".JPG", ".jpeg", ".JPEG"];
     const numericSrc = `/assets/images/${index}${exts[0]}`;
