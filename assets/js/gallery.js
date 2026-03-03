@@ -788,6 +788,8 @@ IMAGE_LABELS[671] = "segway-FTS-realartmaine-tags";
 IMAGE_LABELS[672] = "neptune, segway-DNB,TSZ,FTS-realartmaine-tags";
 IMAGE_LABELS[673] = "BD-VC-realartmaine-throwie, fillin";
 IMAGE_LABELS[674] = "solar, flea-DNB-realartmaine-tags";
+IMAGE_LABELS[675] = "gask-PTG-americanaccents-piece";
+IMAGE_LABELS[676] = "gask-PTG-americanaccents-piece";
 
 function getLabelForIndex(index) {
   if (!index || index < 1) return "";
