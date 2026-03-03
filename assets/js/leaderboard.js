@@ -22,11 +22,11 @@ const VIEW_DEFS = {
     countLabel: "Flicks they were shown in",
     empty: "No crews found.",
   },
-  styles: {
-    option: "Styles",
-    nameLabel: "Style",
+  names: {
+    option: "Names",
+    nameLabel: "Name",
     countLabel: "Flicks they were shown in",
-    empty: "No styles found.",
+    empty: "No names found.",
   },
 };
 
@@ -154,7 +154,7 @@ function collectLabels() {
 function buildLeaderboards(labels, debugMode) {
   const flickers = new Map();
   const crews = new Map();
-  const styles = new Map();
+  const names = new Map();
 
   labels.forEach((label) => {
     const parsed = parseLabelSegments(label);
@@ -166,14 +166,14 @@ function buildLeaderboards(labels, debugMode) {
     const crewValues = splitCommaValues(parsed.crewSegment);
     if (crewValues.length) incrementUniquePerEntry(crews, crewValues);
 
-    const styleValues = splitCommaValues(parsed.styleSegment);
-    if (styleValues.length) incrementUniquePerEntry(styles, styleValues);
+    const nameValues = splitCommaValues(parsed.styleSegment);
+    if (nameValues.length) incrementUniquePerEntry(names, nameValues);
   });
 
   return {
     flickers: sortLeaderboard(flickers),
     crews: sortLeaderboard(crews),
-    styles: sortLeaderboard(styles),
+    names: sortLeaderboard(names),
   };
 }
 
@@ -238,7 +238,7 @@ function renderLeaderboard(root, boardData, activeView, debugMode) {
       <select id="leaderboardViewSelect" aria-label="Leaderboard view" title="Leaderboard view">
         <option value="flickers">${VIEW_DEFS.flickers.option}</option>
         <option value="crews">${VIEW_DEFS.crews.option}</option>
-        <option value="styles">${VIEW_DEFS.styles.option}</option>
+        <option value="names">${VIEW_DEFS.names.option}</option>
       </select>
     </div>
   `;
