@@ -396,6 +396,7 @@ function getRowsForView(boardDataBySource, source, view) {
   };
   const rows = Array.isArray(bySource[vw]) ? bySource[vw].slice() : [];
   if (vw === "crews") return rows.slice(0, 10);
+  if (vw === "tags") return rows.slice(0, 25);
   return rows;
 }
 
