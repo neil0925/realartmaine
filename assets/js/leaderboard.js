@@ -6,9 +6,12 @@ function escapeHtml(value) {
 }
 
 const LEADERBOARD_VIEW_KEY = "ram_leaderboard_view_v1";
+const LEADERBOARD_SOURCE_KEY = "ram_leaderboard_source_v1";
 const SAVE_LAST_LEADERBOARD_PREF_KEY = "ram_save_last_leaderboard_enabled_v1";
 const LEADERBOARD_VIEW_PARAM = "view";
+const LEADERBOARD_SOURCE_PARAM = "source";
 const DEFAULT_LEADERBOARD_VIEW = "flickers";
+const DEFAULT_LEADERBOARD_SOURCE = "gallery";
 const LEADERBOARD_FALLBACK_SYNONYM_GROUPS = [
   [
     "throwie",
@@ -55,14 +58,24 @@ const VIEW_DEFS = {
   crews: {
     option: "Crews",
     nameLabel: "Crew",
-    countLabel: "Flicks they were shown in",
+    countLabel: "Flicks they are in",
     empty: "No crews found.",
   },
   tags: {
     option: "Tags",
     nameLabel: "Tag",
-    countLabel: "Flicks they were shown in",
+    countLabel: "Flicks they are in",
     empty: "No tags found.",
+  },
+};
+const SOURCE_DEFS = {
+  gallery: {
+    option: "Gallery",
+    searchPath: "/Gallery/",
+  },
+  freights: {
+    option: "Freights",
+    searchPath: "/Freights/",
   },
 };
 
@@ -71,8 +84,18 @@ function normalizeViewKey(view) {
   return view;
 }
 
+function normalizeSourceKey(source) {
+  const key = String(source || "").trim().toLowerCase();
+  if (key === "freight") return "freights";
+  return key;
+}
+
 function isValidView(view) {
   return !!view && Object.prototype.hasOwnProperty.call(VIEW_DEFS, view);
+}
+
+function isValidSource(source) {
+  return !!source && Object.prototype.hasOwnProperty.call(SOURCE_DEFS, source);
 }
 
 function normalizeText(value) {
@@ -120,25 +143,63 @@ function splitCommaValues(segment) {
     .filter(Boolean);
 }
 
+function isYesNoFlagToken(token) {
+  const normalized = String(token || "").trim().toLowerCase();
+  return (
+    normalized === "y" ||
+    normalized === "n" ||
+    normalized === "yes" ||
+    normalized === "no" ||
+    normalized === "true" ||
+    normalized === "false" ||
+    normalized === "1" ||
+    normalized === "0"
+  );
+}
+
 function parseLabelSegments(label) {
   const parts = String(label || "")
     .split("-")
     .map((part) => normalizeText(part))
     .filter(Boolean);
   if (parts.length < 3) return null;
-  if (parts.length >= 4) {
+
+  let coreParts = parts.slice();
+  if (coreParts.length >= 6) {
+    const tail = coreParts.slice(-3);
+    if (tail.every(isYesNoFlagToken)) {
+      coreParts = coreParts.slice(0, -3);
+    }
+  }
+
+  if (coreParts.length < 3) return null;
+
+  const stylesSegment = coreParts.pop() || "";
+  const components = coreParts;
+
+  if (components.length === 2) {
     return {
-      tagNameSegment: parts[0],
-      crewSegment: parts[1],
-      flickerSegment: parts[2],
-      tagSegment: parts.slice(3).join("-"),
+      tagNameSegment: components[0],
+      crewSegment: "",
+      flickerSegment: components[1],
+      stylesSegment,
     };
   }
+
+  if (components.length === 3) {
+    return {
+      tagNameSegment: components[0],
+      crewSegment: components[1],
+      flickerSegment: components[2],
+      stylesSegment,
+    };
+  }
+
   return {
-    tagNameSegment: parts[0],
-    crewSegment: "",
-    flickerSegment: parts[1],
-    tagSegment: parts.slice(2).join("-"),
+    tagNameSegment: components[0] || "",
+    crewSegment: components.slice(1, components.length - 1).join("-"),
+    flickerSegment: components[components.length - 1] || "",
+    stylesSegment,
   };
 }
 
@@ -187,16 +248,35 @@ function pickFlicker(segment, debugMode) {
   return "";
 }
 
-function sortLeaderboard(map) {
+function sortLeaderboard(map, limit) {
+  const max = Number.isFinite(limit) ? Math.max(1, limit) : 200;
   return Array.from(map.values())
     .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name))
-    .slice(0, 200);
+    .slice(0, max);
 }
 
-function collectLabels() {
+function collectFromLabelArray(labelArray) {
+  const out = [];
+  if (!Array.isArray(labelArray)) return out;
+  for (let i = 1; i < labelArray.length; i += 1) {
+    const label = normalizeText(labelArray[i]);
+    if (label) out.push(label);
+  }
+  return out;
+}
+
+function collectLabelsForSource(source) {
+  const key = normalizeSourceKey(source);
+
+  if (key === "freights") {
+    const freightLabels =
+      typeof FREIGHT_LABELS !== "undefined"
+        ? FREIGHT_LABELS
+        : window.FREIGHT_LABELS || null;
+    return collectFromLabelArray(freightLabels);
+  }
+
   const labels = [];
-  const globalMetaList =
-    typeof metaList !== "undefined" ? metaList : window.metaList || null;
   const globalImageLabels =
     typeof IMAGE_LABELS !== "undefined"
       ? IMAGE_LABELS
@@ -206,24 +286,8 @@ function collectLabels() {
       ? VIDEO_LABELS
       : window.VIDEO_LABELS || null;
 
-  if (globalMetaList && Array.isArray(globalMetaList)) {
-    globalMetaList.forEach((item) => {
-      const label = normalizeText(item && item.label);
-      if (label) labels.push(label);
-    });
-  } else if (globalImageLabels && Array.isArray(globalImageLabels)) {
-    for (let i = 1; i < globalImageLabels.length; i += 1) {
-      const label = normalizeText(globalImageLabels[i]);
-      if (label) labels.push(label);
-    }
-  }
-
-  if (globalVideoLabels && Array.isArray(globalVideoLabels)) {
-    for (let i = 1; i < globalVideoLabels.length; i += 1) {
-      const label = normalizeText(globalVideoLabels[i]);
-      if (label) labels.push(label);
-    }
-  }
+  collectFromLabelArray(globalImageLabels).forEach((label) => labels.push(label));
+  collectFromLabelArray(globalVideoLabels).forEach((label) => labels.push(label));
 
   return labels;
 }
@@ -248,9 +312,9 @@ function buildLeaderboards(labels, debugMode) {
   });
 
   return {
-    flickers: sortLeaderboard(flickers),
-    crews: sortLeaderboard(crews),
-    tags: sortLeaderboard(tags),
+    flickers: sortLeaderboard(flickers, 200),
+    crews: sortLeaderboard(crews, 200),
+    tags: sortLeaderboard(tags, 200),
   };
 }
 
@@ -270,6 +334,22 @@ function saveView(view) {
   } catch (e) {}
 }
 
+function readSavedSource() {
+  try {
+    const saved = localStorage.getItem(LEADERBOARD_SOURCE_KEY);
+    const normalized = normalizeSourceKey(saved);
+    return isValidSource(normalized) ? normalized : "";
+  } catch (e) {
+    return "";
+  }
+}
+
+function saveSource(source) {
+  try {
+    localStorage.setItem(LEADERBOARD_SOURCE_KEY, source);
+  } catch (e) {}
+}
+
 function getSaveLastLeaderboardSetting() {
   try {
     const raw = localStorage.getItem(SAVE_LAST_LEADERBOARD_PREF_KEY);
@@ -280,24 +360,25 @@ function getSaveLastLeaderboardSetting() {
   }
 }
 
-function readViewFromUrl() {
+function readStateFromUrl() {
   try {
     const params = new URLSearchParams(window.location.search);
     const view = normalizeViewKey(params.get(LEADERBOARD_VIEW_PARAM));
-    return isValidView(view) ? view : "";
+    const source = normalizeSourceKey(params.get(LEADERBOARD_SOURCE_PARAM));
+    return {
+      view: isValidView(view) ? view : "",
+      source: isValidSource(source) ? source : "",
+    };
   } catch (e) {
-    return "";
+    return { view: "", source: "" };
   }
 }
 
-function writeViewToUrl(view) {
+function cleanupLeaderboardParams() {
   try {
     const url = new URL(window.location.href);
-    if (view === DEFAULT_LEADERBOARD_VIEW) {
-      url.searchParams.delete(LEADERBOARD_VIEW_PARAM);
-    } else {
-      url.searchParams.set(LEADERBOARD_VIEW_PARAM, view);
-    }
+    url.searchParams.delete(LEADERBOARD_VIEW_PARAM);
+    url.searchParams.delete(LEADERBOARD_SOURCE_PARAM);
     const query = url.searchParams.toString();
     const next =
       url.pathname + (query ? "?" + query : "") + (url.hash ? url.hash : "");
@@ -305,13 +386,36 @@ function writeViewToUrl(view) {
   } catch (e) {}
 }
 
-function renderLeaderboard(root, boardData, activeView, debugMode) {
+function getRowsForView(boardDataBySource, source, view) {
+  const src = isValidSource(source) ? source : DEFAULT_LEADERBOARD_SOURCE;
+  const vw = isValidView(view) ? view : DEFAULT_LEADERBOARD_VIEW;
+  const bySource = boardDataBySource[src] || {
+    flickers: [],
+    crews: [],
+    tags: [],
+  };
+  const rows = Array.isArray(bySource[vw]) ? bySource[vw].slice() : [];
+  if (vw === "crews") return rows.slice(0, 10);
+  return rows;
+}
+
+function renderLeaderboard(root, boardDataBySource, activeSource, activeView, debugMode) {
+  const source = isValidSource(activeSource)
+    ? activeSource
+    : DEFAULT_LEADERBOARD_SOURCE;
   const view = isValidView(activeView) ? activeView : DEFAULT_LEADERBOARD_VIEW;
-  const def = VIEW_DEFS[view];
-  const rows = boardData[view] || [];
+  const sourceDef = SOURCE_DEFS[source];
+  const viewDef = VIEW_DEFS[view];
+  const rows = getRowsForView(boardDataBySource, source, view);
 
   let html = "<h1>Leaderboard</h1>";
   html += `
+    <div class="leaderboard-controls search-bar">
+      <select id="leaderboardSourceSelect" aria-label="Leaderboard source" title="Leaderboard source">
+        <option value="gallery">${SOURCE_DEFS.gallery.option}</option>
+        <option value="freights">${SOURCE_DEFS.freights.option}</option>
+      </select>
+    </div>
     <div class="leaderboard-controls search-bar">
       <select id="leaderboardViewSelect" aria-label="Leaderboard view" title="Leaderboard view">
         <option value="flickers">${VIEW_DEFS.flickers.option}</option>
@@ -326,10 +430,12 @@ function renderLeaderboard(root, boardData, activeView, debugMode) {
   }
 
   if (!rows.length) {
-    html += `<p>${escapeHtml(def.empty)}</p>`;
+    html += `<p>${escapeHtml(viewDef.empty)}</p>`;
     root.innerHTML = html;
-    const emptySelect = document.getElementById("leaderboardViewSelect");
-    if (emptySelect) emptySelect.value = view;
+    const sourceSelect = document.getElementById("leaderboardSourceSelect");
+    const viewSelect = document.getElementById("leaderboardViewSelect");
+    if (sourceSelect) sourceSelect.value = source;
+    if (viewSelect) viewSelect.value = view;
     return;
   }
 
@@ -339,26 +445,27 @@ function renderLeaderboard(root, boardData, activeView, debugMode) {
         <thead>
           <tr>
             <th class="rank-col">#</th>
-            <th class="photog-col">${escapeHtml(def.nameLabel)}</th>
-            <th class="count-col">${escapeHtml(def.countLabel)}</th>
+            <th class="photog-col">${escapeHtml(viewDef.nameLabel)}</th>
+            <th class="count-col">${escapeHtml(viewDef.countLabel)}</th>
           </tr>
         </thead>
         <tbody>
   `;
 
   rows.forEach((row, index) => {
-    const gallerySearchHref = `/Gallery/?search=${encodeURIComponent(row.name)}`;
-    const rowNameEscaped = escapeHtml(row.name);
+    const nameEscaped = escapeHtml(row.name);
+    const targetHref =
+      sourceDef.searchPath + "?search=" + encodeURIComponent(row.name);
     html += `
       <tr>
         <td class="rank-col">${index + 1}</td>
         <td class="photog-col">
           <a
             class="leaderboard-link"
-            href="${gallerySearchHref}"
-            aria-label="Search gallery for ${rowNameEscaped}"
-            title="Search gallery for ${rowNameEscaped}"
-          >${rowNameEscaped}</a>
+            href="${targetHref}"
+            aria-label="Search ${escapeHtml(sourceDef.option)} for ${nameEscaped}"
+            title="Search ${escapeHtml(sourceDef.option)} for ${nameEscaped}"
+          >${nameEscaped}</a>
         </td>
         <td class="count-col">${row.count}</td>
       </tr>
@@ -372,49 +479,83 @@ function renderLeaderboard(root, boardData, activeView, debugMode) {
   `;
 
   root.innerHTML = html;
-  const select = document.getElementById("leaderboardViewSelect");
-  if (select) select.value = view;
+  const sourceSelect = document.getElementById("leaderboardSourceSelect");
+  const viewSelect = document.getElementById("leaderboardViewSelect");
+  if (sourceSelect) sourceSelect.value = source;
+  if (viewSelect) viewSelect.value = view;
 }
 
 document.addEventListener("DOMContentLoaded", function () {
   const out = document.getElementById("leaderboard");
   if (!out) return;
 
-  const debugMode =
-    new URLSearchParams(window.location.search).get("debug") === "true";
-  const labels = collectLabels();
-  const boardData = buildLeaderboards(labels, debugMode);
+  let debugMode = false;
+  try {
+    debugMode = new URLSearchParams(window.location.search).get("debug") === "true";
+  } catch (e) {
+    debugMode = false;
+  }
+
+  const boardDataBySource = {
+    gallery: buildLeaderboards(collectLabelsForSource("gallery"), debugMode),
+    freights: buildLeaderboards(collectLabelsForSource("freights"), debugMode),
+  };
+
   const saveLastEnabled = getSaveLastLeaderboardSetting();
+  const fromUrl = readStateFromUrl();
+
+  let currentSource =
+    fromUrl.source ||
+    (saveLastEnabled ? readSavedSource() : "") ||
+    DEFAULT_LEADERBOARD_SOURCE;
   let currentView =
-    readViewFromUrl() ||
+    fromUrl.view ||
     (saveLastEnabled ? readSavedView() : "") ||
     DEFAULT_LEADERBOARD_VIEW;
 
+  if (!isValidSource(currentSource)) currentSource = DEFAULT_LEADERBOARD_SOURCE;
   if (!isValidView(currentView)) currentView = DEFAULT_LEADERBOARD_VIEW;
-  if (saveLastEnabled) saveView(currentView);
-  writeViewToUrl(currentView);
 
-  function refresh(nextView) {
-    const normalizedView = normalizeViewKey(nextView);
-    const view = isValidView(normalizedView)
-      ? normalizedView
-      : DEFAULT_LEADERBOARD_VIEW;
-    currentView = view;
-    if (getSaveLastLeaderboardSetting()) saveView(currentView);
-    writeViewToUrl(currentView);
-    renderLeaderboard(out, boardData, currentView, debugMode);
-    const select = document.getElementById("leaderboardViewSelect");
-    if (!select) return;
-    select.addEventListener("change", function () {
-      refresh(select.value);
-    });
+  cleanupLeaderboardParams();
+
+  if (saveLastEnabled) {
+    saveSource(currentSource);
+    saveView(currentView);
   }
 
-  refresh(currentView);
+  function refresh(nextSource, nextView) {
+    const source = isValidSource(normalizeSourceKey(nextSource))
+      ? normalizeSourceKey(nextSource)
+      : currentSource;
+    const view = isValidView(normalizeViewKey(nextView))
+      ? normalizeViewKey(nextView)
+      : currentView;
 
-  window.addEventListener("popstate", function () {
-    const fromUrl = readViewFromUrl() || DEFAULT_LEADERBOARD_VIEW;
-    if (fromUrl === currentView) return;
-    refresh(fromUrl);
-  });
+    currentSource = source;
+    currentView = view;
+
+    if (getSaveLastLeaderboardSetting()) {
+      saveSource(currentSource);
+      saveView(currentView);
+    }
+
+    renderLeaderboard(out, boardDataBySource, currentSource, currentView, debugMode);
+
+    const sourceSelect = document.getElementById("leaderboardSourceSelect");
+    const viewSelect = document.getElementById("leaderboardViewSelect");
+
+    if (sourceSelect) {
+      sourceSelect.addEventListener("change", function () {
+        refresh(sourceSelect.value, currentView);
+      });
+    }
+
+    if (viewSelect) {
+      viewSelect.addEventListener("change", function () {
+        refresh(currentSource, viewSelect.value);
+      });
+    }
+  }
+
+  refresh(currentSource, currentView);
 });

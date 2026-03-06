@@ -903,6 +903,7 @@ function tokensForSrc(src) {
 const gallery = document.getElementById("galleryContainer");
 const searchInput = document.getElementById("searchInput");
 const sortSelect = document.getElementById("sortSelect");
+const freightAllToggle = document.getElementById("freightAllToggle");
 const freightMaineToggle = document.getElementById("freightMaineToggle");
 const freightMaineWritersToggle = document.getElementById(
   "freightMaineWritersToggle",
@@ -911,6 +912,7 @@ const freightOutStateWritersToggle = document.getElementById(
   "freightOutStateWritersToggle",
 );
 const freightFilterMenu = document.getElementById("freightFilterMenu");
+const FREIGHT_FILTERS_KEY = "ram_freight_filters_v1";
 const SORT_KEY = "gallerySort";
 let currentSort = "newest";
 try {
@@ -2113,8 +2115,73 @@ function loadImageIntoCard(meta, card, wrap, placeholder, expectedLoadId) {
     tryNext();
   });
 }
-function getActiveFreightFilters() {
+function normalizeFreightFiltersState(raw) {
+  const state = {
+    all: !!(raw && raw.all),
+    maineFreight: !!(raw && raw.maineFreight),
+    maineWriters: !!(raw && raw.maineWriters),
+    outOfStateWriters: !!(raw && raw.outOfStateWriters),
+  };
+  if (!state.all && !state.maineFreight && !state.maineWriters && !state.outOfStateWriters) {
+    state.all = true;
+  }
+  if (state.all) {
+    state.maineFreight = false;
+    state.maineWriters = false;
+    state.outOfStateWriters = false;
+  }
+  return state;
+}
+function readSavedFreightFilters() {
+  const fallback = normalizeFreightFiltersState({
+    all: true,
+    maineFreight: false,
+    maineWriters: false,
+    outOfStateWriters: false,
+  });
+  try {
+    const raw = localStorage.getItem(FREIGHT_FILTERS_KEY);
+    if (!raw) return fallback;
+    const parsed = JSON.parse(raw);
+    return normalizeFreightFiltersState(parsed);
+  } catch (e) {
+    return fallback;
+  }
+}
+function saveFreightFilters(state) {
+  try {
+    localStorage.setItem(
+      FREIGHT_FILTERS_KEY,
+      JSON.stringify(normalizeFreightFiltersState(state)),
+    );
+  } catch (e) {}
+}
+function applyFreightFiltersToUI(state) {
+  const normalized = normalizeFreightFiltersState(state);
+  if (freightAllToggle) freightAllToggle.checked = normalized.all;
+  if (freightMaineToggle) freightMaineToggle.checked = normalized.maineFreight;
+  if (freightMaineWritersToggle)
+    freightMaineWritersToggle.checked = normalized.maineWriters;
+  if (freightOutStateWritersToggle)
+    freightOutStateWritersToggle.checked = normalized.outOfStateWriters;
+  [
+    freightMaineToggle,
+    freightMaineWritersToggle,
+    freightOutStateWritersToggle,
+  ].forEach((toggle) => {
+    if (!toggle) return;
+    toggle.disabled = false;
+    const label = toggle.closest("label");
+    if (label) label.classList.remove("is-disabled");
+  });
+}
+function getFreightFiltersFromUI() {
   return {
+    all: !!(
+      freightAllToggle &&
+      typeof freightAllToggle.checked === "boolean" &&
+      freightAllToggle.checked
+    ),
     maineFreight: !!(
       freightMaineToggle &&
       typeof freightMaineToggle.checked === "boolean" &&
@@ -2132,9 +2199,63 @@ function getActiveFreightFilters() {
     ),
   };
 }
+function enforceFreightFilterRules(changedKey) {
+  const current = getFreightFiltersFromUI();
+  const next = {
+    all: current.all,
+    maineFreight: current.maineFreight,
+    maineWriters: current.maineWriters,
+    outOfStateWriters: current.outOfStateWriters,
+  };
+  if (changedKey === "all") {
+    if (next.all) {
+      next.maineFreight = false;
+      next.maineWriters = false;
+      next.outOfStateWriters = false;
+    } else if (!next.maineFreight && !next.maineWriters && !next.outOfStateWriters) {
+      next.all = true;
+    }
+  } else if (next.maineFreight || next.maineWriters || next.outOfStateWriters) {
+    next.all = false;
+  } else {
+    next.all = true;
+  }
+  const normalized = normalizeFreightFiltersState(next);
+  applyFreightFiltersToUI(normalized);
+  saveFreightFilters(normalized);
+  return normalized;
+}
+function initFreightFilters() {
+  if (!IS_FREIGHTS_PAGE) return;
+  applyFreightFiltersToUI(readSavedFreightFilters());
+
+  if (freightAllToggle) {
+    freightAllToggle.addEventListener("change", () => {
+      enforceFreightFilterRules("all");
+      const q = searchInput && searchInput.value ? searchInput.value : "";
+      filterGallery(q);
+    });
+  }
+  [
+    [freightMaineToggle, "maineFreight"],
+    [freightMaineWritersToggle, "maineWriters"],
+    [freightOutStateWritersToggle, "outOfStateWriters"],
+  ].forEach(([toggle, key]) => {
+    if (!toggle) return;
+    toggle.addEventListener("change", () => {
+      enforceFreightFilterRules(key);
+      const q = searchInput && searchInput.value ? searchInput.value : "";
+      filterGallery(q);
+    });
+  });
+}
+function getActiveFreightFilters() {
+  return normalizeFreightFiltersState(getFreightFiltersFromUI());
+}
 function matchesFreightFilters(meta, filters) {
   if (!IS_FREIGHTS_PAGE) return true;
-  const opts = filters || getActiveFreightFilters();
+  const opts = normalizeFreightFiltersState(filters || getActiveFreightFilters());
+  if (opts.all) return true;
   if (opts.maineFreight && meta.isMaineFreight !== true) return false;
   if (opts.maineWriters && meta.hasMaineWriters !== true) return false;
   if (opts.outOfStateWriters && meta.hasNonMaineWriters !== true) return false;
@@ -2194,17 +2315,6 @@ if (searchInput) {
   searchInput.addEventListener("input", (e) => filterGallery(e.target.value));
 }
 if (IS_FREIGHTS_PAGE) {
-  [
-    freightMaineToggle,
-    freightMaineWritersToggle,
-    freightOutStateWritersToggle,
-  ].forEach((toggle) => {
-    if (!toggle) return;
-    toggle.addEventListener("change", () => {
-      const q = searchInput && searchInput.value ? searchInput.value : "";
-      filterGallery(q);
-    });
-  });
   if (freightFilterMenu) {
     document.addEventListener("click", (ev) => {
       if (!freightFilterMenu.contains(ev.target)) {
@@ -2313,6 +2423,9 @@ document.addEventListener("DOMContentLoaded", () => {
       window.history.replaceState(null, "", cleaned);
     } catch (e) {}
   }
+  try {
+    initFreightFilters();
+  } catch (e) {}
   try {
     preCacheGuiAssets().catch(() => {});
   } catch (e) {}

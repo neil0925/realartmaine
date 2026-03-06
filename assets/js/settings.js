@@ -9,7 +9,7 @@
   const JUMP_TOP_HELP_TEXT =
     "Lets users jump to the top of a page with a button when scrolling up";
   const SAVE_LAST_LEADERBOARD_HELP_TEXT =
-    "Saves last leaderboard a user was on for the next time they visit the page instead of always bringing them to Top flickers by default";
+    "Saves last leaderboard source and filter for the next time they visit instead of always resetting to Gallery Top Flickers";
   const CHECK_ICON = (function () {
     const svg =
       "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path d='M3 8.6L6.2 11.6L13 4.6' fill='none' stroke='" +

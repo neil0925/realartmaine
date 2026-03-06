@@ -126,22 +126,52 @@
         display: none !important;
       }
       .freight-search-bar {
-        display: flex;
+        --freight-bar-shift: -52px;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(260px, 420px) minmax(
+            0,
+            1fr
+          );
         align-items: center;
-        justify-content: center;
-        gap: 10px;
-        flex-wrap: wrap;
+        column-gap: 10px;
+        row-gap: 10px;
+        width: 100%;
+        max-width: 100%;
+        margin: 20px 0;
       }
       .freight-search-bar #searchInput {
-        width: min(620px, 72vw);
+        grid-column: 2;
+        width: 100%;
+        min-width: 0;
+        max-width: 420px;
+        justify-self: center;
+        transform: translateX(var(--freight-bar-shift));
       }
       .freight-filter-dropdown {
         position: relative;
+        grid-column: 1;
+        justify-self: end;
+        transform: translateX(var(--freight-bar-shift));
+      }
+      .freight-search-bar #sortSelect,
+      .freight-filter-dropdown {
+        flex: 0 0 auto;
+      }
+      .freight-search-bar #sortSelect {
+        grid-column: 3;
+        justify-self: start;
+        margin-left: 0 !important;
+        transform: translateX(var(--freight-bar-shift));
       }
       .freight-filter-dropdown > summary {
         list-style: none;
         cursor: pointer;
-        padding: 8px 10px;
+        width: 38px;
+        height: 36px;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         border-radius: 6px;
         border: 1px solid rgba(48, 81, 61, 0.4);
         color: #30513d;
@@ -154,11 +184,27 @@
       .freight-filter-dropdown > summary::-webkit-details-marker {
         display: none;
       }
-      .freight-filter-dropdown > summary::after {
-        content: " \25BE";
+      .freight-filter-icon {
+        width: 16px;
+        display: inline-flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 3px;
       }
-      .freight-filter-dropdown[open] > summary::after {
-        content: " \25B4";
+      .freight-filter-icon span {
+        display: block;
+        height: 2px;
+        background: #30513d;
+        border-radius: 2px;
+      }
+      .freight-filter-icon span:nth-child(1) {
+        width: 16px;
+      }
+      .freight-filter-icon span:nth-child(2) {
+        width: 12px;
+      }
+      .freight-filter-icon span:nth-child(3) {
+        width: 8px;
       }
       .freight-filter-panel {
         position: absolute;
@@ -186,13 +232,55 @@
         gap: 8px;
         cursor: pointer;
       }
+      .freight-filter-panel input[type="checkbox"] {
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        margin: 0;
+        width: 16px;
+        height: 16px;
+        border-radius: 3px;
+        border: 1.5px solid #30513d;
+        background-color: transparent;
+        background-repeat: no-repeat;
+        background-position: center;
+        background-size: 12px 12px;
+        box-sizing: border-box;
+        outline: none;
+        cursor: pointer;
+        flex: 0 0 auto;
+      }
+      .freight-filter-panel input[type="checkbox"]:checked {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3 8.6L6.2 11.6L13 4.6' fill='none' stroke='%2330513d' stroke-width='2.1' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+      }
+      .freight-filter-panel input[type="checkbox"]:focus {
+        box-shadow: 0 0 0 2px rgba(48, 81, 61, 0.22);
+      }
       @media (max-width: 700px) {
         .freight-search-bar {
+          --freight-bar-shift: 0px;
+          width: 100%;
+          max-width: none;
+          margin-left: 0;
+          margin-right: 0;
+          padding: 0 10px;
+          margin-top: 20px;
+          margin-bottom: 20px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
           gap: 8px;
+          flex-wrap: wrap;
         }
         .freight-search-bar #searchInput {
           width: min(620px, 90vw);
           order: 2;
+        }
+        .freight-filter-dropdown {
+          order: 1;
+        }
+        .freight-search-bar #sortSelect {
+          order: 3;
         }
       }
     </style>
@@ -233,8 +321,18 @@
     <main style="flex: 1 1 auto">
       <div class="search-bar freight-search-bar">
         <details class="freight-filter-dropdown" id="freightFilterMenu">
-          <summary aria-label="Freight filters">Freight Filters</summary>
+          <summary aria-label="Freight filters" title="Freight filters">
+            <span class="freight-filter-icon" aria-hidden="true">
+              <span></span>
+              <span></span>
+              <span></span>
+            </span>
+          </summary>
           <div class="freight-filter-panel">
+            <label for="freightAllToggle">
+              <input type="checkbox" id="freightAllToggle" />
+              All
+            </label>
             <label for="freightMaineToggle">
               <input type="checkbox" id="freightMaineToggle" />
               Maine freights
@@ -254,6 +352,11 @@
           type="text"
           id="searchInput"
           placeholder="Search tags, crews, photographers, or styles..."
+          autocomplete="off"
+          autocorrect="off"
+          autocapitalize="off"
+          spellcheck="false"
+          inputmode="search"
         />
 
         <select

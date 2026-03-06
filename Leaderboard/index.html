@@ -47,7 +47,7 @@
       }
       .leaderboard .table-wrap {
         flex: 1 1 auto;
-        overflow: auto;
+        overflow: visible;
       }
       .leaderboard-table {
         width: 100%;
@@ -75,9 +75,15 @@
         text-align: left;
       }
       .count-col {
-        width: 160px;
-        text-align: right;
+        width: 1%;
+        white-space: nowrap;
         font-weight: 700;
+      }
+      .leaderboard-table thead th.count-col {
+        text-align: left;
+      }
+      .leaderboard-table tbody td.count-col {
+        text-align: right;
       }
     </style>
   </head>
