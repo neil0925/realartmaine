@@ -795,13 +795,13 @@ IMAGE_LABELS[676] = "gask-PTG-americanaccents-piece";
 /*example1:FREIGHT_LABELS[1] ="27-2GF,TSZ-realartmaine-piece-y-y-n";*/
 /*example2:FREIGHT_LABELS[2] ="27,mayo-2GF,TSZ-realartmaine-piece,throw-n-y-y";*/
 const FREIGHT_LABELS = [null];
-FREIGHT_LABELS[1] = "link-5G,CRAFT,AX,SDH-chagrinedminnow-tags";
-FREIGHT_LABELS[2] = "qjoe, cats, link-5G,CRAFT,UK,SDH,AX-realartmaine-straightletter, antistyle";
-FREIGHT_LABELS[3] = "ankle, spud, ne1-LTB,2K69-realartmaine-straightletter, fillin, throwie";
-FREIGHT_LABELS[4] = "doves-CFM,SLT-realartmaine-straightletter";
-FREIGHT_LABELS[5] = "muul, catch, lerk, pyle-FNL,BNE,SLT,PTG,OHK,TMS,SFL-realartmaine-tags";
-FREIGHT_LABELS[6] = "enya-5G-realartmaine-piece";
-FREIGHT_LABELS[7] = "ankle-LTB,2K69-thesaltysardine9-straightletter";
+FREIGHT_LABELS[1] = "link-5G,CRAFT,AX,SDH-chagrinedminnow-tags-n-y-n";
+FREIGHT_LABELS[2] = "qjoe, cats, link-5G,CRAFT,UK,SDH,AX-realartmaine-straightletter, antistyle-y-y-n";
+FREIGHT_LABELS[3] = "ankle, spud, ne1-LTB,2K69-realartmaine-straightletter, fillin, throwie-n-y-y";
+FREIGHT_LABELS[4] = "doves-CFM,SLT-realartmaine-straightletter-n-y-n";
+FREIGHT_LABELS[5] = "muul, catch, lerk, pyle-FNL,BNE,SLT,PTG,OHK,TMS,SFL-realartmaine-tags-n-y-y";
+FREIGHT_LABELS[6] = "enya-5G-realartmaine-piece-n-y-n";
+FREIGHT_LABELS[7] = "ankle-LTB,2K69-thesaltysardine9-straightletter-n-y-n";
 if (typeof window !== "undefined") {
   window.FREIGHT_LABELS = FREIGHT_LABELS;
 }
