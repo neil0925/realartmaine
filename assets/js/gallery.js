@@ -1,4 +1,14 @@
-const IMAGE_LABELS = [null];
+const IMAGE_LABELS = [null];  
+/* ________  ________  ___       ___       _______   ________      ___    ___ */
+/*|\   ____\|\   __  \|\  \     |\  \     |\  ___ \ |\   __  \    |\  \  /  /|*/
+/*\ \  \___|\ \  \|\  \ \  \    \ \  \    \ \   __/|\ \  \|\  \   \ \  \/  / /*/
+/* \ \  \  __\ \   __  \ \  \    \ \  \    \ \  \_|/_\ \   _  _\   \ \    / / */
+/*  \ \  \|\  \ \  \ \  \ \  \____\ \  \____\ \  \_|\ \ \  \\  \|   \/  /  /  */
+/*   \ \_______\ \__\ \__\ \_______\ \_______\ \_______\ \__\\ _\ __/  / /    */
+/*    \|_______|\|__|\|__|\|_______|\|_______|\|_______|\|__|\|__|\___/ /     */
+/*                                                               \|___|/      */
+/*                                                                            */ 
+/*                                                                            */
 IMAGE_LABELS[1] =
   "catch, link, wake, hugo-OHK,PTG,LTB,5G,SDh,CRAFT-realartmaine-throwie, tag";
 IMAGE_LABELS[2] = "same-SLT,TVT-realartmaine-tags";
@@ -795,6 +805,16 @@ IMAGE_LABELS[676] = "gask-PTG-americanaccents-piece";
 /*example1:FREIGHT_LABELS[1] ="27-2GF,TSZ-realartmaine-piece-y-y-n";*/
 /*example2:FREIGHT_LABELS[2] ="27,mayo-2GF,TSZ-realartmaine-piece,throw-n-y-y";*/
 const FREIGHT_LABELS = [null];
+/* ________ ________  _______   ___  ________  ___  ___  _________  ________      */
+/*|\  _____\\   __  \|\  ___ \ |\  \|\   ____\|\  \|\  \|\___   ___\\   ____\     */
+/*\ \  \__/\ \  \|\  \ \   __/|\ \  \ \  \___|\ \  \\\  \|___ \  \_\ \  \___|_    */
+/* \ \   __\\ \   _  _\ \  \_|/_\ \  \ \  \  __\ \   __  \   \ \  \ \ \_____  \   */
+/*  \ \  \_| \ \  \\  \\ \  \_|\ \ \  \ \  \|\  \ \  \ \  \   \ \  \ \|____|\  \  */
+/*   \ \__\   \ \__\\ _\\ \_______\ \__\ \_______\ \__\ \__\   \ \__\  ____\_\  \ */
+/*    \|__|    \|__|\|__|\|_______|\|__|\|_______|\|__|\|__|    \|__| |\_________\*/
+/*                                                                    \|_________|*/
+/*                                                                                */	
+/*                                                                                */
 FREIGHT_LABELS[1] = "link-5G,CRAFT,AX,SDH-chagrinedminnow-tags-n-y-n";
 FREIGHT_LABELS[2] = "qjoe, cats, link-5G,CRAFT,UK,SDH,AX-realartmaine-straightletter, antistyle-y-y-n";
 FREIGHT_LABELS[3] = "ankle, spud, ne1-LTB,2K69-realartmaine-straightletter, fillin, throwie-n-y-y";
