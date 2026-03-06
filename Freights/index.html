@@ -20,10 +20,11 @@
       gtag("js", new Date());
       gtag("config", "G-HZ2XXFNT02");
     </script>
-    <title>Real Art Maine | Home</title>
+    <title>Real Art Maine | Freights</title>
     <link rel="stylesheet" href="/assets/css/style.css" />
-
     <link rel="icon" href="/assets/logo.png" type="image/png" />
+  </head>
+  <body>
     <style>
       html,
       body {
@@ -66,7 +67,6 @@
       .nav-left {
         display: flex;
         gap: 14px;
-        align-items: center;
       }
       .nav-left a {
         color: #fff;
@@ -81,8 +81,10 @@
         font-size: 1.05rem;
         margin-left: 0;
       }
-      .settings-dropdown {
-        margin-left: 8px;
+      .right-group {
+        display: flex;
+        align-items: center;
+        gap: 10px;
       }
       .gear-box {
         flex: 0 0 32px;
@@ -94,11 +96,6 @@
         width: 22px;
         height: 22px;
         display: block;
-      }
-      .right-group {
-        display: flex;
-        align-items: center;
-        gap: 10px;
       }
       .gear-box {
         background: transparent;
@@ -128,19 +125,77 @@
       .nav-left a::after {
         display: none !important;
       }
-      .banner {
-        width: 100%;
-        overflow: hidden;
-        display: block;
+      .freight-search-bar {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        flex-wrap: wrap;
       }
-      .banner img {
-        width: 100%;
-        height: auto;
-        display: block;
+      .freight-search-bar #searchInput {
+        width: min(620px, 72vw);
+      }
+      .freight-filter-dropdown {
+        position: relative;
+      }
+      .freight-filter-dropdown > summary {
+        list-style: none;
+        cursor: pointer;
+        padding: 8px 10px;
+        border-radius: 6px;
+        border: 1px solid rgba(48, 81, 61, 0.4);
+        color: #30513d;
+        background-color: transparent;
+        background-image: url("/assets/GUI/tile.png");
+        background-repeat: repeat;
+        background-size: 400px 400px;
+        font-family: var(--ram-font8);
+      }
+      .freight-filter-dropdown > summary::-webkit-details-marker {
+        display: none;
+      }
+      .freight-filter-dropdown > summary::after {
+        content: " \25BE";
+      }
+      .freight-filter-dropdown[open] > summary::after {
+        content: " \25B4";
+      }
+      .freight-filter-panel {
+        position: absolute;
+        top: calc(100% + 8px);
+        left: 0;
+        min-width: 210px;
+        border-radius: 8px;
+        border: 1px solid rgba(48, 81, 61, 0.4);
+        background-image: url("/assets/GUI/tile.png");
+        background-repeat: repeat;
+        background-size: 400px 400px;
+        box-shadow: 0 10px 28px rgba(0, 0, 0, 0.2);
+        padding: 8px;
+        z-index: 2500;
+        color: #30513d;
+        font-family: var(--ram-font8);
+        font-size: 0.88rem;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .freight-filter-panel label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+      }
+      @media (max-width: 700px) {
+        .freight-search-bar {
+          gap: 8px;
+        }
+        .freight-search-bar #searchInput {
+          width: min(620px, 90vw);
+          order: 2;
+        }
       }
     </style>
-  </head>
-  <body>
     <nav>
       <div class="nav-left">
         <details class="nav-menu">
@@ -159,7 +214,6 @@
         <a href="/Freights/" aria-label="Freights">Freights</a>
         <a href="/Leaderboard/" aria-label="Leaderboard">Leaderboard</a>
       </div>
-
       <div class="right-group">
         <div class="settings-dropdown">
           <div class="gear-box">
@@ -172,42 +226,52 @@
           </div>
           <div class="dropdown-content" style="background: transparent"></div>
         </div>
-
         <div class="site-title">RealArtMaine</div>
       </div>
     </nav>
 
     <main style="flex: 1 1 auto">
-      <div class="banner" aria-hidden="true">
-        <img
-          src="/assets/GUI/realartmainebanner.png"
-          alt="Real Art Maine banner"
+      <div class="search-bar freight-search-bar">
+        <details class="freight-filter-dropdown" id="freightFilterMenu">
+          <summary aria-label="Freight filters">Freight Filters</summary>
+          <div class="freight-filter-panel">
+            <label for="freightMaineToggle">
+              <input type="checkbox" id="freightMaineToggle" />
+              Maine freights
+            </label>
+            <label for="freightMaineWritersToggle">
+              <input type="checkbox" id="freightMaineWritersToggle" />
+              Maine writers
+            </label>
+            <label for="freightOutStateWritersToggle">
+              <input type="checkbox" id="freightOutStateWritersToggle" />
+              Out of state writers
+            </label>
+          </div>
+        </details>
+
+        <input
+          type="text"
+          id="searchInput"
+          placeholder="Search tags, crews, photographers, or styles..."
         />
+
+        <select
+          id="sortSelect"
+          aria-label="Sort results"
+          title="Sort results"
+          style="margin-left: 0; padding: 8px; border-radius: 6px"
+        >
+          <option value="newest">Newest</option>
+          <option value="oldest">Oldest</option>
+        </select>
       </div>
-      <p class="home-intro">
-        <strong>Real Art Maine</strong> is dedicated to documenting graffiti and
-        street art throughout Maine.
-      </p>
-      <p class="home-intro">
-        Explore our gallery to see tags, crews, and styles captured by
-        photographers and artists from around the state.
-      </p>
+
+      <div class="gallery" id="galleryContainer"></div>
     </main>
 
-    <footer>
-      <hr />
-      <p>
-        Disclaimer: All street art featured on this site is the property of the
-        original artists. This website documents graffiti and street art for
-        educational, archival, and journalistic purposes only. We do not
-        condone, promote, or encourage illegal activity. All images are used for
-        commentary and documentation; no copyright infringement is intended. Any
-        commercial use of these images is prohibited without the express
-        permission of the original artist.
-      </p>
-    </footer>
-
     <script src="/assets/js/maintenance.js"></script>
+    <script src="/assets/js/gallery.js"></script>
     <script src="/assets/js/settings.js"></script>
     <script src="/assets/js/background.js"></script>
   </body>

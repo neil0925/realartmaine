@@ -791,23 +791,65 @@ IMAGE_LABELS[674] = "solar, flea-DNB-realartmaine-tags";
 IMAGE_LABELS[675] = "gask-PTG-americanaccents-piece";
 IMAGE_LABELS[676] = "gask-PTG-americanaccents-piece";
 
+/*
+FREIGHT LABEL CHEAT SHEET
+
+No crew format:
+  tags-photographer-styles-isMaineFreight-hasMaineWriters-hasNonMaineWriters
+
+With crew format:
+  tags-crew-photographer-styles-isMaineFreight-hasMaineWriters-hasNonMaineWriters
+
+Flags use y/n only, in this exact order:
+  1) isMaineFreight
+  2) hasMaineWriters
+  3) hasNonMaineWriters
+
+Example (no crew):
+  FREIGHT_LABELS[1] = "27,mayo-reallartmaine-piece-y-y-y";
+*/
+const FREIGHT_LABELS = [null];
+if (typeof window !== "undefined") {
+  window.FREIGHT_LABELS = FREIGHT_LABELS;
+}
+const PAGE_PATHNAME = String(window.location.pathname || "").toLowerCase();
+const IS_FREIGHTS_PAGE = PAGE_PATHNAME.includes("/freights");
+const ACTIVE_LABELS = IS_FREIGHTS_PAGE ? FREIGHT_LABELS : IMAGE_LABELS;
+const ACTIVE_IMAGE_ROOT = IS_FREIGHTS_PAGE
+  ? "/assets/Freights"
+  : "/assets/images";
+const ACTIVE_EXTENSIONS = IS_FREIGHTS_PAGE
+  ? [
+      ".jpg",
+      ".JPG",
+      ".jpeg",
+      ".JPEG",
+      ".png",
+      ".PNG",
+      ".gif",
+      ".GIF",
+      ".webp",
+      ".WEBP",
+    ]
+  : [".jpg", ".JPG", ".jpeg", ".JPEG"];
+
 function getLabelForIndex(index) {
   if (!index || index < 1) return "";
-  return String(IMAGE_LABELS[index] || "").trim();
+  return String(ACTIVE_LABELS[index] || "").trim();
 }
 const metaList = (function () {
   const list = [];
   const total =
-    typeof IMAGE_LABELS !== "undefined"
-      ? Math.max(0, IMAGE_LABELS.length - 1)
+    typeof ACTIVE_LABELS !== "undefined"
+      ? Math.max(0, ACTIVE_LABELS.length - 1)
       : 0;
   for (let idx = 0; idx < total; idx++) {
     const index = idx + 1;
-    const label = String(IMAGE_LABELS[index] || "").trim();
+    const label = String(ACTIVE_LABELS[index] || "").trim();
     if (!label) continue;
     const nameNoExt = label || String(index);
-    const exts = [".jpg", ".JPG", ".jpeg", ".JPEG"];
-    const numericSrc = `/assets/images/${index}${exts[0]}`;
+    const exts = ACTIVE_EXTENSIONS.slice();
+    const numericSrc = `${ACTIVE_IMAGE_ROOT}/${index}${exts[0]}`;
     const basename = `${index}${exts[0]}`;
     const orig = numericSrc;
     const tokens = (label || "")
@@ -816,7 +858,7 @@ const metaList = (function () {
       .toLowerCase()
       .split(/\s+/)
       .filter(Boolean);
-    const candidates = exts.map((e) => `/assets/images/${index}${e}`);
+    const candidates = exts.map((e) => `${ACTIVE_IMAGE_ROOT}/${index}${e}`);
     list.push({
       index,
       orig,
@@ -848,7 +890,7 @@ function getMetaForSrc(src) {
 function tokensForSrc(src) {
   const m = getMetaForSrc(src);
   if (m) return m.tokens;
-  const base = (src || "").replace(/^.*\/(assets\/images\/)?/i, "");
+  const base = String(src || "").split("/").pop() || "";
   const d = base.lastIndexOf(".");
   const name = d >= 0 ? base.slice(0, d) : base;
   return name
@@ -861,6 +903,14 @@ function tokensForSrc(src) {
 const gallery = document.getElementById("galleryContainer");
 const searchInput = document.getElementById("searchInput");
 const sortSelect = document.getElementById("sortSelect");
+const freightMaineToggle = document.getElementById("freightMaineToggle");
+const freightMaineWritersToggle = document.getElementById(
+  "freightMaineWritersToggle",
+);
+const freightOutStateWritersToggle = document.getElementById(
+  "freightOutStateWritersToggle",
+);
+const freightFilterMenu = document.getElementById("freightFilterMenu");
 const SORT_KEY = "gallerySort";
 let currentSort = "newest";
 try {
@@ -1242,24 +1292,55 @@ function buildMetaTokens(meta) {
   } catch (e) {}
   return tokens;
 }
-function parseFilename(filename) {
-  if (typeof metaBySrc !== "undefined" && metaBySrc[filename]) {
-    return metaBySrc[filename];
+function parseYNFlag(value) {
+  const norm = normToken(value);
+  if (norm === "y" || norm === "yes" || norm === "true" || norm === "1") {
+    return true;
   }
-  const base = filename
-    .split("/")
-    .pop()
-    .replace(/\.[^.]+$/, "");
-  const rawParts = base.split("-").map((p) => p.trim());
-  const stylesPart = rawParts.pop() || "";
-  const components = rawParts;
+  if (norm === "n" || norm === "no" || norm === "false" || norm === "0") {
+    return false;
+  }
+  return null;
+}
+function maybeExtractFreightFlags(parts) {
+  const flags = {
+    isMaineFreight: null,
+    hasMaineWriters: null,
+    hasNonMaineWriters: null,
+  };
+  const copy = Array.isArray(parts) ? parts.slice() : [];
+  if (copy.length < 6) {
+    return { parts: copy, flags };
+  }
+  const tail = copy.slice(-3).map(parseYNFlag);
+  if (tail.every((v) => typeof v === "boolean")) {
+    return {
+      parts: copy.slice(0, -3),
+      flags: {
+        isMaineFreight: tail[0],
+        hasMaineWriters: tail[1],
+        hasNonMaineWriters: tail[2],
+      },
+    };
+  }
+  return { parts: copy, flags };
+}
+function parseLabelStringToMeta(labelText, srcHint, rawBaseHint) {
+  const rawParts = String(labelText || "")
+    .split("-")
+    .map((p) => p.trim())
+    .filter(Boolean);
+  const extracted = maybeExtractFreightFlags(rawParts);
+  const coreParts = extracted.parts.slice();
+  const stylesPart = coreParts.pop() || "";
+  const components = coreParts;
   const styles = stylesPart
     .split(",")
     .map((s) => s.trim().toLowerCase())
     .filter(Boolean);
-  let tag = "",
-    crew = null,
-    photographer = "";
+  let tag = "";
+  let crew = null;
+  let photographer = "";
   if (components.length === 2) {
     [tag, photographer] = components;
   } else if (components.length === 3) {
@@ -1276,13 +1357,40 @@ function parseFilename(filename) {
     .map((t) => t.trim().toLowerCase())
     .filter(Boolean);
   return {
-    src: filename,
-    rawBase: base,
+    src: srcHint || "",
+    rawBase: rawBaseHint || String(labelText || "").trim(),
     tags,
     crew: crew ? crew.toLowerCase() : null,
     photographer: (photographer || "").toLowerCase(),
     styles,
+    isMaineFreight: extracted.flags.isMaineFreight,
+    hasMaineWriters: extracted.flags.hasMaineWriters,
+    hasNonMaineWriters: extracted.flags.hasNonMaineWriters,
+    __parsedMetaReady: true,
   };
+}
+function parseFilename(filename) {
+  const base = filename
+    .split("/")
+    .pop()
+    .replace(/\.[^.]+$/, "");
+  if (typeof metaBySrc !== "undefined" && metaBySrc[filename]) {
+    const existing = metaBySrc[filename];
+    if (existing && existing.__parsedMetaReady) {
+      return existing;
+    }
+    const parsed = parseLabelStringToMeta(
+      (existing && existing.label) || base,
+      (existing && (existing.numericSrc || existing.src)) || filename,
+      (existing && (existing.rawBase || existing.label || existing.nameNoExt)) ||
+        base,
+    );
+    if (existing && typeof existing === "object") {
+      Object.assign(existing, parsed);
+      return existing;
+    }
+  }
+  return parseLabelStringToMeta(base, filename, base);
 }
 const imagesList = metaList.map((m) => {
   m.src = m.numericSrc;
@@ -1455,19 +1563,17 @@ function openModal(meta) {
     let tagText = "";
     let photographerText = "";
 
-    if (targetMeta && targetMeta.label) {
-      const dashParts = targetMeta.label.split("-");
+    if (targetMeta && Array.isArray(targetMeta.tags) && targetMeta.tags.length) {
+      tagText = targetMeta.tags[0];
+    } else if (targetMeta && targetMeta.label) {
+      const dashParts = String(targetMeta.label).split("-");
       if (dashParts.length > 0) tagText = dashParts[0].trim();
+    }
 
-      let photographerIndex = -1;
-      if (dashParts.length >= 4) photographerIndex = 2;
-      else if (dashParts.length >= 3) photographerIndex = 1;
-
-      if (photographerIndex >= 0 && dashParts[photographerIndex]) {
-        const photoStr = dashParts[photographerIndex].trim();
-        const photoTokens = photoStr.split(/[\s,]+/);
-        photographerText = photoTokens[0];
-      }
+    if (targetMeta && targetMeta.photographer) {
+      photographerText = String(targetMeta.photographer)
+        .split(/[\s,]+/)
+        .filter(Boolean)[0];
     }
 
     let captionText = "";
@@ -2007,12 +2113,44 @@ function loadImageIntoCard(meta, card, wrap, placeholder, expectedLoadId) {
     tryNext();
   });
 }
+function getActiveFreightFilters() {
+  return {
+    maineFreight: !!(
+      freightMaineToggle &&
+      typeof freightMaineToggle.checked === "boolean" &&
+      freightMaineToggle.checked
+    ),
+    maineWriters: !!(
+      freightMaineWritersToggle &&
+      typeof freightMaineWritersToggle.checked === "boolean" &&
+      freightMaineWritersToggle.checked
+    ),
+    outOfStateWriters: !!(
+      freightOutStateWritersToggle &&
+      typeof freightOutStateWritersToggle.checked === "boolean" &&
+      freightOutStateWritersToggle.checked
+    ),
+  };
+}
+function matchesFreightFilters(meta, filters) {
+  if (!IS_FREIGHTS_PAGE) return true;
+  const opts = filters || getActiveFreightFilters();
+  if (opts.maineFreight && meta.isMaineFreight !== true) return false;
+  if (opts.maineWriters && meta.hasMaineWriters !== true) return false;
+  if (opts.outOfStateWriters && meta.hasNonMaineWriters !== true) return false;
+  return true;
+}
 function filterGallery(q) {
   if (!gallery) return;
   q = (q || "").trim().toLowerCase();
   if (sortSelect) currentSort = sortSelect.value || currentSort;
+  const freightFilters = getActiveFreightFilters();
   if (!q) {
-    const all = imagesList.slice();
+    const all = imagesList.filter((src) => {
+      if (!IS_FREIGHTS_PAGE) return true;
+      const meta = parseFilename(src);
+      return matchesFreightFilters(meta, freightFilters);
+    });
     all.sort((a, b) => {
       const ia = getNumericIndexFromSrc(a);
       const ib = getNumericIndexFromSrc(b);
@@ -2041,6 +2179,7 @@ function filterGallery(q) {
   }
   const filtered = imagesList.filter((src) => {
     const meta = parseFilename(src);
+    if (!matchesFreightFilters(meta, freightFilters)) return false;
     const metaTokens = buildMetaTokens(meta);
     return Array.from(expandedQueryTokens).some((qt) => metaTokens.has(qt));
   });
@@ -2054,6 +2193,31 @@ function filterGallery(q) {
 if (searchInput) {
   searchInput.addEventListener("input", (e) => filterGallery(e.target.value));
 }
+if (IS_FREIGHTS_PAGE) {
+  [
+    freightMaineToggle,
+    freightMaineWritersToggle,
+    freightOutStateWritersToggle,
+  ].forEach((toggle) => {
+    if (!toggle) return;
+    toggle.addEventListener("change", () => {
+      const q = searchInput && searchInput.value ? searchInput.value : "";
+      filterGallery(q);
+    });
+  });
+  if (freightFilterMenu) {
+    document.addEventListener("click", (ev) => {
+      if (!freightFilterMenu.contains(ev.target)) {
+        freightFilterMenu.open = false;
+      }
+    });
+    document.addEventListener("keydown", (ev) => {
+      if (ev.key === "Escape") {
+        freightFilterMenu.open = false;
+      }
+    });
+  }
+}
 function getNumericIndexFromSrc(src) {
   if (!src) return 0;
   try {
@@ -2065,7 +2229,7 @@ function getNumericIndexFromSrc(src) {
       return metaBySrc[src].index;
   } catch (e) {}
   try {
-    const base = src.replace(/^.*\/(assets\/images\/)?/, "");
+    const base = (src || "").split("/").pop() || "";
     const m = base.match(/(\d+)/);
     if (m && m[1]) return parseInt(m[1], 10) || 0;
   } catch (e) {}
