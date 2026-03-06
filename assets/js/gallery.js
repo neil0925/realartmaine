@@ -2138,6 +2138,17 @@ document.addEventListener("DOMContentLoaded", () => {
       searchInput.value = initialQuery;
     } catch (e) {}
   }
+  if (initialQuery) {
+    try {
+      const url = new URL(window.location.href);
+      url.searchParams.delete("search");
+      url.searchParams.delete("q");
+      const query = url.searchParams.toString();
+      const cleaned =
+        url.pathname + (query ? "?" + query : "") + (url.hash || "");
+      window.history.replaceState(null, "", cleaned);
+    } catch (e) {}
+  }
   try {
     preCacheGuiAssets().catch(() => {});
   } catch (e) {}
