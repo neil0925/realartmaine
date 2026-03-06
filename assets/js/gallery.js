@@ -791,24 +791,11 @@ IMAGE_LABELS[674] = "solar, flea-DNB-realartmaine-tags";
 IMAGE_LABELS[675] = "gask-PTG-americanaccents-piece";
 IMAGE_LABELS[676] = "gask-PTG-americanaccents-piece";
 
-/*
-FREIGHT LABEL CHEAT SHEET
-
-No crew format:
-  tags-photographer-styles-isMaineFreight-hasMaineWriters-hasNonMaineWriters
-
-With crew format:
-  tags-crew-photographer-styles-isMaineFreight-hasMaineWriters-hasNonMaineWriters
-
-Flags use y/n only, in this exact order:
-  1) isMaineFreight
-  2) hasMaineWriters
-  3) hasNonMaineWriters
-
-Example (no crew):
-  FREIGHT_LABELS[1] = "27,mayo-reallartmaine-piece-y-y-y";
-*/
+/*tag-crew-flicker-style-Maine freight y/n-has Maine writers y/n-has out of state writers y/n */
+/*example1:FREIGHT_LABELS[1] ="27-2GF,TSZ-realartmaine-piece-y-y-n";*/
+/*example2:FREIGHT_LABELS[2] ="27,mayo-2GF,TSZ-realartmaine-piece,throw-n-y-y";*/
 const FREIGHT_LABELS = [null];
+FREIGHT_LABELS[1] ="";
 if (typeof window !== "undefined") {
   window.FREIGHT_LABELS = FREIGHT_LABELS;
 }
