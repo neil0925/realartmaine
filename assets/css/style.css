@@ -799,6 +799,14 @@ nav .right-group .gear-box {
 .leaderboard-table tbody td.photog-col {
   font-family: var(--ram-font11);
 }
+.leaderboard-table .leaderboard-link {
+  color: inherit;
+  text-decoration: none;
+}
+.leaderboard-table .leaderboard-link:hover,
+.leaderboard-table .leaderboard-link:focus {
+  text-decoration: underline;
+}
 nav .right-group {
   display: flex;
   align-items: center;

@@ -9,6 +9,42 @@ const LEADERBOARD_VIEW_KEY = "ram_leaderboard_view_v1";
 const SAVE_LAST_LEADERBOARD_PREF_KEY = "ram_save_last_leaderboard_enabled_v1";
 const LEADERBOARD_VIEW_PARAM = "view";
 const DEFAULT_LEADERBOARD_VIEW = "flickers";
+const LEADERBOARD_FALLBACK_SYNONYM_GROUPS = [
+  [
+    "throwie",
+    "bubble letter",
+    "throw",
+    "bubbleletter",
+    "throw up",
+    "throwups",
+    "throwup",
+    "throw ups",
+  ],
+  [
+    "antistyle",
+    "anti style",
+    "anti",
+    "hipster graffiti",
+    "hipster graff",
+    "hipstergraff",
+    "hipstergraffiti",
+  ],
+  ["catch", "cache"],
+  ["ducky", "theportlandbee", "the portland bee", "bee"],
+  ["dove", "doves"],
+  ["VC", "HKC"],
+  ["salud", "saludpig", "salud pig", "pig"],
+  ["CTS", "TNL"],
+  ["OY!", "oh yes!", "ohyes!"],
+  [
+    "triangle",
+    "tri angle",
+    "cheese",
+    "cheesegrater",
+    "cheese grater",
+    "cheesegrater of death",
+  ],
+];
 const VIEW_DEFS = {
   flickers: {
     option: "Top Flickers",
@@ -22,13 +58,18 @@ const VIEW_DEFS = {
     countLabel: "Flicks they were shown in",
     empty: "No crews found.",
   },
-  names: {
-    option: "Names",
-    nameLabel: "Name",
+  tags: {
+    option: "Tags",
+    nameLabel: "Tag",
     countLabel: "Flicks they were shown in",
-    empty: "No names found.",
+    empty: "No tags found.",
   },
 };
+
+function normalizeViewKey(view) {
+  if (view === "styles" || view === "names") return "tags";
+  return view;
+}
 
 function isValidView(view) {
   return !!view && Object.prototype.hasOwnProperty.call(VIEW_DEFS, view);
@@ -36,6 +77,40 @@ function isValidView(view) {
 
 function normalizeText(value) {
   return String(value || "").replace(/\s+/g, " ").trim();
+}
+
+function resolveSynonymGroups() {
+  if (typeof SYNONYM_GROUPS !== "undefined" && Array.isArray(SYNONYM_GROUPS)) {
+    return SYNONYM_GROUPS;
+  }
+  if (typeof window !== "undefined" && Array.isArray(window.SYNONYM_GROUPS)) {
+    return window.SYNONYM_GROUPS;
+  }
+  return LEADERBOARD_FALLBACK_SYNONYM_GROUPS;
+}
+
+function buildCanonicalSynonymMap(groups) {
+  const map = {};
+  if (!Array.isArray(groups)) return map;
+  groups.forEach((group) => {
+    if (!Array.isArray(group) || !group.length) return;
+    const normalizedGroup = group.map(normalizeText).filter(Boolean);
+    if (!normalizedGroup.length) return;
+    const canonical = normalizedGroup[0];
+    normalizedGroup.forEach((term) => {
+      map[term.toLowerCase()] = canonical;
+    });
+  });
+  return map;
+}
+
+const SYNONYM_CANONICAL_MAP = buildCanonicalSynonymMap(resolveSynonymGroups());
+
+function canonicalizeName(name) {
+  const display = normalizeText(name);
+  if (!display) return "";
+  const canonical = SYNONYM_CANONICAL_MAP[display.toLowerCase()];
+  return canonical || display;
 }
 
 function splitCommaValues(segment) {
@@ -53,20 +128,22 @@ function parseLabelSegments(label) {
   if (parts.length < 3) return null;
   if (parts.length >= 4) {
     return {
+      tagNameSegment: parts[0],
       crewSegment: parts[1],
       flickerSegment: parts[2],
-      styleSegment: parts.slice(3).join("-"),
+      tagSegment: parts.slice(3).join("-"),
     };
   }
   return {
+    tagNameSegment: parts[0],
     crewSegment: "",
     flickerSegment: parts[1],
-    styleSegment: parts.slice(2).join("-"),
+    tagSegment: parts.slice(2).join("-"),
   };
 }
 
 function incrementCounter(map, name) {
-  const display = normalizeText(name);
+  const display = canonicalizeName(name);
   if (!display) return;
   const key = display.toLowerCase();
   const existing = map.get(key);
@@ -80,7 +157,7 @@ function incrementCounter(map, name) {
 function incrementUniquePerEntry(map, values) {
   const seen = new Set();
   values.forEach((raw) => {
-    const display = normalizeText(raw);
+    const display = canonicalizeName(raw);
     if (!display) return;
     const key = display.toLowerCase();
     if (seen.has(key)) return;
@@ -154,7 +231,7 @@ function collectLabels() {
 function buildLeaderboards(labels, debugMode) {
   const flickers = new Map();
   const crews = new Map();
-  const names = new Map();
+  const tags = new Map();
 
   labels.forEach((label) => {
     const parsed = parseLabelSegments(label);
@@ -166,21 +243,22 @@ function buildLeaderboards(labels, debugMode) {
     const crewValues = splitCommaValues(parsed.crewSegment);
     if (crewValues.length) incrementUniquePerEntry(crews, crewValues);
 
-    const nameValues = splitCommaValues(parsed.styleSegment);
-    if (nameValues.length) incrementUniquePerEntry(names, nameValues);
+    const tagValues = splitCommaValues(parsed.tagNameSegment);
+    if (tagValues.length) incrementUniquePerEntry(tags, tagValues);
   });
 
   return {
     flickers: sortLeaderboard(flickers),
     crews: sortLeaderboard(crews),
-    names: sortLeaderboard(names),
+    tags: sortLeaderboard(tags),
   };
 }
 
 function readSavedView() {
   try {
     const saved = localStorage.getItem(LEADERBOARD_VIEW_KEY);
-    return isValidView(saved) ? saved : "";
+    const normalized = normalizeViewKey(saved);
+    return isValidView(normalized) ? normalized : "";
   } catch (e) {
     return "";
   }
@@ -205,7 +283,7 @@ function getSaveLastLeaderboardSetting() {
 function readViewFromUrl() {
   try {
     const params = new URLSearchParams(window.location.search);
-    const view = params.get(LEADERBOARD_VIEW_PARAM);
+    const view = normalizeViewKey(params.get(LEADERBOARD_VIEW_PARAM));
     return isValidView(view) ? view : "";
   } catch (e) {
     return "";
@@ -238,7 +316,7 @@ function renderLeaderboard(root, boardData, activeView, debugMode) {
       <select id="leaderboardViewSelect" aria-label="Leaderboard view" title="Leaderboard view">
         <option value="flickers">${VIEW_DEFS.flickers.option}</option>
         <option value="crews">${VIEW_DEFS.crews.option}</option>
-        <option value="names">${VIEW_DEFS.names.option}</option>
+        <option value="tags">${VIEW_DEFS.tags.option}</option>
       </select>
     </div>
   `;
@@ -269,10 +347,19 @@ function renderLeaderboard(root, boardData, activeView, debugMode) {
   `;
 
   rows.forEach((row, index) => {
+    const gallerySearchHref = `/Gallery/?search=${encodeURIComponent(row.name)}`;
+    const rowNameEscaped = escapeHtml(row.name);
     html += `
       <tr>
         <td class="rank-col">${index + 1}</td>
-        <td class="photog-col">${escapeHtml(row.name)}</td>
+        <td class="photog-col">
+          <a
+            class="leaderboard-link"
+            href="${gallerySearchHref}"
+            aria-label="Search gallery for ${rowNameEscaped}"
+            title="Search gallery for ${rowNameEscaped}"
+          >${rowNameEscaped}</a>
+        </td>
         <td class="count-col">${row.count}</td>
       </tr>
     `;
@@ -308,7 +395,10 @@ document.addEventListener("DOMContentLoaded", function () {
   writeViewToUrl(currentView);
 
   function refresh(nextView) {
-    const view = isValidView(nextView) ? nextView : DEFAULT_LEADERBOARD_VIEW;
+    const normalizedView = normalizeViewKey(nextView);
+    const view = isValidView(normalizedView)
+      ? normalizedView
+      : DEFAULT_LEADERBOARD_VIEW;
     currentView = view;
     if (getSaveLastLeaderboardSetting()) saveView(currentView);
     writeViewToUrl(currentView);

@@ -162,7 +162,7 @@ IMAGE_LABELS[129] = "house-TNL-realartmaine-tags";
 IMAGE_LABELS[130] = "ducky-realartmaine-character, antistyle, portlandbee";
 IMAGE_LABELS[131] = "ducky-realartmaine-character, antistyle, portlandbee";
 IMAGE_LABELS[132] = "ducky-realartmaine-antistyle, paintroller";
-IMAGE_LABELS[133] = "solar-DNB-realartmaine-throwie, fillin";
+IMAGE_LABELS[133] = "ducky-realartmaine-character, antistyle, portlandbee";
 IMAGE_LABELS[134] = "solar-DNB-realartmaine-tags, tag, handstyle";
 IMAGE_LABELS[135] =
   "same, sped, borax-SLT,TVT,BTD,RTS-ericwhite-throwie, fillin, tags";
@@ -1150,6 +1150,7 @@ const SYNONYM_GROUPS = [
     "cheese grater",
     "cheesegrater of death",
   ],
+  ["ichabod","ich", "itch"],
 ];
 function buildSynonymMap(groups) {
   const map = {};
@@ -2127,6 +2128,16 @@ document.addEventListener("DOMContentLoaded", () => {
       sortSelect.value = currentSort;
     } catch (e) {}
   }
+  let initialQuery = "";
+  try {
+    const params = new URLSearchParams(window.location.search || "");
+    initialQuery = (params.get("search") || params.get("q") || "").trim();
+  } catch (e) {}
+  if (searchInput && initialQuery) {
+    try {
+      searchInput.value = initialQuery;
+    } catch (e) {}
+  }
   try {
     preCacheGuiAssets().catch(() => {});
   } catch (e) {}
@@ -2134,7 +2145,7 @@ document.addEventListener("DOMContentLoaded", () => {
     replaceGuiImagesFromCache().catch(() => {});
   } catch (e) {}
   try {
-    filterGallery("");
+    filterGallery(initialQuery);
   } catch (e) {
     loadImagesSequentially(imagesList);
   }
