@@ -23,8 +23,7 @@ IMAGE_LABELS[10] = "SLT-SLT-realartmaine-paintroller";
 IMAGE_LABELS[11] = "pest-realartmaine-throwie, bubble letter, hollow";
 IMAGE_LABELS[12] = "rune-LTB,2K69-realartmaine-throwie, hollow, bubble letter";
 IMAGE_LABELS[13] = "5G-5G-chagrinedminnow-straightletter, antistyle";
-IMAGE_LABELS[14] =
-  "kujoe, cats, link-5G,SDH,UK,CRAFT-realartmaine-antistyle, straightletter";
+IMAGE_LABELS[14] = "catch, high8-OHK,BNE,PTG,SLT-realartmaine-throwie, hollow";
 IMAGE_LABELS[15] = "link-5G,CRAFT-realartmaine-antistyle, piece";
 IMAGE_LABELS[16] = "prizm, ruski, cats-realartmaine-paintroller";
 IMAGE_LABELS[17] = "some1-realartmaine-stencil";
@@ -70,8 +69,7 @@ IMAGE_LABELS[50] = "LSE-LSE-chagrinedminnow-straightletter";
 IMAGE_LABELS[51] = "2GF-realartmaine-tag";
 IMAGE_LABELS[52] = "27-TSZ,2GF-realartmaine-throwie, antistyle";
 IMAGE_LABELS[53] = "ankle-LTB,2K69-realartmaine-tags";
-IMAGE_LABELS[54] =
-  "ankle, ne1, symbol, spud-LTB, 2K69, CTS-realartmaine-throwie, straightletter, tags, tag, fillin";
+IMAGE_LABELS[54] = "halt-5G,CRAFT-zplk-piece";
 IMAGE_LABELS[55] = "ankor-SFL-realartmaine-straightletter";
 IMAGE_LABELS[56] = "aura-OHK-realartmaine-straightletter, piece";
 IMAGE_LABELS[57] = "auto-CTS,TNL-realartmaine-tags, character";
@@ -396,7 +394,7 @@ IMAGE_LABELS[328] = "link-5G,SDH,CRAFT-tincan1-piece";
 IMAGE_LABELS[329] = "enya-5G-tincan1-piece, antistyle";
 IMAGE_LABELS[330] = "enya-5G-tincan1-tags, antistyle";
 IMAGE_LABELS[331] = "wilt-VC-realartmaine-tags";
-IMAGE_LABELS[332] = "doves-CFM,SLT-realartmaine-piece";
+IMAGE_LABELS[332] = "symbol-CTS,TNL-zplk-piece";
 IMAGE_LABELS[333] = "doves-CFM,SLT-realartmaine-tags";
 IMAGE_LABELS[334] = "enzyme-DPW-realartmaine-tags";
 IMAGE_LABELS[335] =
@@ -407,8 +405,7 @@ IMAGE_LABELS[337] =
 IMAGE_LABELS[338] = "same, ian-SLT,TVT,2K69-realartmaine-throwie, fillin";
 IMAGE_LABELS[339] =
   "catch, neptune-OHK,PTG,BNE,SLT,DNB-realartmaine-character, piece, fillin";
-IMAGE_LABELS[340] =
-  "muul, catch, pyle, lerk-FNL,TMS,SFL,PTG,BNE,OHK,SLT-realartmaine-tags";
+IMAGE_LABELS[340] = "learn-YME,SFL,CIRCLET-zplk-piece";
 IMAGE_LABELS[341] = "osha, port-PTG,IMS,OHK,SLT-realartmaine-tags";
 IMAGE_LABELS[342] = "pout-realartmaine-tags, character";
 IMAGE_LABELS[343] = "catch-PTG-realartmaine-straightletter";
@@ -471,7 +468,7 @@ IMAGE_LABELS[391] = "object-SDH-chagrinedminnow-tag";
 IMAGE_LABELS[392] = "wake, 27-2GF,TSZ,LTB-chagrinedminnow-tags, stencil";
 IMAGE_LABELS[393] = "ozek, charm, 27-TSZ,2GF,DWT,MGI-chagrinedminnow-tags";
 IMAGE_LABELS[394] = "27-TSZ,2GF-chagrinedminnow-tags";
-IMAGE_LABELS[395] = "link-5G,CRAFT,SDH-chagrinedminnow-tags";
+IMAGE_LABELS[395] = "lamb-CTS-realartmaine-tags";
 IMAGE_LABELS[396] = "WOOF-DFT-chagrinedminnow-tags";
 IMAGE_LABELS[397] = "27-TSZ,2GF-chagrinedminnow-tags";
 IMAGE_LABELS[398] = "27-TSZ,2GF-chagrinedminnow-throwie, antistyle, hollow";
@@ -587,7 +584,7 @@ IMAGE_LABELS[482] =
   "aura, pyle, unidentified-PTG,BNE,OHK-Northeastmillinocket-piece, throwie, fillin";
 IMAGE_LABELS[483] =
   "bike, catch, doe, goal, aura, petco, en-BNE,PTG,OHK,SLT,CFM,5G,ICBM,RTH-Northeastmillinocket-throwie, fillin, paintroller";
-IMAGE_LABELS[484] = "enya-5G-realartmaine-frieghts, antistyle, straightletter";
+IMAGE_LABELS[484] = "ankle, aidan-CTS,TNL,LTB,2K69-zplk-straightletter";
 IMAGE_LABELS[485] = "fish-CTS,TNL-realartmaine-blockbuster";
 IMAGE_LABELS[486] = "muul-FNL-realartmaine-paintroller";
 IMAGE_LABELS[487] = "enzyme, urchin-DPW-realartmaine-throwie, fillin";
@@ -772,7 +769,7 @@ IMAGE_LABELS[645] = "catch, high8, iowa, grazi-3FK,DWT,OHK,BNE,PTG,SLT-thesaltys
 IMAGE_LABELS[646] = "ichabod-YME,CIRLCET-thesaltysardine9-blockbuster";
 IMAGE_LABELS[647] = "boub-AX,RB-thesaltysardine9-throwie, fillin";
 IMAGE_LABELS[648] = "esko, link, lerk-TMS,5G,AX,CRAFT,SFL,SDH-thesaltysardine9-throwie, fillin";
-IMAGE_LABELS[649] = "ankle-LTB,2K69-thesaltysardine9-straightletter, frieghts";
+IMAGE_LABELS[649] = "hebrew-CTS,SDH-zplk-piece";
 IMAGE_LABELS[650] = "plolite, ekiper-FSH,KFA-thesaltysardine9-piece, paintroller";
 IMAGE_LABELS[651] = "kusch, esko-5G,TMS,IMS-thesaltysardine9-straightletter";
 IMAGE_LABELS[652] = "uewrp-PSH-thesaltysardine9-piece";
