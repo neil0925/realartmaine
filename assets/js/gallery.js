@@ -1579,7 +1579,7 @@ function openModal(meta) {
     let photographerText = "";
 
     if (targetMeta && Array.isArray(targetMeta.tags) && targetMeta.tags.length) {
-      tagText = targetMeta.tags[0];
+      tagText = targetMeta.tags.filter(Boolean).join(", ");
     } else if (targetMeta && targetMeta.label) {
       const dashParts = String(targetMeta.label).split("-");
       if (dashParts.length > 0) tagText = dashParts[0].trim();
