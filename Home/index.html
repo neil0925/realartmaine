@@ -138,6 +138,292 @@
         height: auto;
         display: block;
       }
+      .home-feature-row {
+        width: 100%;
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: clamp(12px, 2vw, 24px);
+        padding: 96px clamp(12px, 3vw, 36px) 0 clamp(12px, 3vw, 36px);
+        box-sizing: border-box;
+      }
+      .flick-day {
+        width: auto;
+        margin: 0;
+        flex: 1 1 auto;
+        min-width: 0;
+      }
+      .flick-day-inner {
+        width: fit-content;
+        max-width: min(960px, calc(100vw - 420px));
+        margin: 0;
+      }
+      .flick-day h2 {
+        margin: 0 0 12px 0;
+        color: #30513d;
+        font-family: var(--ram-font8);
+        font-size: clamp(1.6rem, 3.1vw, 2.35rem);
+        line-height: 1.1;
+        text-align: center;
+        width: 100%;
+      }
+      .flick-day-card {
+        width: fit-content;
+        max-width: min(960px, calc(100vw - 420px));
+        border: 1px solid rgba(48, 81, 61, 0.38);
+        border-radius: 8px;
+        padding: 12px;
+        background-image: url("/assets/GUI/tile.png");
+        background-repeat: repeat;
+        background-size: 400px 400px;
+        color: #30513d;
+        cursor: pointer;
+        text-align: left;
+        display: inline-flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      .flick-day-image-wrap {
+        width: auto;
+        max-width: min(936px, calc(100vw - 444px));
+        max-height: min(58vh, 540px);
+        overflow: hidden;
+        border-radius: 6px;
+        background: rgba(255, 255, 255, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .flick-day-image-wrap img {
+        width: auto;
+        max-width: min(936px, calc(100vw - 444px));
+        height: auto;
+        max-height: min(58vh, 540px);
+        object-fit: contain;
+        display: block;
+        opacity: 0;
+        transition: opacity 180ms ease;
+      }
+      .flick-day-card.loaded .flick-day-image-wrap img {
+        opacity: 1;
+      }
+      .flick-day-loader {
+        width: min(380px, calc(100% - 8px));
+        height: 6px;
+        border-radius: 999px;
+        margin: 10px auto 4px auto;
+        overflow: hidden;
+        background: rgba(48, 81, 61, 0.18);
+      }
+      .flick-day-loader-bar {
+        display: block;
+        width: 34%;
+        height: 100%;
+        border-radius: 999px;
+        background: #30513d;
+        animation: flickDayLoad 1s ease-in-out infinite;
+      }
+      .flick-day-card.loaded .flick-day-loader {
+        display: none;
+      }
+      @keyframes flickDayLoad {
+        0% {
+          transform: translateX(-120%);
+        }
+        100% {
+          transform: translateX(360%);
+        }
+      }
+      .flick-day-caption {
+        margin: 0;
+        font-family: var(--ram-font8);
+        font-size: 1.02rem;
+        display: none;
+      }
+      .devlog-box {
+        flex: 0 0 min(340px, 32vw);
+        width: min(340px, 32vw);
+        min-width: 250px;
+        border: 1px solid rgba(230, 234, 232, 0.3);
+        border-radius: 8px;
+        padding: 12px;
+        background: rgba(24, 27, 26, 0.76);
+        color: #dce1de;
+        font-family: var(--ram-font8);
+        text-align: left;
+      }
+      .devlog-box h3 {
+        margin: 0 0 8px 0;
+        font-size: 1.25rem;
+        line-height: 1.15;
+      }
+      .devlog-scroll {
+        height: clamp(170px, 30vh, 260px);
+        overflow-y: scroll;
+        padding-right: 4px;
+      }
+      .devlog-entry {
+        font-size: 0.98rem;
+        line-height: 1.3;
+      }
+      .devlog-version {
+        margin: 0 0 8px 0;
+      }
+      .devlog-list {
+        margin: 0 0 10px 18px;
+        padding: 0;
+      }
+      .devlog-list li {
+        margin: 0 0 4px 0;
+      }
+      .devlog-note {
+        margin: 0;
+      }
+      .devlog-entry + .devlog-entry {
+        margin-top: 12px;
+        padding-top: 10px;
+        border-top: 1px solid rgba(220, 225, 222, 0.28);
+      }
+      .home-social-row {
+        width: 100%;
+        display: flex;
+        justify-content: flex-end;
+        padding: 12px clamp(12px, 3vw, 36px) 14px clamp(12px, 3vw, 36px);
+        box-sizing: border-box;
+      }
+      .home-social-links {
+        display: flex;
+        gap: 8px;
+      }
+      .home-social-link {
+        width: 172px;
+        height: 48px;
+        border: 0;
+        border-radius: 0;
+        background: transparent;
+        padding: 0;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .home-social-link img {
+        display: block;
+        width: 126px;
+        height: 26px;
+        object-fit: contain;
+      }
+      .external-redirect-overlay {
+        position: fixed;
+        inset: 0;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        background: rgba(0, 0, 0, 0.45);
+        z-index: 120000;
+        padding: 12px;
+        box-sizing: border-box;
+      }
+      .external-redirect-overlay.open {
+        display: flex;
+      }
+      .external-redirect-dialog {
+        width: min(460px, calc(100vw - 24px));
+        border: 1px solid rgba(230, 234, 232, 0.3);
+        border-radius: 8px;
+        padding: 14px 14px 12px 14px;
+        background-image: linear-gradient(
+            rgba(24, 27, 26, 0.8),
+            rgba(24, 27, 26, 0.8)
+          ),
+          url("/assets/GUI/tile.png");
+        background-repeat: repeat;
+        background-size: auto, 400px 400px;
+        color: #dce1de;
+        font-family: var(--ram-font8);
+        position: relative;
+      }
+      .external-redirect-close {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        width: 28px;
+        height: 28px;
+        border: 1px solid rgba(230, 234, 232, 0.3);
+        border-radius: 6px;
+        background: transparent;
+        color: #dce1de;
+        cursor: pointer;
+        font-family: var(--ram-font8);
+        font-size: 0.96rem;
+      }
+      .external-redirect-title {
+        margin: 0 32px 8px 0;
+        font-size: 1.2rem;
+      }
+      .external-redirect-text {
+        margin: 0 0 14px 0;
+        font-size: 0.98rem;
+        line-height: 1.25;
+      }
+      .external-redirect-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+      }
+      .external-redirect-btn {
+        border: 1px solid rgba(230, 234, 232, 0.3);
+        border-radius: 6px;
+        background-image: linear-gradient(
+            rgba(24, 27, 26, 0.8),
+            rgba(24, 27, 26, 0.8)
+          ),
+          url("/assets/GUI/tile.png");
+        background-repeat: repeat;
+        background-size: auto, 400px 400px;
+        color: #dce1de;
+        padding: 7px 12px;
+        cursor: pointer;
+        font-family: var(--ram-font8);
+        font-size: 0.94rem;
+      }
+      .modal.flick-day-modal .caption {
+        margin: 0 -16px;
+        padding: 12px 16px;
+        background: transparent;
+        color: #30513d;
+        font-family: var(--ram-font8);
+        text-align: center;
+        border-radius: 0;
+      }
+      .home-scroll-space {
+        width: 100%;
+        height: clamp(180px, 28vh, 360px);
+      }
+      @media (max-width: 1180px) {
+        .home-feature-row {
+          flex-direction: column;
+          align-items: flex-start;
+          padding-top: 96px;
+        }
+        .flick-day-inner {
+          max-width: calc(100vw - 24px);
+        }
+        .flick-day-card {
+          max-width: calc(100vw - 24px);
+        }
+        .flick-day-image-wrap,
+        .flick-day-image-wrap img {
+          max-width: min(936px, calc(100vw - 64px));
+        }
+        .devlog-box {
+          width: min(420px, calc(100vw - 24px));
+          min-width: 0;
+        }
+        .home-social-row {
+          justify-content: flex-start;
+        }
+      }
     </style>
   </head>
   <body>
@@ -192,6 +478,107 @@
         Explore our gallery to see tags, crews, and styles captured by
         photographers and artists from around the state.
       </p>
+      <div class="home-feature-row">
+        <section class="flick-day" aria-labelledby="flickDayTitle">
+          <div class="flick-day-inner">
+            <h2 id="flickDayTitle">Flick of the Day</h2>
+            <button
+              type="button"
+              id="flickDayCard"
+              class="flick-day-card"
+              aria-label="Open flick of the day in spotlight"
+            >
+              <div class="flick-day-image-wrap">
+                <img id="flickDayImage" alt="Flick of the day" />
+              </div>
+              <div id="flickDayLoader" class="flick-day-loader" aria-hidden="true">
+                <span class="flick-day-loader-bar"></span>
+              </div>
+              <p id="flickDayCaption" class="flick-day-caption"></p>
+            </button>
+          </div>
+        </section>
+        <aside class="devlog-box" aria-labelledby="devlogTitle">
+          <h3 id="devlogTitle">Devlog</h3>
+          <div id="devlogScroll" class="devlog-scroll">
+            <article class="devlog-entry">
+              <p class="devlog-version">v1.2.3 added:</p>
+              <ul class="devlog-list">
+                <li>dev notes</li>
+                <li>flick of the day</li>
+                <li>links</li>
+                <li>freights gallery</li>
+              </ul>
+            </article>
+          </div>
+        </aside>
+      </div>
+      <div
+        id="externalRedirectModal"
+        class="external-redirect-overlay"
+        aria-hidden="true"
+      >
+        <div
+          class="external-redirect-dialog"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="externalRedirectTitle"
+        >
+          <button
+            type="button"
+            id="externalRedirectClose"
+            class="external-redirect-close"
+            aria-label="Close redirect dialog"
+          >
+            x
+          </button>
+          <h4 id="externalRedirectTitle" class="external-redirect-title">
+            Leaving RealArtMaine
+          </h4>
+          <p id="externalRedirectText" class="external-redirect-text">
+            Redirecting to site.
+          </p>
+          <div class="external-redirect-actions">
+            <button
+              type="button"
+              id="externalRedirectCancel"
+              class="external-redirect-btn"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              id="externalRedirectContinue"
+              class="external-redirect-btn"
+            >
+              Continue
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="home-scroll-space" aria-hidden="true"></div>
+      <div class="home-social-row">
+        <div class="home-social-links">
+          <button
+            type="button"
+            class="home-social-link js-external-link"
+            data-url="https://instagram.com/realartmaine/"
+            data-site="instagram.com/realartmaine/"
+            aria-label="Open Instagram"
+          >
+            <img src="/assets/GUI/instagram.png" alt="Instagram" />
+          </button>
+          <button
+            type="button"
+            class="home-social-link js-external-link"
+            data-url="mailto:realartmaine@gmail.com"
+            data-site="realartmaine@gmail.com"
+            aria-label="Open Gmail"
+          >
+            <img src="/assets/GUI/Gmail.png" alt="Gmail" />
+          </button>
+        </div>
+      </div>
     </main>
 
     <footer>
@@ -208,6 +595,9 @@
     </footer>
 
     <script src="/assets/js/maintenance.js"></script>
+    <script src="/assets/js/gallery.js"></script>
+    <script src="/assets/js/flick_of_day.js"></script>
+    <script src="/assets/js/devlog_links.js"></script>
     <script src="/assets/js/settings.js"></script>
     <script src="/assets/js/background.js"></script>
   </body>
