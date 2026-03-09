@@ -489,11 +489,19 @@
     bindMobileNavMenuBehavior();
     const pageType = getPageType();
 
-    scrollTopEnabled = getScrollTopSetting();
-    scrollTopButton = ensureScrollTopButton();
-    lastScrollY = Math.max(0, window.scrollY || window.pageYOffset || 0);
-    bindScrollTopListeners();
-    applyScrollTopSetting(scrollTopEnabled);
+    if (pageType === "home") {
+      const existing = document.getElementById(SCROLL_TOP_BUTTON_ID);
+      if (existing && existing.parentNode) {
+        existing.parentNode.removeChild(existing);
+      }
+      scrollTopButton = null;
+    } else {
+      scrollTopEnabled = getScrollTopSetting();
+      scrollTopButton = ensureScrollTopButton();
+      lastScrollY = Math.max(0, window.scrollY || window.pageYOffset || 0);
+      bindScrollTopListeners();
+      applyScrollTopSetting(scrollTopEnabled);
+    }
 
     const container = qs(".settings-dropdown");
     if (!container) return;
