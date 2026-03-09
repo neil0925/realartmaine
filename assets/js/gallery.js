@@ -579,7 +579,7 @@ IMAGE_LABELS[478] = "halt, ajna-SLT-Northeastmillinocket-piece, straightletter";
 IMAGE_LABELS[479] = "raket-SFL,TMS-Northeastmillinocket-straightletter";
 IMAGE_LABELS[480] = "thex-SLT-Northeastmillinocket-straightletter";
 IMAGE_LABELS[481] =
-  "ojea3, unidentified-HEX, OY!-Northeastmillinocket-piece, character";
+  "ojea3, tears-HEX, OY!-Northeastmillinocket-piece, character";
 IMAGE_LABELS[482] =
   "aura, pyle, unidentified-PTG,BNE,OHK-Northeastmillinocket-piece, throwie, fillin";
 IMAGE_LABELS[483] =
@@ -763,7 +763,7 @@ IMAGE_LABELS[639] = "rune-LTB,2K69-Northeastmillinocket-straightletter, hollow";
 IMAGE_LABELS[640] = "cosmo-Northeastmillinocket-piece, wildstyle";
 IMAGE_LABELS[641] = "rune, wilt-LTB,2K69,VC-Northeastmillinocket-piece, antistyle";
 IMAGE_LABELS[642] = "wilt-2K69,VC-Northeastmillinocket-piece, antistyle";
-IMAGE_LABELS[643] = "wilt, unidentified-2K69,VC-thesaltysardine9-throwie, antistyle, hollow";
+IMAGE_LABELS[643] = "wilt, boras-BSC,2K69,VC-thesaltysardine9-throwie, antistyle, hollow";
 IMAGE_LABELS[644] = "catch-OHK,PTG,BNE,SLT-thesaltysardine9-straightletter";
 IMAGE_LABELS[645] = "catch, high8, iowa, grazi-3FK,DWT,OHK,BNE,PTG,SLT-thesaltysardine9-straightletter, throwie, fillin";
 IMAGE_LABELS[646] = "ichabod-YME,CIRLCET-thesaltysardine9-blockbuster";
@@ -830,7 +830,7 @@ IMAGE_LABELS[706] = "eons, pyle, catch-SLT,TVT,OHK,BNE,PTG,RBH-realartmaine-tags
 IMAGE_LABELS[707] = "lerk-TMS,SFL-realartmaine-striaghtletter";
 IMAGE_LABELS[708] = "boras-BSC-realartmaine-tags";
 IMAGE_LABELS[709] = "cats, vomer-5G-realartmaine-tags";
-IMAGE_LABELS[710] = "unidentified, boras-BSC-realartmaine-character";
+IMAGE_LABELS[710] = "past, boras-BSC-realartmaine-character";
 IMAGE_LABELS[711] = "unidentified-realartmaine-moniker";
 IMAGE_LABELS[712] = "mika-realartmaine-tags";
 IMAGE_LABELS[713] = "lerk-SFL,TMS-realartmaine-tags";
