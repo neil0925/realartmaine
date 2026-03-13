@@ -29,7 +29,7 @@ IMAGE_LABELS[16] = "prizm, ruski, cats-realartmaine-paintroller";
 IMAGE_LABELS[17] = "some1-realartmaine-stencil";
 IMAGE_LABELS[18] = "owell-realartmaine-antistyle, throwie";
 IMAGE_LABELS[19] = "owell-realartmaine-antistyle, throwie, fillin";
-IMAGE_LABELS[20] = "sloan-BNE,PTG-realartmaine-throwie, hollow";
+IMAGE_LABELS[20] = "merlin, koldtone-SK8,CTS,TNL-mcgeehunts-tags";
 IMAGE_LABELS[21] = "zone-ZPLK-antistyle, wildstyle";
 IMAGE_LABELS[22] = "vroom-ZPLK-piece, character";
 IMAGE_LABELS[23] = "lufa-hex-ZPLK-tags, piece";
@@ -148,8 +148,8 @@ IMAGE_LABELS[111] = "ajna-SLT-ZPLK-piece";
 IMAGE_LABELS[112] = "ajna-SLT-ZPLK-piece, character";
 IMAGE_LABELS[113] =
   "aidan, grazi, loupe-CTS,TNL,DWT-ZPLK-straightletter, piece, fillin";
-IMAGE_LABELS[114] = "sloan-PTG,BNE-realartmaine-moniker, tag, character";
-IMAGE_LABELS[115] = "tabz, sloan-2gf,ptg,bne-realartmaine-hand style";
+IMAGE_LABELS[114] = "mobi-TSZ-mcgeehunts-straightletter";
+IMAGE_LABELS[115] = "mobi-TSZ-mcgeehunts-tags";
 IMAGE_LABELS[116] = "songy-realartmaine-straightletter, hollow";
 IMAGE_LABELS[117] = "salud-PTG,OHK-realartmaine-tags, character";
 IMAGE_LABELS[118] = "learn-YME,CIRCLET-realartmaine-piece";
@@ -604,9 +604,9 @@ IMAGE_LABELS[499] =
 IMAGE_LABELS[500] =
   "egirl, salud, towel, wake, towel, gask-FK,LTB,OHK,PTG-realartmaine-character, tags";
 IMAGE_LABELS[501] =
-  "kost, same-SLT,TVT,WKT-realartmaine-frieghts, piece, straightletter";
-IMAGE_LABELS[502] = "spud, akoe-5G-realartmaine-throwie, frieghts";
-IMAGE_LABELS[503] = "like-SDH,CRAFT,5G-realartmaine-piece";
+  "kindbud, wilt, 27, bd-5G,SDH,VC,2K69,TSZ,2GF-mcgeehunts-tags";
+IMAGE_LABELS[502] = "wilt-VC,2K69-mcgeehunts-tags";
+IMAGE_LABELS[503] = "pyle, grazi, loupe-DWT,PTG,OHK,BNE,SLT,RBH,AMP-mcgeehunts-throwie, hollow";
 IMAGE_LABELS[504] = "slug, brik, pest, songy-PTG-realartmaine-tags";
 IMAGE_LABELS[505] = "slept, wake, rune, muin-NF,LTB,2K69-realartmaine-tags";
 IMAGE_LABELS[506] = "suer-TMS-realartmaine-tags";
@@ -671,7 +671,7 @@ IMAGE_LABELS[556] = "5G-5G-realartmaine-tags, antistyle";
 IMAGE_LABELS[557] =
   "mobi, ducky-TSZ-realartmaine-throwie, fillin, antistyle, character";
 IMAGE_LABELS[558] = "ducky-realartmaine-character, antistyle";
-IMAGE_LABELS[559] = "doves-CFM,SLT-realartmaine-hollow, throwie";
+IMAGE_LABELS[559] = "tera, calm, enzyme-DPW,PTG,OHK,BNE-mcgeehunts-tags";
 IMAGE_LABELS[560] = "nihil-realartmaine-tags";
 IMAGE_LABELS[561] = "scipio-2GF-realartmaine-tags";
 IMAGE_LABELS[562] = "ozek-MGI-realartmaine-tags";
@@ -895,6 +895,15 @@ FREIGHT_LABELS[4] = "doves-CFM,SLT-realartmaine-straightletter-n-y-n";
 FREIGHT_LABELS[5] = "muul, catch, lerk, pyle-FNL,BNE,SLT,PTG,OHK,TMS,SFL-realartmaine-tags-n-y-y";
 FREIGHT_LABELS[6] = "enya-5G-realartmaine-piece-n-y-n";
 FREIGHT_LABELS[7] = "ankle-LTB,2K69-thesaltysardine9-straightletter-n-y-n";
+FREIGHT_LABELS[8] = "sloan-BNE,PTG-realartmaine-throwie, hollow-n-n-y";
+FREIGHT_LABELS[9] = "sloan-BNE,PTG-realartmaine-character, tags, moniker-n-n-y";
+FREIGHT_LABELS[10] = "sloan, tabz-BNE,PTG,2GF-realartmaine-tags-n-y-y";
+FREIGHT_LABELS[11] = "kost, same-SLT,TVT,OHK,BNE-realartmaine-piece-n-y-n";
+FREIGHT_LABELS[12] = "spud, akoe-5G-realartmaine-throwie, fillin-n-n-y";
+FREIGHT_LABELS[13] = "link-5G,CRAFT,SDH,AX,TMS-realartmaine-piece-n-y-n";
+FREIGHT_LABELS[14] = "doves-CFM,SLT-realartmaine-throwie, hollow-n-y-n";
+FREIGHT_LABELS[15] = "about-5G-realartmaine-tags-n-y-n";
+
 if (typeof window !== "undefined") {
   window.FREIGHT_LABELS = FREIGHT_LABELS;
 }
