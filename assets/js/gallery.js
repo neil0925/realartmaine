@@ -873,6 +873,17 @@ IMAGE_LABELS[749] = "doves-SLT,CFM-realartmaine-tags";
 IMAGE_LABELS[750] = "ehsk, gerk, grazi-DWT-realartmaine-straightletter";
 IMAGE_LABELS[751] = "grazi-DWT-realartmaine-tags";
 IMAGE_LABELS[752] = "ehsk, muul, enzyme, frog-DWP,FNL-realartmaine-tags";
+IMAGE_LABELS[753] = "lerk, esko-5G,TMS,SFL-thesaltysardine9-straightletter";
+IMAGE_LABELS[754] = "dive, dove, wilt, osha, enzyme-CFM,SLT,VC,2K69,PW,DPW-thesaltysardine9-straightletter";
+IMAGE_LABELS[755] = "boras-NEF,BSG-thesaltysardine9-throwie, fillin";
+IMAGE_LABELS[756] = "enzyme, kite, frog, deky, piza-DPW,KYS-thesaltysardine9-throwie, fillin";
+IMAGE_LABELS[757] = "enzyme-DPW-thesaltysardine9-throwie, fillin";
+IMAGE_LABELS[758] = "boras-NEF,BSG-thesaltysardine9-piece";
+IMAGE_LABELS[759] = "ankle-LTB,2K69-thesaltysardine9-throwie, fillin";
+IMAGE_LABELS[760] = "khed-thesaltysardine9-piece";
+IMAGE_LABELS[761] = "wilt-VC,2K69-thesaltysardine9-throwie, hollow";
+IMAGE_LABELS[762] = "enzyme, ethan-DPW-thesaltysardine9-throwie, fillin";
+IMAGE_LABELS[763] = "enzyme-DPW-thesaltysardine9-throwie, fillin";
 
 /*tag-crew-flicker-style-Maine freight y/n-has Maine writers y/n-has out of state writers y/n */
 /*example1:FREIGHT_LABELS[1] ="27-2GF,TSZ-realartmaine-piece-y-y-n";*/
