@@ -32,6 +32,8 @@
     const path = String(window.location.pathname || "").toLowerCase();
     if (path.includes("/gallery")) return "gallery";
     if (path.includes("/freights")) return "freights";
+    if (path.includes("/halloffame") || path.includes("/hallofshame"))
+      return "hall";
     if (path.includes("/leaderboard")) return "leaderboard";
     if (path.includes("/home")) return "home";
     return "other";
@@ -509,7 +511,8 @@
       container.style.display = "none";
       return;
     }
-    const isGalleryLike = pageType === "gallery" || pageType === "freights";
+    const isGalleryLike =
+      pageType === "gallery" || pageType === "freights" || pageType === "hall";
     if (!isGalleryLike && pageType !== "leaderboard") {
       container.style.display = "none";
       return;

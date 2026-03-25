@@ -1283,84 +1283,15 @@ async function getValidatedImageBlob(candidate) {
   return null;
 }
 loadImageRevalidationState();
-const TOY_BLACKLIST = [
-  "arise",
-  "cutie",
-  "love",
-  "lovey",
-  "4kt",
-  "fourkt",
-  "sajak",
-  "sajack",
-  "sano",
-  "sanok",
-  "seko",
-  "skeptikor",
-  "smok",
-  "smoke",
-  "dweeb",
-  "dweab",
-  "risk",
-  "kid",
-  "normal",
-  "goblin",
-  "seak",
-  "sleep",
-  "tint",
-  "freeze",
-  "ames",
-  "ame",
-  "chad",
-  "token",
-  "sour",
-  "saint",
-  "ecko",
-  "echo",
-  "cemo",
-  "mohammed hoch",
-  "mohammedhoch",
-  "calcium",
-  "cal",
-  "moyo",
-  "wd40",
-].map((s) => s.toLowerCase());
-const SYNONYM_GROUPS = [
-  [
-    "throwie",
-    "bubble letter",
-    "throw",
-    "bubbleletter",
-    "throw up",
-    "throwups",
-    "throwup",
-    "throw ups",
-  ],
-  [
-    "antistyle",
-    "anti style",
-    "anti",
-    "hipster graffiti",
-    "hipster graff",
-    "hipstergraff",
-    "hipstergraffiti",
-  ],
-  ["catch", "cache"],
-  ["ducky", "theportlandbee", "the portland bee", "bee"],
-  ["dove", "doves"],
-  ["VC", "HKC"],
-  ["salud", "saludpig", "salud pig", "pig"],
-  ["CTS", "TNL"],
-  ["OY!", "oh yes!", "ohyes!"],
-  [
-    "triangle",
-    "tri angle",
-    "cheese",
-    "cheesegrater",
-    "cheese grater",
-    "cheesegrater of death",
-  ],
-  ["ichabod","ich", "itch"],
-];
+const TAGGER_LIST_URL = "/assets/Tagger%20List.json";
+const TOY_LIST_URL = "/assets/Toy%20List.json";
+const SYNONYM_LIST_URL = "/assets/Synonym%20List.json";
+
+let TOY_BLACKLIST = [];
+let SYNONYM_MAP = {};
+let TAGGER_ICON_MAP = new Map();
+let listsLoaded = false;
+let listsPromise = null;
 function buildSynonymMap(groups) {
   const map = {};
   if (!Array.isArray(groups)) return map;
@@ -1374,7 +1305,65 @@ function buildSynonymMap(groups) {
   });
   return map;
 }
-const SYNONYM_MAP = buildSynonymMap(SYNONYM_GROUPS);
+async function fetchJsonFile(url) {
+  try {
+    const resp = await fetch(url, { cache: "no-store" });
+    if (!resp || !resp.ok) return null;
+    return await resp.json();
+  } catch (e) {
+    return null;
+  }
+}
+
+async function loadTaggerList() {
+  const data = await fetchJsonFile(TAGGER_LIST_URL);
+  if (!data || typeof data !== "object") return;
+  const map = new Map();
+  Object.keys(data).forEach((name) => {
+    const key = normalizeTaggerName(name);
+    if (!key) return;
+    const rawList = Array.isArray(data[name]) ? data[name] : [data[name]];
+    const tokens = [];
+    rawList.forEach((item) => {
+      splitIconTokens(item).forEach((token) => tokens.push(token));
+    });
+    map.set(key, tokens);
+  });
+  TAGGER_ICON_MAP = map;
+  if (typeof window !== "undefined") {
+    window.RAM_TAGGER_ICON_MAP = TAGGER_ICON_MAP;
+  }
+}
+
+async function loadToyList() {
+  const data = await fetchJsonFile(TOY_LIST_URL);
+  if (!Array.isArray(data)) return;
+  TOY_BLACKLIST = data
+    .map((s) => String(s || "").trim().toLowerCase())
+    .filter(Boolean);
+}
+
+async function loadSynonymList() {
+  const data = await fetchJsonFile(SYNONYM_LIST_URL);
+  if (!Array.isArray(data)) return;
+  SYNONYM_MAP = buildSynonymMap(data);
+}
+
+async function loadGalleryLists() {
+  try {
+    await Promise.all([loadTaggerList(), loadToyList(), loadSynonymList()]);
+  } finally {
+    listsLoaded = true;
+  }
+}
+
+function ensureListsLoaded() {
+  if (listsLoaded) return Promise.resolve();
+  if (!listsPromise) listsPromise = loadGalleryLists();
+  return listsPromise;
+}
+
+ensureListsLoaded();
 function showToyBlockedMessage() {
   if (!gallery) return;
   gallery.innerHTML = "";
@@ -1484,6 +1473,112 @@ function maybeExtractFreightFlags(parts) {
   }
   return { parts: copy, flags };
 }
+
+const MULTI_WORD_ICON_TOKENS = new Set([
+  "old head",
+  "circle t",
+  "helped id",
+  "freight writer",
+  "retired name",
+]);
+const KNOWN_ICON_KEYS = new Set([
+  "5g",
+  "bne",
+  "bomber",
+  "circlet",
+  "craft",
+  "cts",
+  "dpw",
+  "freight",
+  "helped id",
+  "locals",
+  "ltb",
+  "mgi",
+  "ohk",
+  "oldhead",
+  "ptg",
+  "retiredname",
+  "sdh",
+  "slt",
+  "tnl",
+  "vc",
+]);
+const ICON_LABEL_MAP = new Map([
+  ["circlet", "circle t"],
+  ["retiredname", "retired name"],
+  ["freight", "freight writer"],
+]);
+
+function normalizeTaggerName(value) {
+  return String(value || "").trim().toLowerCase();
+}
+
+function splitIconTokens(value) {
+  if (!value) return [];
+  const rawTokens = String(value || "")
+    .split(",")
+    .map((token) => token.trim())
+    .filter(Boolean);
+  const out = [];
+  rawTokens.forEach((token) => {
+    const lower = token.toLowerCase();
+    if (lower.includes(" ") && !MULTI_WORD_ICON_TOKENS.has(lower)) {
+      lower
+        .split(/\s+/)
+        .map((part) => part.trim())
+        .filter(Boolean)
+        .forEach((part) => out.push(part));
+    } else {
+      out.push(lower);
+    }
+  });
+  return out;
+}
+
+function normalizeIconToken(value) {
+  let token = String(value || "").trim().toLowerCase();
+  if (!token) return "";
+  token = token.replace(/\s+/g, " ").trim();
+  if (token === "helpedid") token = "helped id";
+  if (token === "local") token = "locals";
+  if (token === "locals") return "locals";
+  if (token === "old head") return "oldhead";
+  if (token === "oldhead") return "oldhead";
+  if (token === "circle t") return "circlet";
+  if (token === "circlet") return "circlet";
+  if (
+    token === "freight" ||
+    token === "freight writer" ||
+    token === "freightwriter" ||
+    token === "freights" ||
+    token === "frieght" ||
+    token === "frieghts"
+  )
+    return "freight";
+  if (token === "retired" || token === "retired name")
+    return "retiredname";
+  return token;
+}
+
+function getIconLabel(iconKey) {
+  if (!iconKey) return "";
+  return ICON_LABEL_MAP.get(iconKey) || iconKey;
+}
+
+function getDisplayIconsForTagger(taggerKey) {
+  const icons = TAGGER_ICON_MAP.get(taggerKey) || [];
+  const seen = new Set();
+  const out = [];
+  icons.forEach((icon) => {
+    const key = normalizeIconToken(icon);
+    if (!key || !KNOWN_ICON_KEYS.has(key)) return;
+    if (seen.has(key)) return;
+    seen.add(key);
+    out.push(key);
+  });
+  return out;
+}
+
 function parseLabelStringToMeta(labelText, srcHint, rawBaseHint) {
   const rawParts = String(labelText || "")
     .split("-")
@@ -1558,11 +1653,13 @@ const imagesList = metaList.map((m) => {
   return m.numericSrc;
 });
 function openModal(meta) {
+  let taggerPopup = null;
+  let taggerPopupRow = null;
   const backdrop = document.createElement("div");
   backdrop.className = "modal-backdrop";
 
   const modal = document.createElement("div");
-  modal.className = "modal";
+  modal.className = "modal modal-has-fullscreen-btn";
 
   const imgwrap = document.createElement("div");
   imgwrap.className = "modal-imgwrap";
@@ -1643,16 +1740,49 @@ function openModal(meta) {
   leftImg.style.filter = "invert(1)";
   rightImg.style.filter = "invert(1)";
 
+  const fullscreenBtn = document.createElement("button");
+  fullscreenBtn.className = "modal-fullscreen-btn";
+  fullscreenBtn.type = "button";
+  fullscreenBtn.setAttribute("aria-label", "Toggle fullscreen");
+  fullscreenBtn.textContent = "Fullscreen";
+
+  const fullscreenClose = document.createElement("button");
+  fullscreenClose.className = "modal-fullscreen-close hidden";
+  fullscreenClose.type = "button";
+  fullscreenClose.setAttribute("aria-label", "Close fullscreen");
+  fullscreenClose.textContent = "x";
+
   modal.appendChild(leftArrow);
   modal.appendChild(rightArrow);
+  modal.appendChild(fullscreenBtn);
+  modal.appendChild(fullscreenClose);
 
   const existingBackdrop = document.querySelector(".modal-backdrop");
   if (existingBackdrop && existingBackdrop.parentNode) {
     document.body.removeChild(existingBackdrop);
   }
 
+  taggerPopup = document.createElement("div");
+  taggerPopup.className = "tagger-icon-popup hidden";
+  taggerPopup.dataset.tagger = "";
+  taggerPopupRow = document.createElement("div");
+  taggerPopupRow.className = "tagger-icon-row";
+  taggerPopup.appendChild(taggerPopupRow);
+
   backdrop.appendChild(modal);
+  backdrop.appendChild(taggerPopup);
   document.body.appendChild(backdrop);
+
+  ensureListsLoaded().then(() => {
+    if (!backdrop.parentNode) return;
+    try {
+      setCaptionFromMeta(meta);
+    } catch (err) {
+      try {
+        caption.textContent = (meta && (meta.label || meta.rawBase)) || "";
+      } catch (e) {}
+    }
+  });
 
   const isDebug = (() => {
     try {
@@ -1699,7 +1829,127 @@ function openModal(meta) {
     return -1;
   };
 
+  let taggerButtons = [];
+  let activeTaggerKey = "";
+
+  const setActiveTaggerButton = (taggerKey) => {
+    activeTaggerKey = taggerKey || "";
+    taggerButtons.forEach(({ key, button }) => {
+      if (key === taggerKey) {
+        button.classList.add("active");
+      } else {
+        button.classList.remove("active");
+      }
+    });
+  };
+
+  const hideTaggerPopup = () => {
+    if (!taggerPopup) return;
+    taggerPopup.classList.add("hidden");
+    taggerPopup.dataset.tagger = "";
+    taggerPopup.style.visibility = "";
+    setActiveTaggerButton("");
+  };
+
+  const positionTaggerPopup = (anchorEl) => {
+    if (!taggerPopup || !anchorEl) return;
+    const rect = anchorEl.getBoundingClientRect();
+    const desiredLeft = rect.left + rect.width / 2;
+    const desiredTop = rect.bottom + 8;
+    taggerPopup.style.left = `${desiredLeft}px`;
+    taggerPopup.style.top = `${desiredTop}px`;
+    taggerPopup.style.transform = "translate(-50%, 0)";
+    taggerPopup.style.visibility = "hidden";
+    taggerPopup.classList.remove("hidden");
+
+    const popupRect = taggerPopup.getBoundingClientRect();
+    const half = popupRect.width / 2;
+    const minLeft = 8 + half;
+    const maxLeft = window.innerWidth - 8 - half;
+    let left = desiredLeft;
+    if (left < minLeft) left = minLeft;
+    if (left > maxLeft) left = maxLeft;
+
+    let top = desiredTop;
+    let transform = "translate(-50%, 0)";
+    if (top + popupRect.height > window.innerHeight - 8) {
+      top = rect.top - 8;
+      transform = "translate(-50%, -100%)";
+    }
+    if (top < 8) top = 8;
+
+    taggerPopup.style.left = `${left}px`;
+    taggerPopup.style.top = `${top}px`;
+    taggerPopup.style.transform = transform;
+    taggerPopup.style.visibility = "visible";
+  };
+
+  const renderTaggerPopup = (taggerKey, anchorEl) => {
+    if (!taggerPopup || !taggerPopupRow) return;
+    taggerPopupRow.innerHTML = "";
+    const icons = getDisplayIconsForTagger(taggerKey);
+    if (!icons.length) {
+      hideTaggerPopup();
+      return;
+    }
+
+    icons.forEach((iconKey) => {
+      const iconWrap = document.createElement("span");
+      iconWrap.className = "tagger-icon";
+      iconWrap.setAttribute("tabindex", "0");
+      const iconLabel = getIconLabel(iconKey);
+      iconWrap.dataset.label = iconLabel;
+      iconWrap.setAttribute("aria-label", iconLabel);
+      iconWrap.setAttribute("role", "img");
+
+      const img = document.createElement("img");
+      img.className = "tagger-icon-img";
+      img.alt = iconKey;
+      img.src = `/assets/GUI/icons/${encodeURIComponent(iconKey)}.png`;
+      img.onerror = () => {
+        if (iconWrap.parentNode) iconWrap.parentNode.removeChild(iconWrap);
+      };
+
+      iconWrap.appendChild(img);
+      taggerPopupRow.appendChild(iconWrap);
+    });
+
+    if (!taggerPopupRow.childElementCount) {
+      hideTaggerPopup();
+      return;
+    }
+
+    taggerPopup.dataset.tagger = taggerKey || "";
+    setActiveTaggerButton(taggerKey);
+    positionTaggerPopup(anchorEl);
+  };
+
+  const toggleTaggerPopup = (taggerName, anchorEl) => {
+    if (document.fullscreenElement) {
+      hideTaggerPopup();
+      return;
+    }
+    const taggerKey = normalizeTaggerName(taggerName);
+    if (!getDisplayIconsForTagger(taggerKey).length) return;
+    if (!taggerPopup) return;
+    const isOpen =
+      taggerPopup.dataset.tagger === taggerKey &&
+      !taggerPopup.classList.contains("hidden");
+    if (isOpen) {
+      hideTaggerPopup();
+      return;
+    }
+    renderTaggerPopup(taggerKey, anchorEl);
+  };
+
   const setCaptionFromMeta = (targetMeta) => {
+    hideTaggerPopup();
+    caption.innerHTML = "";
+    const inner = document.createElement("div");
+    inner.className = "caption-inner";
+    caption.appendChild(inner);
+    taggerButtons = [];
+
     if (isDebug) {
       const full =
         targetMeta && (targetMeta.label || targetMeta.rawBase)
@@ -1715,19 +1965,16 @@ function openModal(meta) {
           idx = null;
         }
       }
-      caption.textContent = full + (idx ? ` (${idx})` : "");
+      inner.textContent = full + (idx ? ` (${idx})` : "");
       return;
     }
 
-    let tagText = "";
     let photographerText = "";
 
-    if (targetMeta && Array.isArray(targetMeta.tags) && targetMeta.tags.length) {
-      tagText = targetMeta.tags.filter(Boolean).join(", ");
-    } else if (targetMeta && targetMeta.label) {
-      const dashParts = String(targetMeta.label).split("-");
-      if (dashParts.length > 0) tagText = dashParts[0].trim();
-    }
+    const taggers =
+      targetMeta && Array.isArray(targetMeta.tags)
+        ? targetMeta.tags.filter(Boolean)
+        : [];
 
     if (targetMeta && targetMeta.photographer) {
       photographerText = String(targetMeta.photographer)
@@ -1735,15 +1982,52 @@ function openModal(meta) {
         .filter(Boolean)[0];
     }
 
-    let captionText = "";
-    if (tagText) captionText = tagText;
-    if (photographerText) {
-      captionText +=
-        (captionText ? " " : "") + `flicked by ${photographerText}`;
+    const line = document.createElement("span");
+    line.className = "caption-line";
+    inner.appendChild(line);
+
+    let hasText = false;
+    if (taggers.length) {
+      const taggerRow = document.createElement("span");
+      taggerRow.className = "caption-tags";
+      taggers.forEach((tagger) => {
+        const key = normalizeTaggerName(tagger);
+        const hasIcons = getDisplayIconsForTagger(key).length > 0;
+        if (hasIcons) {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = "tagger-link";
+          button.textContent = tagger;
+          taggerButtons.push({ key, button });
+          button.addEventListener("click", (e) => {
+            e.stopPropagation();
+            toggleTaggerPopup(tagger, button);
+          });
+          taggerRow.appendChild(button);
+        } else {
+          const label = document.createElement("span");
+          label.className = "tagger-name";
+          label.textContent = tagger;
+          taggerRow.appendChild(label);
+        }
+      });
+      line.appendChild(taggerRow);
+      hasText = true;
     }
 
-    caption.textContent =
-      captionText || (targetMeta && targetMeta.rawBase) || "";
+    if (photographerText) {
+      const spacer = hasText ? " " : "";
+      line.appendChild(document.createTextNode(`${spacer}flicked by `));
+      const photo = document.createElement("span");
+      photo.className = "caption-photographer";
+      photo.textContent = photographerText;
+      line.appendChild(photo);
+      hasText = true;
+    }
+
+    if (!hasText) {
+      line.textContent = (targetMeta && targetMeta.rawBase) || "";
+    }
   };
 
   let activeList = resolveActiveList();
@@ -1862,16 +2146,119 @@ function openModal(meta) {
     img.style.visibility = "visible";
     img.style.display = "block";
     caption.style.visibility = "visible";
+    updateFullscreenFit();
+  };
+
+  function updateFullscreenLabel() {
+    const isFs = !!document.fullscreenElement;
+    fullscreenBtn.textContent = isFs ? "Exit Fullscreen" : "Fullscreen";
+    if (isFs) {
+      backdrop.classList.add("gallery-fullscreen");
+      modal.classList.add("gallery-fullscreen");
+      fullscreenClose.classList.remove("hidden");
+      hideTaggerPopup();
+    } else {
+      backdrop.classList.remove("gallery-fullscreen");
+      modal.classList.remove("gallery-fullscreen");
+      fullscreenClose.classList.add("hidden");
+    }
+    updateFullscreenFit();
+  }
+
+  function updateFullscreenFit() {
+    if (!document.fullscreenElement) {
+      modal.classList.remove("fs-tall");
+      modal.classList.remove("fs-wide");
+      img.style.width = "";
+      img.style.height = "";
+      img.style.maxWidth = "";
+      img.style.maxHeight = "";
+      try {
+        delete modal.dataset.tallFixedW;
+        delete modal.dataset.tallFixedH;
+      } catch (e) {}
+      return;
+    }
+
+    const naturalW = img.naturalWidth;
+    const naturalH = img.naturalHeight;
+    if (!naturalW || !naturalH) return;
+
+    const viewW = window.innerWidth || 1;
+    const viewH = window.innerHeight || 1;
+    if (naturalH > naturalW) {
+      modal.classList.remove("fs-tall");
+      modal.classList.remove("fs-wide");
+      const fixedW = parseInt(modal.dataset.tallFixedW || "", 10);
+      const fixedH = parseInt(modal.dataset.tallFixedH || "", 10);
+      if (fixedW > 0 && fixedH > 0) {
+        img.style.width = `${fixedW}px`;
+        img.style.height = `${fixedH}px`;
+        img.style.maxWidth = "";
+        img.style.maxHeight = "";
+        return;
+      }
+      const targetH = Math.max(1, Math.round(viewH * 0.5));
+      const targetW = Math.max(
+        1,
+        Math.round(targetH * (naturalW / naturalH)),
+      );
+      modal.dataset.tallFixedW = String(targetW);
+      modal.dataset.tallFixedH = String(targetH);
+      img.style.width = `${targetW}px`;
+      img.style.height = `${targetH}px`;
+      img.style.maxWidth = "";
+      img.style.maxHeight = "";
+      return;
+    }
+
+    try {
+      delete modal.dataset.tallFixedW;
+      delete modal.dataset.tallFixedH;
+    } catch (e) {}
+    img.style.width = "";
+    img.style.height = "";
+    img.style.maxWidth = "";
+    img.style.maxHeight = "";
+
+    const viewRatio = viewW / viewH;
+    const imgRatio = naturalW / naturalH;
+    if (imgRatio < viewRatio) {
+      modal.classList.add("fs-tall");
+      modal.classList.remove("fs-wide");
+    } else {
+      modal.classList.add("fs-wide");
+      modal.classList.remove("fs-tall");
+    }
+  }
+
+  const handleOutsideTaggerClick = (ev) => {
+    if (!taggerPopup || taggerPopup.classList.contains("hidden")) return;
+    if (taggerPopup.contains(ev.target)) return;
+    if (ev.target.closest && ev.target.closest(".tagger-link")) return;
+    hideTaggerPopup();
   };
 
   const closeModal = () => {
     modalLoadToken++;
+    try {
+      if (
+        document.fullscreenElement === backdrop ||
+        document.fullscreenElement === modal
+      ) {
+        if (document.exitFullscreen) document.exitFullscreen();
+      }
+    } catch (e) {}
     const cards = document.querySelectorAll(".card");
     cards.forEach((card) => card.classList.remove("highlighted"));
     if (backdrop.parentNode) {
       document.body.removeChild(backdrop);
     }
     document.removeEventListener("keydown", handleKeyboard);
+    document.removeEventListener("fullscreenchange", updateFullscreenLabel);
+    window.removeEventListener("resize", updateFullscreenFit);
+    document.removeEventListener("mousedown", handleOutsideTaggerClick, true);
+    hideTaggerPopup();
   };
 
   backdrop.addEventListener("click", (e) => {
@@ -1900,6 +2287,30 @@ function openModal(meta) {
   rightArrow.addEventListener("click", (e) => {
     e.stopPropagation();
     navigateTo(currentIndex + 1);
+  });
+
+  fullscreenBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    try {
+      if (document.fullscreenElement) {
+        if (document.exitFullscreen) document.exitFullscreen();
+        return;
+      }
+      const target = backdrop || modal;
+      if (target && target.requestFullscreen) {
+        target.requestFullscreen();
+      }
+    } catch (err) {}
+  });
+
+  document.addEventListener("fullscreenchange", updateFullscreenLabel);
+  updateFullscreenLabel();
+  window.addEventListener("resize", updateFullscreenFit);
+  document.addEventListener("mousedown", handleOutsideTaggerClick, true);
+
+  fullscreenClose.addEventListener("click", (e) => {
+    e.stopPropagation();
+    closeModal();
   });
 
   const handleKeyboard = (e) => {
@@ -2172,11 +2583,18 @@ function loadImageIntoCard(meta, card, wrap, placeholder, expectedLoadId) {
       meta && meta.candidates && meta.candidates.length
         ? meta.candidates.slice()
         : [meta.src];
-    const onWrapClick = (e) => {
-      e.stopPropagation();
+  const onWrapClick = (e) => {
+    if (e) e.stopPropagation();
+    try {
       openModal(meta);
-    };
-    wrap.addEventListener("click", onWrapClick);
+    } catch (err) {
+      try {
+        console.error(err);
+      } catch (e2) {}
+    }
+  };
+  wrap.addEventListener("click", onWrapClick);
+  wrap.addEventListener("pointerup", onWrapClick);
     let attemptIndex = 0;
     function tryNext() {
       if (expectedLoadId !== currentLoadId) {
@@ -2420,6 +2838,10 @@ function matchesFreightFilters(meta, filters) {
 }
 function filterGallery(q) {
   if (!gallery) return;
+  if (!listsLoaded) {
+    ensureListsLoaded().then(() => filterGallery(q));
+    return;
+  }
   q = (q || "").trim().toLowerCase();
   if (sortSelect) currentSort = sortSelect.value || currentSort;
   const freightFilters = getActiveFreightFilters();

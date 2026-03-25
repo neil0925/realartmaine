@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -20,12 +20,12 @@
       gtag("js", new Date());
       gtag("config", "G-HZ2XXFNT02");
     </script>
-    <title>Real Art Maine | Gallery</title>
+    <title>Real Art Maine | Hall of Fame</title>
     <link rel="stylesheet" href="/assets/css/style.css" />
 
     <link rel="icon" href="/assets/logo.png" type="image/png" />
   </head>
-  <body>
+  <body data-hall="fame">
     <style>
       html,
       body {
@@ -167,34 +167,40 @@
       </div>
     </nav>
 
-    <main style="flex: 1 1 auto">
-      <div class="search-bar">
-        <input
-          type="text"
-          id="searchInput"
-          placeholder="Search tags, crews, photographers, or styles..."
-          autocomplete="off"
-          autocorrect="off"
-          autocapitalize="off"
-          spellcheck="false"
-          inputmode="search"
-        />
-        <select
-          id="sortSelect"
-          aria-label="Sort results"
-          title="Sort results"
-          style="margin-left: 10px; padding: 8px; border-radius: 6px"
-        >
+    <main class="hall-main">
+      <header class="hall-header">
+        <h1 class="hall-page-title">Hall of Fame</h1>
+        <div class="hall-toggle" role="tablist" aria-label="Hall selector">
+          <a
+            href="/HallOfFame"
+            class="hall-toggle-link active"
+            role="tab"
+            aria-selected="true"
+            >Hall of Fame</a
+          >
+          <a
+            href="/HallOfShame"
+            class="hall-toggle-link"
+            role="tab"
+            aria-selected="false"
+            >Hall of Shame</a
+          >
+        </div>
+      </header>
+
+      <div class="search-bar hall-controls">
+        <select id="hallSortSelect" aria-label="Sort entries" title="Sort entries">
           <option value="newest">Newest</option>
           <option value="oldest">Oldest</option>
         </select>
       </div>
 
-      <div class="gallery" id="galleryContainer"></div>
+      <section class="hall-entries" id="hallEntries"></section>
     </main>
 
     <script src="/assets/js/maintenance.js"></script>
-    <script src="/assets/js/gallery.js"></script>
+    <script src="/assets/js/hall_labels.js"></script>
+    <script src="/assets/js/hall.js"></script>
     <script src="/assets/js/settings.js"></script>
     <script src="/assets/js/background.js"></script>
   </body>
