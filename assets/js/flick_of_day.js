@@ -47,6 +47,11 @@
     ["retiredname", "retired name"],
     ["freight", "freight writer"],
   ]);
+  const ICON_FILE_MAP = new Map([
+    ["freight", "freight writer"],
+    ["retiredname", "retired name"],
+    ["helped id", "helped id"],
+  ]);
   let taggerListPromise = null;
   let taggerIconMap = null;
   const PICK_STORAGE_KEY = "ram_flick_of_day_pick_v2";
@@ -160,6 +165,11 @@
   function getIconLabel(iconKey) {
     if (!iconKey) return "";
     return ICON_LABEL_MAP.get(iconKey) || iconKey;
+  }
+
+  function getIconFileName(iconKey) {
+    if (!iconKey) return "";
+    return ICON_FILE_MAP.get(iconKey) || iconKey;
   }
 
   function buildTaggerIconMap(data) {
@@ -476,6 +486,7 @@
 
     const modal = document.createElement("div");
     modal.className = "modal modal-has-fullscreen-btn flick-day-modal";
+    modal.classList.add("modal-loading");
 
     const imgWrap = document.createElement("div");
     imgWrap.className = "modal-imgwrap";
@@ -484,6 +495,12 @@
     img.className = "modal-image";
     img.alt = captionText || "Flick of the day";
     img.src = imageSrc;
+    img.addEventListener("load", () => {
+      modal.classList.remove("modal-loading");
+    });
+    img.addEventListener("error", () => {
+      modal.classList.remove("modal-loading");
+    });
 
     imgWrap.appendChild(img);
     modal.appendChild(imgWrap);
@@ -569,7 +586,8 @@
         const iconImg = document.createElement("img");
         iconImg.className = "tagger-icon-img";
         iconImg.alt = iconKey;
-        iconImg.src = `/assets/GUI/Icons/${encodeURIComponent(iconKey)}.png`;
+        const iconFile = getIconFileName(iconKey);
+        iconImg.src = `/assets/GUI/Icons/${encodeURIComponent(iconFile)}.png`;
         iconImg.onerror = () => {
           if (iconWrap.parentNode) iconWrap.parentNode.removeChild(iconWrap);
         };

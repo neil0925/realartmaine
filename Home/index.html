@@ -276,6 +276,37 @@
       .devlog-list li {
         margin: 0 0 4px 0;
       }
+      .devlog-bugs {
+        margin: 0;
+      }
+      .devlog-bugs summary {
+        list-style: none;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .devlog-bugs summary::-webkit-details-marker {
+        display: none;
+      }
+      .devlog-arrow {
+        width: 0;
+        height: 0;
+        border-left: 5px solid transparent;
+        border-right: 5px solid transparent;
+        border-top: 7px solid #dce1de;
+        transition: transform 0.15s ease;
+      }
+      .devlog-bugs[open] .devlog-arrow {
+        transform: rotate(180deg);
+      }
+      .devlog-sublist {
+        margin: 6px 0 0 18px;
+        padding: 0;
+      }
+      .devlog-sublist li {
+        margin: 0 0 4px 0;
+      }
       .devlog-note {
         margin: 0;
       }
@@ -511,9 +542,25 @@
               <p class="devlog-version">v1.3 added:</p>
               <ul class="devlog-list">
                 <li>icons</li>
-                <li>bug fixes</li>
+                <li>fullscreen button</li>
                 <li>hall of fame</li>
                 <li>hall of shame</li>
+                <li>
+                  <details class="devlog-bugs">
+                    <summary>bug fixes<span class="devlog-arrow"></span></summary>
+                    <ul class="devlog-sublist">
+                      <li>
+                        Fixed a bug where only photos from the freight gallery
+                        were on the flick of the day
+                      </li>
+                      <li>Fixed a bug where images didnt load when clicked on</li>
+                      <li>
+                        Fixed a bug where icons would not load and would show
+                        an empty frame
+                      </li>
+                    </ul>
+                  </details>
+                </li>
               </ul>
               <p class="devlog-note">
                 devnote: -reach out if we made any mastakes with the icons
@@ -526,6 +573,21 @@
                 <li>flick of the day</li>
                 <li>links</li>
                 <li>freights gallery</li>
+                <li>
+                  <details class="devlog-bugs">
+                    <summary>bug fixes<span class="devlog-arrow"></span></summary>
+                    <ul class="devlog-sublist">
+                      <li>
+                        Fixed a bug where images showed that they did not load
+                        despite being loaded
+                      </li>
+                      <li>
+                        Fixed a bug where the leaderboard thought that "piece"
+                        was a flicker
+                      </li>
+                    </ul>
+                  </details>
+                </li>
               </ul>
             </article>
           </div>

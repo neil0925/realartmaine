@@ -454,11 +454,23 @@
 
     const menus = Array.from(document.querySelectorAll("details.nav-menu"));
     if (!menus.length) return;
+    let backdrop = document.querySelector(".nav-menu-backdrop");
+    if (!backdrop) {
+      backdrop = document.createElement("div");
+      backdrop.className = "nav-menu-backdrop";
+      document.body.appendChild(backdrop);
+    }
+
+    function setBackdrop(isOpen) {
+      if (!backdrop) return;
+      backdrop.classList.toggle("active", !!isOpen);
+    }
 
     function closeAllMenus(except) {
       for (let i = 0; i < menus.length; i += 1) {
         if (menus[i] !== except) menus[i].open = false;
       }
+      if (!except) setBackdrop(false);
     }
 
     for (let i = 0; i < menus.length; i += 1) {
@@ -472,6 +484,13 @@
         const shouldOpen = !menu.open;
         closeAllMenus(menu);
         menu.open = shouldOpen;
+        setBackdrop(menu.open);
+      });
+    }
+
+    if (backdrop) {
+      backdrop.addEventListener("click", function () {
+        closeAllMenus(null);
       });
     }
 
@@ -479,11 +498,13 @@
       for (let i = 0; i < menus.length; i += 1) {
         if (!menus[i].contains(ev.target)) menus[i].open = false;
       }
+      setBackdrop(false);
     });
 
     document.addEventListener("keydown", function (ev) {
       if (ev.key !== "Escape") return;
       closeAllMenus(null);
+      setBackdrop(false);
     });
   }
 

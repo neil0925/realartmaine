@@ -952,6 +952,7 @@ FREIGHT_LABELS[50] = "egirl, agree-CRAFT-thesaltysardine9-straightletter-n-n-y";
 
 
 if (typeof window !== "undefined") {
+  window.IMAGE_LABELS = IMAGE_LABELS;
   window.FREIGHT_LABELS = FREIGHT_LABELS;
 }
 const PAGE_PATHNAME = String(window.location.pathname || "").toLowerCase();
@@ -1508,6 +1509,11 @@ const ICON_LABEL_MAP = new Map([
   ["retiredname", "retired name"],
   ["freight", "freight writer"],
 ]);
+const ICON_FILE_MAP = new Map([
+  ["freight", "freight writer"],
+  ["retiredname", "retired name"],
+  ["helped id", "helped id"],
+]);
 
 function normalizeTaggerName(value) {
   return String(value || "").trim().toLowerCase();
@@ -1563,6 +1569,11 @@ function normalizeIconToken(value) {
 function getIconLabel(iconKey) {
   if (!iconKey) return "";
   return ICON_LABEL_MAP.get(iconKey) || iconKey;
+}
+
+function getIconFileName(iconKey) {
+  if (!iconKey) return "";
+  return ICON_FILE_MAP.get(iconKey) || iconKey;
 }
 
 function getDisplayIconsForTagger(taggerKey) {
@@ -1905,7 +1916,8 @@ function openModal(meta) {
       const img = document.createElement("img");
       img.className = "tagger-icon-img";
       img.alt = iconKey;
-      img.src = `/assets/GUI/Icons/${encodeURIComponent(iconKey)}.png`;
+      const iconFile = getIconFileName(iconKey);
+      img.src = `/assets/GUI/Icons/${encodeURIComponent(iconFile)}.png`;
       img.onerror = () => {
         if (iconWrap.parentNode) iconWrap.parentNode.removeChild(iconWrap);
       };

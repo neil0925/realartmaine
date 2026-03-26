@@ -871,6 +871,7 @@ nav .nav-menu-panel {
   padding: 8px;
   z-index: 2000;
   box-shadow: 0 10px 26px rgba(0, 0, 0, 0.25);
+  pointer-events: auto;
 }
 nav .nav-menu[open] .nav-menu-panel {
   display: flex;
@@ -887,6 +888,16 @@ nav .nav-menu-panel a {
 }
 nav .nav-menu-panel a:hover {
   background: rgba(255, 255, 255, 0.12);
+}
+.nav-menu-backdrop {
+  position: fixed;
+  inset: 0;
+  background: transparent;
+  z-index: 1500;
+  display: none;
+}
+.nav-menu-backdrop.active {
+  display: block;
 }
 @media (max-width: 700px) {
   nav .nav-left > a {
@@ -1320,6 +1331,10 @@ footer hr {
 .modal.modal-loading .modal-imgwrap {
   background: transparent;
   min-height: min(58vh, 520px);
+}
+.modal.modal-loading .modal-fullscreen-btn,
+.modal.modal-loading .modal-fullscreen-close {
+  display: none;
 }
 .modal.modal-loading .modal-spinner {
   width: 62px;
