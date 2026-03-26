@@ -1209,25 +1209,30 @@ footer hr {
 }
 .modal .caption {
   margin: 0 -16px;
-  padding: 12px 16px;
+  padding: 20px 16px 12px;
   background: transparent;
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
   border-radius: 0;
 }
 .modal .caption .caption-inner {
   background-color: transparent;
   background-image: none;
   border: none;
-  padding: 6px 10px;
+  padding: 0 10px 6px;
   border-radius: 6px;
   color: #30513d;
   font-weight: 600;
-  display: inline-block;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
 }
 .caption-line {
-  display: inline;
+  display: block;
+  width: 100%;
+  text-align: center;
 }
 .caption-tags {
   display: inline;
@@ -1260,6 +1265,50 @@ footer hr {
   text-decoration: none;
 }
 .caption-photographer {
+  font-weight: 600;
+}
+.favorite-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: 0;
+}
+.favorite-row {
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+  margin-top: 20px;
+}
+.favorite-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  width: 45px;
+  height: 45px;
+}
+.favorite-spinner {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid rgba(48, 81, 61, 0.25);
+  border-top-color: rgba(48, 81, 61, 0.7);
+  animation: spin 0.9s linear infinite;
+  display: block;
+}
+.favorite-spinner.hidden {
+  display: none;
+}
+.favorite-btn img {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+  display: block;
+}
+.favorite-count {
   font-weight: 600;
 }
 .tagger-icon-row {
@@ -1497,7 +1546,7 @@ footer hr {
 }
 .modal-imgwrap {
   margin: 0 -16px;
-  padding: 16px;
+  padding: 16px 16px 0;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -1513,6 +1562,10 @@ footer hr {
   height: auto;
   object-fit: contain;
   display: block;
+}
+.modal .favorite-btn img {
+  width: 30px;
+  height: 30px;
 }
 @media (max-width: 600px) {
   .modal-backdrop {
@@ -1741,6 +1794,24 @@ img {
   background-image: url("/assets/GUI/tile.png") !important;
   background-repeat: repeat !important;
   background-size: 400px 400px !important;
+}
+nav {
+  position: relative;
+  z-index: 100000;
+}
+.settings-dropdown {
+  z-index: 100001;
+}
+.dropdown-content {
+  z-index: 100002;
+}
+@media (max-width: 700px) {
+  #searchInput::placeholder,
+  #searchInput::-webkit-input-placeholder,
+  #searchInput::-moz-placeholder,
+  #searchInput:-ms-input-placeholder {
+    font-size: 0.82em;
+  }
 }
 
 /* Hall of Fame/Shame */

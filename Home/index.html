@@ -138,6 +138,32 @@
         height: auto;
         display: block;
       }
+      .friend-banner-section {
+        width: 100%;
+        margin: 0;
+        padding: 0;
+      }
+      .friend-banner-text {
+        margin: 50px 20px 0 20px;
+        text-align: center;
+        color: #30513d;
+        font-family: var(--ram-font8);
+        font-size: clamp(1rem, 2vw, 1.2rem);
+      }
+      .friend-banner {
+        margin: 20px 5px 0 5px;
+        padding: 0;
+        border: none;
+        background: transparent;
+        cursor: pointer;
+        display: block;
+        width: calc(100% - 10px);
+      }
+      .friend-banner img {
+        width: 100%;
+        height: auto;
+        display: block;
+      }
       .home-feature-row {
         width: 100%;
         display: flex;
@@ -429,7 +455,7 @@
       }
       .home-scroll-space {
         width: 100%;
-        height: clamp(180px, 28vh, 360px);
+        height: 40px;
       }
       @media (max-width: 1180px) {
         .home-feature-row {
@@ -515,6 +541,20 @@
         Explore our gallery to see tags, crews, and styles captured by
         photographers and artists from around the state.
       </p>
+      <div class="friend-banner-section">
+        <p class="friend-banner-text">
+          Check out our friend and one of our best flickers website at:
+        </p>
+        <button
+          type="button"
+          class="banner friend-banner js-external-link"
+          data-url="https://netscape.page/"
+          data-site="netscape.page"
+          aria-label="Open netscape.page"
+        >
+          <img src="/assets/GUI/NetscapeBanner.jpg" alt="Netscape banner" />
+        </button>
+      </div>
       <div class="home-feature-row">
         <section class="flick-day" aria-labelledby="flickDayTitle">
           <div class="flick-day-inner">
@@ -538,6 +578,14 @@
         <aside class="devlog-box" aria-labelledby="devlogTitle">
           <h3 id="devlogTitle">Devlog</h3>
           <div id="devlogScroll" class="devlog-scroll">
+            <article class="devlog-entry">
+              <p class="devlog-version">v1.4 added:</p>
+              <ul class="devlog-list">
+                <li>Favorite system</li>
+                <li>New filters for the leaderboard</li>
+                <li>new search bar display setting</li>
+              </ul>
+            </article>
             <article class="devlog-entry">
               <p class="devlog-version">v1.3 added:</p>
               <ul class="devlog-list">
@@ -675,6 +723,7 @@
     </footer>
 
     <script src="/assets/js/maintenance.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="/assets/js/gallery.js"></script>
     <script src="/assets/js/flick_of_day.js"></script>
     <script src="/assets/js/devlog_links.js"></script>

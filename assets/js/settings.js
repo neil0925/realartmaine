@@ -2,12 +2,16 @@
   const IMAGE_CACHE = "realart-image-cache-v2";
   const IMAGE_REVALIDATION_STATE_KEY = "ram_image_revalidation_state_v1";
   const SCROLL_TOP_PREF_KEY = "ram_scroll_top_button_enabled_v1";
+  const SCROLL_PLACEHOLDER_PREF_KEY =
+    "ram_scroll_placeholder_enabled_v1";
   const SAVE_LAST_LEADERBOARD_PREF_KEY = "ram_save_last_leaderboard_enabled_v1";
   const SCROLL_TOP_BUTTON_ID = "ram-scroll-top-button";
   const FONT_FAMILY = "var(--ram-font8, Arial, Helvetica, sans-serif)";
   const FRAME_TEXT = "#30513d";
   const JUMP_TOP_HELP_TEXT =
     "Lets users jump to the top of a page with a button when scrolling up";
+  const SCROLL_PLACEHOLDER_HELP_TEXT =
+    "Scrolls the search bar placeholder text after 10 seconds";
   const SAVE_LAST_LEADERBOARD_HELP_TEXT =
     "Saves last leaderboard source and filter for the next time they visit instead of always resetting to Gallery Top Flickers";
   const CHECK_ICON = (function () {
@@ -508,6 +512,25 @@
     });
   }
 
+  function getScrollPlaceholderSetting() {
+    try {
+      const raw = localStorage.getItem(SCROLL_PLACEHOLDER_PREF_KEY);
+      if (raw === null) return true;
+      return raw === "1";
+    } catch (e) {
+      return true;
+    }
+  }
+
+  function saveScrollPlaceholderSetting(enabled) {
+    try {
+      localStorage.setItem(
+        SCROLL_PLACEHOLDER_PREF_KEY,
+        enabled ? "1" : "0",
+      );
+    } catch (e) {}
+  }
+
   function createSettingsUI() {
     bindMobileNavMenuBehavior();
     const pageType = getPageType();
@@ -534,6 +557,8 @@
     }
     const isGalleryLike =
       pageType === "gallery" || pageType === "freights" || pageType === "hall";
+    const showSearchPlaceholderToggle =
+      pageType === "gallery" || pageType === "freights";
     if (!isGalleryLike && pageType !== "leaderboard") {
       container.style.display = "none";
       return;
@@ -579,6 +604,16 @@
     );
     dropdown.appendChild(jumpTopToggle.row);
 
+    let searchPlaceholderToggle = null;
+    if (showSearchPlaceholderToggle) {
+      searchPlaceholderToggle = createToggleRow(
+        "Scrolling search bar",
+        getScrollPlaceholderSetting(),
+        SCROLL_PLACEHOLDER_HELP_TEXT,
+      );
+      dropdown.appendChild(searchPlaceholderToggle.row);
+    }
+
     let saveLeaderboardToggle = null;
     if (pageType === "leaderboard") {
       saveLeaderboardToggle = createToggleRow(
@@ -605,6 +640,20 @@
     if (saveLeaderboardToggle) {
       saveLeaderboardToggle.checkbox.addEventListener("change", function () {
         saveLastLeaderboardSetting(!!saveLeaderboardToggle.checkbox.checked);
+      });
+    }
+
+    if (searchPlaceholderToggle) {
+      searchPlaceholderToggle.checkbox.addEventListener("change", function () {
+        const enabled = !!searchPlaceholderToggle.checkbox.checked;
+        saveScrollPlaceholderSetting(enabled);
+        try {
+          window.dispatchEvent(
+            new CustomEvent("ramSearchPlaceholderToggle", {
+              detail: { enabled },
+            }),
+          );
+        } catch (e) {}
       });
     }
 

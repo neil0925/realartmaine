@@ -277,7 +277,7 @@
           flex-wrap: wrap;
         }
         .freight-search-bar #searchInput {
-          width: min(620px, 90vw);
+          width: min(480px, 86vw);
           order: 2;
         }
         .freight-filter-dropdown {
@@ -377,6 +377,8 @@
         >
           <option value="newest">Newest</option>
           <option value="oldest">Oldest</option>
+          <option value="favorites">Your Favorites</option>
+          <option value="most_favorites">Most Favorites</option>
         </select>
       </div>
 
@@ -384,6 +386,8 @@
     </main>
 
     <script src="/assets/js/maintenance.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/assets/js/uid.js"></script>
     <script src="/assets/js/gallery.js"></script>
     <script src="/assets/js/settings.js"></script>
     <script src="/assets/js/background.js"></script>

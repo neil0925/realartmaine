@@ -38,8 +38,15 @@
         text-align: center;
         margin: 8px 0 18px 0;
       }
-      .leaderboard-controls {
+      .leaderboard-filters {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 14px;
         margin: 0 0 14px 0;
+      }
+      .leaderboard-controls {
+        margin: 0;
         text-align: center;
       }
       .leaderboard-controls select {
@@ -238,6 +245,7 @@
 
     <script src="/assets/js/maintenance.js"></script>
     <script src="/assets/js/gallery.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="/assets/js/leaderboard.js"></script>
     <script src="/assets/js/settings.js"></script>
     <script src="/assets/js/background.js"></script>

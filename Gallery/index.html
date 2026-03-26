@@ -126,6 +126,73 @@
       .nav-left a::after {
         display: none !important;
       }
+      .gallery-search-bar {
+        --gallery-bar-shift: -52px;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(260px, 420px) minmax(
+            0,
+            1fr
+          );
+        align-items: center;
+        column-gap: 10px;
+        row-gap: 10px;
+        width: 100%;
+        max-width: 100%;
+        margin: 20px 0;
+        position: relative;
+        z-index: 9000;
+        overflow: visible;
+      }
+      .gallery-search-bar .gallery-search-spacer {
+        grid-column: 1;
+        justify-self: end;
+        width: 38px;
+        height: 36px;
+        opacity: 0;
+        pointer-events: none;
+        transform: translateX(var(--gallery-bar-shift));
+      }
+      .gallery-search-bar #searchInput {
+        grid-column: 2;
+        width: 100%;
+        min-width: 0;
+        max-width: 420px;
+        justify-self: center;
+        transform: translateX(var(--gallery-bar-shift));
+      }
+      .gallery-search-bar #sortSelect {
+        grid-column: 3;
+        justify-self: start;
+        margin-left: 0 !important;
+        transform: translateX(var(--gallery-bar-shift));
+      }
+      @media (max-width: 700px) {
+        .gallery-search-bar {
+          --gallery-bar-shift: 0px;
+          width: 100%;
+          max-width: none;
+          margin-left: 0;
+          margin-right: 0;
+          padding: 0 10px;
+          margin-top: 20px;
+          margin-bottom: 20px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          flex-wrap: wrap;
+        }
+        .gallery-search-bar .gallery-search-spacer {
+          display: none;
+        }
+        .gallery-search-bar #searchInput {
+          width: min(480px, 86vw);
+          order: 1;
+        }
+        .gallery-search-bar #sortSelect {
+          order: 2;
+        }
+      }
     </style>
     <nav>
       <div class="nav-left">
@@ -168,7 +235,8 @@
     </nav>
 
     <main style="flex: 1 1 auto">
-      <div class="search-bar">
+      <div class="search-bar gallery-search-bar">
+        <div class="gallery-search-spacer" aria-hidden="true"></div>
         <input
           type="text"
           id="searchInput"
@@ -183,10 +251,12 @@
           id="sortSelect"
           aria-label="Sort results"
           title="Sort results"
-          style="margin-left: 10px; padding: 8px; border-radius: 6px"
+          style="margin-left: 0; padding: 8px; border-radius: 6px"
         >
           <option value="newest">Newest</option>
           <option value="oldest">Oldest</option>
+          <option value="favorites">Your Favorites</option>
+          <option value="most_favorites">Most Favorites</option>
         </select>
       </div>
 
@@ -194,6 +264,8 @@
     </main>
 
     <script src="/assets/js/maintenance.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/assets/js/uid.js"></script>
     <script src="/assets/js/gallery.js"></script>
     <script src="/assets/js/settings.js"></script>
     <script src="/assets/js/background.js"></script>

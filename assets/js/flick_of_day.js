@@ -58,6 +58,138 @@
   const DAY_CHECK_INTERVAL_MS = 60000;
   let autoRefreshTimer = null;
   let renderToken = 0;
+  const SUPABASE_URL = "https://ydojwnfxxnwwppfuadwl.supabase.co";
+  const SUPABASE_KEY = "sb_publishable_DolnQT7u83wmDg4otUDBuQ_yMR1d26I";
+  const FAVORITES_TABLE = "favorites";
+  const FAVORITE_ICON_SRC = "/assets/GUI/Favorite.png";
+  const UNFAVORITE_ICON_SRC = "/assets/GUI/Unfavorite.png";
+  let supabaseClient = null;
+  let userFavorites = new Set();
+  let favoriteCounts = new Map();
+
+  function getSupabaseClient() {
+    if (supabaseClient) return supabaseClient;
+    try {
+      if (window.supabase && typeof window.supabase.createClient === "function") {
+        supabaseClient = window.supabase.createClient(
+          SUPABASE_URL,
+          SUPABASE_KEY,
+        );
+      }
+    } catch (e) {}
+    return supabaseClient;
+  }
+
+  function getGalleryUIDSafe() {
+    try {
+      if (typeof window.getGalleryUID === "function") {
+        return window.getGalleryUID();
+      }
+      if (typeof window.getUID === "function") return window.getUID();
+    } catch (e) {}
+    try {
+      let uid = localStorage.getItem("gallery_uid");
+      if (!uid) {
+        uid =
+          typeof crypto !== "undefined" && crypto.randomUUID
+            ? crypto.randomUUID()
+            : `uid_${Date.now()}_${Math.random().toString(16).slice(2)}`;
+        localStorage.setItem("gallery_uid", uid);
+      }
+      return uid;
+    } catch (e) {}
+    return null;
+  }
+
+  function getItemIdFromEntry(entry) {
+    if (!entry) return "";
+    const prefix = entry.source === "freights" ? "freights" : "gallery";
+    const idx = entry.index;
+    if (idx === undefined || idx === null || idx === "") return "";
+    return `${prefix}:${idx}`;
+  }
+
+  function formatFavoriteCount(value) {
+    const count = Number(value || 0);
+    if (!Number.isFinite(count) || count <= 0) return "0";
+    if (count < 1000) return String(count);
+    if (count < 1_000_000) {
+      const v = count / 1000;
+      const label = v >= 10 ? Math.round(v) : Math.round(v * 10) / 10;
+      return `${label}`.replace(/\.0$/, "") + "k";
+    }
+    if (count < 1_000_000_000) {
+      const v = count / 1_000_000;
+      const label = v >= 10 ? Math.round(v) : Math.round(v * 10) / 10;
+      return `${label}`.replace(/\.0$/, "") + "m";
+    }
+    const v = count / 1_000_000_000;
+    const label = v >= 10 ? Math.round(v) : Math.round(v * 10) / 10;
+    return `${label}`.replace(/\.0$/, "") + "b";
+  }
+
+  async function fetchFavoriteCount(itemId) {
+    if (!itemId) return null;
+    const client = getSupabaseClient();
+    if (!client) return null;
+    const { count } = await client
+      .from(FAVORITES_TABLE)
+      .select("id", { count: "exact", head: true })
+      .eq("item_id", itemId);
+    if (typeof count === "number") {
+      favoriteCounts.set(itemId, count);
+      return count;
+    }
+    return null;
+  }
+
+  async function fetchUserFavoriteState(itemId) {
+    if (!itemId) return null;
+    const client = getSupabaseClient();
+    const uid = getGalleryUIDSafe();
+    if (!client || !uid) return null;
+    const { data } = await client
+      .from(FAVORITES_TABLE)
+      .select("id")
+      .eq("user_uid", uid)
+      .eq("item_id", itemId)
+      .limit(1);
+    const isFav = Array.isArray(data) && data.length > 0;
+    if (isFav) userFavorites.add(itemId);
+    else userFavorites.delete(itemId);
+    return isFav;
+  }
+
+  async function addFavorite(itemId) {
+    if (!itemId) return false;
+    const client = getSupabaseClient();
+    const uid = getGalleryUIDSafe();
+    if (!client || !uid) return false;
+    const { error } = await client
+      .from(FAVORITES_TABLE)
+      .insert({ user_uid: uid, item_id: itemId });
+    if (error) return false;
+    userFavorites.add(itemId);
+    favoriteCounts.set(itemId, (favoriteCounts.get(itemId) || 0) + 1);
+    return true;
+  }
+
+  async function removeFavorite(itemId) {
+    if (!itemId) return false;
+    const client = getSupabaseClient();
+    const uid = getGalleryUIDSafe();
+    if (!client || !uid) return false;
+    const { error } = await client
+      .from(FAVORITES_TABLE)
+      .delete()
+      .eq("user_uid", uid)
+      .eq("item_id", itemId);
+    if (error) return false;
+    userFavorites.delete(itemId);
+    const next = Math.max(0, (favoriteCounts.get(itemId) || 1) - 1);
+    favoriteCounts.set(itemId, next);
+    return true;
+  }
 
   function parseFlagToken(value) {
     const token = String(value || "").trim().toLowerCase();
@@ -464,7 +596,7 @@
     });
   }
 
-  function openSpotlight(imageSrc, captionParts, captionText) {
+  function openSpotlight(imageSrc, captionParts, captionText, entry) {
     if (!imageSrc) return;
 
     const existing = document.querySelector(".modal-backdrop");
@@ -508,10 +640,13 @@
     const caption = document.createElement("div");
     caption.className = "caption";
     const parts = captionParts || { tags: [], photographer: "" };
+    const favoriteEntry = entry || null;
     let taggerPopup = null;
     let taggerPopupRow = null;
     let taggerButtons = [];
     let activeTaggerKey = "";
+    let favoriteState = null;
+    let favoriteRequestToken = 0;
 
     const setActiveTaggerButton = (taggerKey) => {
       activeTaggerKey = taggerKey || "";
@@ -624,6 +759,47 @@
       renderTaggerPopup(taggerKey, anchorEl);
     };
 
+    const setFavoriteUI = (state) => {
+      if (!state || !state.button || !state.icon || !state.countEl) return;
+      if (state.spinner) {
+        state.spinner.classList.add("hidden");
+        state.icon.style.display = "block";
+        state.button.disabled = false;
+        state.button.setAttribute("aria-busy", "false");
+      }
+      const isFav = userFavorites.has(state.itemId);
+      state.icon.src = isFav ? UNFAVORITE_ICON_SRC : FAVORITE_ICON_SRC;
+      state.icon.alt = isFav ? "Unfavorite" : "Favorite";
+      const countValue =
+        favoriteCounts.get(state.itemId) != null
+          ? favoriteCounts.get(state.itemId)
+          : 0;
+      state.countEl.textContent = formatFavoriteCount(countValue);
+    };
+
+    const loadFavoriteState = async (itemId, token) => {
+      if (!itemId) return;
+      try {
+        await fetchUserFavoriteState(itemId);
+        await fetchFavoriteCount(itemId);
+      } catch (e) {}
+      if (token !== favoriteRequestToken) return;
+      if (favoriteState && favoriteState.itemId === itemId) {
+        setFavoriteUI(favoriteState);
+      }
+    };
+
+    const toggleFavorite = async (state) => {
+      if (!state || !state.itemId) return;
+      const itemId = state.itemId;
+      const isFav = userFavorites.has(itemId);
+      let ok = false;
+      if (isFav) ok = await removeFavorite(itemId);
+      else ok = await addFavorite(itemId);
+      if (!ok) return;
+      setFavoriteUI(state);
+    };
+
     const renderCaption = () => {
       caption.innerHTML = "";
       const inner = document.createElement("div");
@@ -633,6 +809,8 @@
       inner.appendChild(line);
       caption.appendChild(inner);
       taggerButtons = [];
+      favoriteState = null;
+      favoriteRequestToken += 1;
 
       const taggers = Array.isArray(parts.tags) ? parts.tags.filter(Boolean) : [];
       let hasText = false;
@@ -673,6 +851,50 @@
         photo.textContent = parts.photographer;
         line.appendChild(photo);
         hasText = true;
+      }
+
+      const itemId = getItemIdFromEntry(favoriteEntry);
+      const clientReady = !!getSupabaseClient();
+      const uidReady = !!getGalleryUIDSafe();
+      if (itemId && clientReady && uidReady) {
+        const token = favoriteRequestToken;
+        const action = document.createElement("span");
+        action.className = "favorite-action";
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "favorite-btn";
+        button.style.width = "45px";
+        button.style.height = "45px";
+        button.disabled = true;
+        button.setAttribute("aria-busy", "true");
+        const spinner = document.createElement("span");
+        spinner.className = "favorite-spinner";
+        const icon = document.createElement("img");
+        icon.src = FAVORITE_ICON_SRC;
+        icon.alt = "Favorite";
+        icon.style.width = "30px";
+        icon.style.height = "30px";
+        icon.style.objectFit = "contain";
+        icon.style.display = "none";
+        button.appendChild(spinner);
+        button.appendChild(icon);
+        const countEl = document.createElement("span");
+        countEl.className = "favorite-count";
+        countEl.textContent = "...";
+        action.appendChild(button);
+        action.appendChild(countEl);
+        const favoriteRow = document.createElement("div");
+        favoriteRow.className = "favorite-row";
+        favoriteRow.appendChild(action);
+        inner.appendChild(favoriteRow);
+
+        favoriteState = { itemId, button, icon, countEl, spinner };
+        loadFavoriteState(itemId, token).catch(() => {});
+
+        button.addEventListener("click", (e) => {
+          e.stopPropagation();
+          toggleFavorite(favoriteState).catch(() => {});
+        });
       }
 
       if (!hasText) {
@@ -752,32 +974,6 @@
 
       const viewW = window.innerWidth || 1;
       const viewH = window.innerHeight || 1;
-      if (naturalH > naturalW) {
-        modal.classList.remove("fs-tall");
-        modal.classList.remove("fs-wide");
-        const fixedW = parseInt(modal.dataset.tallFixedW || "", 10);
-        const fixedH = parseInt(modal.dataset.tallFixedH || "", 10);
-        if (fixedW > 0 && fixedH > 0) {
-          img.style.width = `${fixedW}px`;
-          img.style.height = `${fixedH}px`;
-          img.style.maxWidth = "";
-          img.style.maxHeight = "";
-          return;
-        }
-        const targetH = Math.max(1, Math.round(viewH * 0.5));
-        const targetW = Math.max(
-          1,
-          Math.round(targetH * (naturalW / naturalH)),
-        );
-        modal.dataset.tallFixedW = String(targetW);
-        modal.dataset.tallFixedH = String(targetH);
-        img.style.width = `${targetW}px`;
-        img.style.height = `${targetH}px`;
-        img.style.maxWidth = "";
-        img.style.maxHeight = "";
-        return;
-      }
-
       try {
         delete modal.dataset.tallFixedW;
         delete modal.dataset.tallFixedH;
@@ -956,7 +1152,7 @@
         }
 
         card.onclick = function () {
-          openSpotlight(src, captionParts, captionText);
+          openSpotlight(src, captionParts, captionText, picked);
         };
       });
     };

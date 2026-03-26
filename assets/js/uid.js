@@ -1,5 +1,6 @@
 (function () {
-  const KEY = "ram_uid";
+  const GALLERY_KEY = "gallery_uid";
+  const LEGACY_KEY = "ram_uid";
   function createUID() {
     if (typeof crypto !== "undefined" && crypto.randomUUID)
       return crypto.randomUUID();
@@ -12,14 +13,22 @@
   }
   function getStoredUID() {
     try {
-      return localStorage.getItem(KEY) || localStorage.userId || null;
+      return (
+        localStorage.getItem(GALLERY_KEY) ||
+        localStorage.getItem(LEGACY_KEY) ||
+        localStorage.userId ||
+        null
+      );
     } catch (e) {
       return null;
     }
   }
   function saveLocalUID(uid) {
     try {
-      localStorage.setItem(KEY, uid);
+      localStorage.setItem(GALLERY_KEY, uid);
+      try {
+        localStorage.setItem(LEGACY_KEY, uid);
+      } catch (e) {}
       try {
         localStorage.userId = uid;
       } catch (e) {}
@@ -45,12 +54,11 @@
         } catch (err) {
           console.warn("[UID] registerUser failed, user saved locally:", err);
         }
-      } else {
-        console.warn(
-          "[UID] window.registerUser not available; user saved locally only",
-        );
       }
     }
+    window.getGalleryUID = function () {
+      return getStoredUID();
+    };
     window.getUID = function () {
       return getStoredUID();
     };

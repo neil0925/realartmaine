@@ -1,3 +1,4 @@
+(function () {
 function escapeHtml(value) {
   return String(value).replace(
     /[&<>\"]/g,
@@ -7,11 +8,30 @@ function escapeHtml(value) {
 
 const LEADERBOARD_VIEW_KEY = "ram_leaderboard_view_v1";
 const LEADERBOARD_SOURCE_KEY = "ram_leaderboard_source_v1";
+const LEADERBOARD_METRIC_KEY = "ram_leaderboard_metric_v1";
 const SAVE_LAST_LEADERBOARD_PREF_KEY = "ram_save_last_leaderboard_enabled_v1";
 const LEADERBOARD_VIEW_PARAM = "view";
 const LEADERBOARD_SOURCE_PARAM = "source";
+const LEADERBOARD_METRIC_PARAM = "metric";
 const DEFAULT_LEADERBOARD_VIEW = "flickers";
 const DEFAULT_LEADERBOARD_SOURCE = "gallery";
+const DEFAULT_LEADERBOARD_METRIC = "presence";
+const SUPABASE_URL = "https://ydojwnfxxnwwppfuadwl.supabase.co";
+const SUPABASE_KEY = "sb_publishable_DolnQT7u83wmDg4otUDBuQ_yMR1d26I";
+const FAVORITES_TABLE = "favorites";
+let supabaseClient = null;
+const favoriteCountsBySource = {
+  gallery: null,
+  freights: null,
+};
+const favoriteCountsPromiseBySource = {
+  gallery: null,
+  freights: null,
+};
+const favoriteLeaderboardsBySource = {
+  gallery: null,
+  freights: null,
+};
 const LEADERBOARD_FALLBACK_SYNONYM_GROUPS = [
   [
     "throwie",
@@ -68,6 +88,14 @@ const VIEW_DEFS = {
     empty: "No tags found.",
   },
 };
+const METRIC_DEFS = {
+  presence: {
+    option: "Presence",
+  },
+  favorites: {
+    option: "Most Favorites",
+  },
+};
 const SOURCE_DEFS = {
   gallery: {
     option: "Gallery",
@@ -90,6 +118,14 @@ function normalizeSourceKey(source) {
   return key;
 }
 
+function normalizeMetricKey(metric) {
+  const key = String(metric || "").trim().toLowerCase();
+  if (key === "most favorites" || key === "most_favorites") return "favorites";
+  if (key === "favorite" || key === "favorites") return "favorites";
+  if (key === "presence" || key === "standard") return "presence";
+  return key;
+}
+
 function isValidView(view) {
   return !!view && Object.prototype.hasOwnProperty.call(VIEW_DEFS, view);
 }
@@ -98,8 +134,25 @@ function isValidSource(source) {
   return !!source && Object.prototype.hasOwnProperty.call(SOURCE_DEFS, source);
 }
 
+function isValidMetric(metric) {
+  return !!metric && Object.prototype.hasOwnProperty.call(METRIC_DEFS, metric);
+}
+
 function normalizeText(value) {
   return String(value || "").replace(/\s+/g, " ").trim();
+}
+
+function getSupabaseClient() {
+  if (supabaseClient) return supabaseClient;
+  try {
+    if (window.supabase && typeof window.supabase.createClient === "function") {
+      supabaseClient = window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_KEY,
+      );
+    }
+  } catch (e) {}
+  return supabaseClient;
 }
 
 function resolveSynonymGroups() {
@@ -215,6 +268,19 @@ function incrementCounter(map, name) {
   map.set(key, { name: display, count: 1 });
 }
 
+function incrementCounterBy(map, name, amount) {
+  const display = canonicalizeName(name);
+  const weight = Number(amount) || 0;
+  if (!display || weight <= 0) return;
+  const key = display.toLowerCase();
+  const existing = map.get(key);
+  if (existing) {
+    existing.count += weight;
+    return;
+  }
+  map.set(key, { name: display, count: weight });
+}
+
 function incrementUniquePerEntry(map, values) {
   const seen = new Set();
   values.forEach((raw) => {
@@ -229,6 +295,25 @@ function incrementUniquePerEntry(map, values) {
       return;
     }
     map.set(key, { name: display, count: 1 });
+  });
+}
+
+function incrementUniquePerEntryBy(map, values, amount) {
+  const weight = Number(amount) || 0;
+  if (weight <= 0) return;
+  const seen = new Set();
+  values.forEach((raw) => {
+    const display = canonicalizeName(raw);
+    if (!display) return;
+    const key = display.toLowerCase();
+    if (seen.has(key)) return;
+    seen.add(key);
+    const existing = map.get(key);
+    if (existing) {
+      existing.count += weight;
+      return;
+    }
+    map.set(key, { name: display, count: weight });
   });
 }
 
@@ -255,17 +340,18 @@ function sortLeaderboard(map, limit) {
     .slice(0, max);
 }
 
-function collectFromLabelArray(labelArray) {
+function collectLabelEntriesFromArray(labelArray) {
   const out = [];
   if (!Array.isArray(labelArray)) return out;
   for (let i = 1; i < labelArray.length; i += 1) {
     const label = normalizeText(labelArray[i]);
-    if (label) out.push(label);
+    if (!label) continue;
+    out.push({ index: i, label });
   }
   return out;
 }
 
-function collectLabelsForSource(source) {
+function collectLabelEntriesForSource(source) {
   const key = normalizeSourceKey(source);
 
   if (key === "freights") {
@@ -273,10 +359,10 @@ function collectLabelsForSource(source) {
       typeof FREIGHT_LABELS !== "undefined"
         ? FREIGHT_LABELS
         : window.FREIGHT_LABELS || null;
-    return collectFromLabelArray(freightLabels);
+    return collectLabelEntriesFromArray(freightLabels);
   }
 
-  const labels = [];
+  const entries = [];
   const globalImageLabels =
     typeof IMAGE_LABELS !== "undefined"
       ? IMAGE_LABELS
@@ -286,18 +372,24 @@ function collectLabelsForSource(source) {
       ? VIDEO_LABELS
       : window.VIDEO_LABELS || null;
 
-  collectFromLabelArray(globalImageLabels).forEach((label) => labels.push(label));
-  collectFromLabelArray(globalVideoLabels).forEach((label) => labels.push(label));
+  collectLabelEntriesFromArray(globalImageLabels).forEach((entry) =>
+    entries.push(entry),
+  );
+  collectLabelEntriesFromArray(globalVideoLabels).forEach((entry) =>
+    entries.push(entry),
+  );
 
-  return labels;
+  return entries;
 }
 
-function buildLeaderboards(labels, debugMode) {
+function buildLeaderboards(entries, debugMode) {
   const flickers = new Map();
   const crews = new Map();
   const tags = new Map();
 
-  labels.forEach((label) => {
+  entries.forEach((entry) => {
+    const label = entry && entry.label ? entry.label : entry;
+    if (!label) return;
     const parsed = parseLabelSegments(label);
     if (!parsed) return;
 
@@ -316,6 +408,69 @@ function buildLeaderboards(labels, debugMode) {
     crews: sortLeaderboard(crews, 200),
     tags: sortLeaderboard(tags, 200),
   };
+}
+
+function buildFavoriteLeaderboards(entries, source, debugMode, favoriteMap) {
+  const flickers = new Map();
+  const tags = new Map();
+  const sourceKey = normalizeSourceKey(source);
+  const favorites = favoriteMap || new Map();
+
+  entries.forEach((entry) => {
+    if (!entry || !entry.label || !entry.index) return;
+    const itemId = `${sourceKey}:${entry.index}`;
+    const weight = favorites.get(itemId) || 0;
+    if (weight <= 0) return;
+    const parsed = parseLabelSegments(entry.label);
+    if (!parsed) return;
+
+    const flicker = pickFlicker(parsed.flickerSegment, debugMode);
+    if (flicker) incrementCounterBy(flickers, flicker, weight);
+
+    const tagValues = splitCommaValues(parsed.tagNameSegment);
+    if (tagValues.length) incrementUniquePerEntryBy(tags, tagValues, weight);
+  });
+
+  return {
+    flickers: sortLeaderboard(flickers, 200),
+    crews: [],
+    tags: sortLeaderboard(tags, 200),
+  };
+}
+
+function ensureFavoriteCountsForSource(source) {
+  const src = normalizeSourceKey(source);
+  if (!isValidSource(src)) return Promise.resolve(new Map());
+  if (favoriteCountsBySource[src]) return Promise.resolve(favoriteCountsBySource[src]);
+  if (favoriteCountsPromiseBySource[src]) return favoriteCountsPromiseBySource[src];
+  const client = getSupabaseClient();
+  if (!client) {
+    const empty = new Map();
+    favoriteCountsBySource[src] = empty;
+    return Promise.resolve(empty);
+  }
+  const prefix = `${src}:`;
+  favoriteCountsPromiseBySource[src] = client
+    .from(FAVORITES_TABLE)
+    .select("item_id")
+    .like("item_id", `${prefix}%`)
+    .then(({ data }) => {
+      const map = new Map();
+      if (Array.isArray(data)) {
+        data.forEach((row) => {
+          if (!row || !row.item_id) return;
+          map.set(row.item_id, (map.get(row.item_id) || 0) + 1);
+        });
+      }
+      favoriteCountsBySource[src] = map;
+      return map;
+    })
+    .catch(() => {
+      const empty = new Map();
+      favoriteCountsBySource[src] = empty;
+      return empty;
+    });
+  return favoriteCountsPromiseBySource[src];
 }
 
 function readSavedView() {
@@ -350,6 +505,22 @@ function saveSource(source) {
   } catch (e) {}
 }
 
+function readSavedMetric() {
+  try {
+    const saved = localStorage.getItem(LEADERBOARD_METRIC_KEY);
+    const normalized = normalizeMetricKey(saved);
+    return isValidMetric(normalized) ? normalized : "";
+  } catch (e) {
+    return "";
+  }
+}
+
+function saveMetric(metric) {
+  try {
+    localStorage.setItem(LEADERBOARD_METRIC_KEY, metric);
+  } catch (e) {}
+}
+
 function getSaveLastLeaderboardSetting() {
   try {
     const raw = localStorage.getItem(SAVE_LAST_LEADERBOARD_PREF_KEY);
@@ -365,12 +536,14 @@ function readStateFromUrl() {
     const params = new URLSearchParams(window.location.search);
     const view = normalizeViewKey(params.get(LEADERBOARD_VIEW_PARAM));
     const source = normalizeSourceKey(params.get(LEADERBOARD_SOURCE_PARAM));
+    const metric = normalizeMetricKey(params.get(LEADERBOARD_METRIC_PARAM));
     return {
       view: isValidView(view) ? view : "",
       source: isValidSource(source) ? source : "",
+      metric: isValidMetric(metric) ? metric : "",
     };
   } catch (e) {
-    return { view: "", source: "" };
+    return { view: "", source: "", metric: "" };
   }
 }
 
@@ -379,6 +552,7 @@ function cleanupLeaderboardParams() {
     const url = new URL(window.location.href);
     url.searchParams.delete(LEADERBOARD_VIEW_PARAM);
     url.searchParams.delete(LEADERBOARD_SOURCE_PARAM);
+    url.searchParams.delete(LEADERBOARD_METRIC_PARAM);
     const query = url.searchParams.toString();
     const next =
       url.pathname + (query ? "?" + query : "") + (url.hash ? url.hash : "");
@@ -400,29 +574,81 @@ function getRowsForView(boardDataBySource, source, view) {
   return rows;
 }
 
-function renderLeaderboard(root, boardDataBySource, activeSource, activeView, debugMode) {
+function sanitizeViewForMetric(view, metric) {
+  if (metric === "favorites" && view === "crews") return "tags";
+  return view;
+}
+
+function getViewDefForMetric(view, metric) {
+  const base = VIEW_DEFS[view] || VIEW_DEFS[DEFAULT_LEADERBOARD_VIEW];
+  if (metric !== "favorites") return base;
+  return {
+    ...base,
+    countLabel: "Amount of favorites",
+  };
+}
+
+function renderLeaderboard(
+  root,
+  boardDataBySource,
+  entriesBySource,
+  activeSource,
+  activeView,
+  activeMetric,
+  debugMode,
+) {
   const source = isValidSource(activeSource)
     ? activeSource
     : DEFAULT_LEADERBOARD_SOURCE;
-  const view = isValidView(activeView) ? activeView : DEFAULT_LEADERBOARD_VIEW;
+  const metric = isValidMetric(activeMetric)
+    ? activeMetric
+    : DEFAULT_LEADERBOARD_METRIC;
+  const view = sanitizeViewForMetric(
+    isValidView(activeView) ? activeView : DEFAULT_LEADERBOARD_VIEW,
+    metric,
+  );
   const sourceDef = SOURCE_DEFS[source];
-  const viewDef = VIEW_DEFS[view];
-  const rows = getRowsForView(boardDataBySource, source, view);
+  const viewDef = getViewDefForMetric(view, metric);
+  const favoriteBoards =
+    metric === "favorites" ? favoriteLeaderboardsBySource[source] : null;
+  const rows =
+    metric === "favorites"
+      ? getRowsForView(
+          { [source]: favoriteBoards || { flickers: [], crews: [], tags: [] } },
+          source,
+          view,
+        )
+      : getRowsForView(boardDataBySource, source, view);
+  const isLoadingFavorites = metric === "favorites" && !favoriteBoards;
+  const showCrews = metric !== "favorites";
+  const viewOptions = [
+    `<option value="flickers">${VIEW_DEFS.flickers.option}</option>`,
+    showCrews ? `<option value="crews">${VIEW_DEFS.crews.option}</option>` : "",
+    `<option value="tags">${VIEW_DEFS.tags.option}</option>`,
+  ]
+    .filter(Boolean)
+    .join("");
 
   let html = "<h1>Leaderboard</h1>";
   html += `
-    <div class="leaderboard-controls search-bar">
-      <select id="leaderboardSourceSelect" aria-label="Leaderboard source" title="Leaderboard source">
-        <option value="gallery">${SOURCE_DEFS.gallery.option}</option>
-        <option value="freights">${SOURCE_DEFS.freights.option}</option>
-      </select>
-    </div>
-    <div class="leaderboard-controls search-bar">
-      <select id="leaderboardViewSelect" aria-label="Leaderboard view" title="Leaderboard view">
-        <option value="flickers">${VIEW_DEFS.flickers.option}</option>
-        <option value="crews">${VIEW_DEFS.crews.option}</option>
-        <option value="tags">${VIEW_DEFS.tags.option}</option>
-      </select>
+    <div class="leaderboard-filters">
+      <div class="leaderboard-controls search-bar">
+        <select id="leaderboardViewSelect" aria-label="Leaderboard view" title="Leaderboard view">
+          ${viewOptions}
+        </select>
+      </div>
+      <div class="leaderboard-controls search-bar">
+        <select id="leaderboardSourceSelect" aria-label="Leaderboard source" title="Leaderboard source">
+          <option value="gallery">${SOURCE_DEFS.gallery.option}</option>
+          <option value="freights">${SOURCE_DEFS.freights.option}</option>
+        </select>
+      </div>
+      <div class="leaderboard-controls search-bar">
+        <select id="leaderboardMetricSelect" aria-label="Leaderboard metric" title="Leaderboard metric">
+          <option value="presence">${METRIC_DEFS.presence.option}</option>
+          <option value="favorites">${METRIC_DEFS.favorites.option}</option>
+        </select>
+      </div>
     </div>
   `;
 
@@ -430,13 +656,27 @@ function renderLeaderboard(root, boardDataBySource, activeSource, activeView, de
     html += '<p style="opacity:.6">Debug mode enabled</p>';
   }
 
+  if (isLoadingFavorites) {
+    html += `<p>Loading favorites...</p>`;
+    root.innerHTML = html;
+    const sourceSelect = document.getElementById("leaderboardSourceSelect");
+    const viewSelect = document.getElementById("leaderboardViewSelect");
+    const metricSelect = document.getElementById("leaderboardMetricSelect");
+    if (sourceSelect) sourceSelect.value = source;
+    if (viewSelect) viewSelect.value = view;
+    if (metricSelect) metricSelect.value = metric;
+    return;
+  }
+
   if (!rows.length) {
     html += `<p>${escapeHtml(viewDef.empty)}</p>`;
     root.innerHTML = html;
     const sourceSelect = document.getElementById("leaderboardSourceSelect");
     const viewSelect = document.getElementById("leaderboardViewSelect");
+    const metricSelect = document.getElementById("leaderboardMetricSelect");
     if (sourceSelect) sourceSelect.value = source;
     if (viewSelect) viewSelect.value = view;
+    if (metricSelect) metricSelect.value = metric;
     return;
   }
 
@@ -482,8 +722,10 @@ function renderLeaderboard(root, boardDataBySource, activeSource, activeView, de
   root.innerHTML = html;
   const sourceSelect = document.getElementById("leaderboardSourceSelect");
   const viewSelect = document.getElementById("leaderboardViewSelect");
+  const metricSelect = document.getElementById("leaderboardMetricSelect");
   if (sourceSelect) sourceSelect.value = source;
   if (viewSelect) viewSelect.value = view;
+  if (metricSelect) metricSelect.value = metric;
 }
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -497,9 +739,13 @@ document.addEventListener("DOMContentLoaded", function () {
     debugMode = false;
   }
 
+  const entriesBySource = {
+    gallery: collectLabelEntriesForSource("gallery"),
+    freights: collectLabelEntriesForSource("freights"),
+  };
   const boardDataBySource = {
-    gallery: buildLeaderboards(collectLabelsForSource("gallery"), debugMode),
-    freights: buildLeaderboards(collectLabelsForSource("freights"), debugMode),
+    gallery: buildLeaderboards(entriesBySource.gallery, debugMode),
+    freights: buildLeaderboards(entriesBySource.freights, debugMode),
   };
 
   const saveLastEnabled = getSaveLastLeaderboardSetting();
@@ -513,50 +759,126 @@ document.addEventListener("DOMContentLoaded", function () {
     fromUrl.view ||
     (saveLastEnabled ? readSavedView() : "") ||
     DEFAULT_LEADERBOARD_VIEW;
+  let currentMetric =
+    fromUrl.metric ||
+    (saveLastEnabled ? readSavedMetric() : "") ||
+    DEFAULT_LEADERBOARD_METRIC;
 
   if (!isValidSource(currentSource)) currentSource = DEFAULT_LEADERBOARD_SOURCE;
   if (!isValidView(currentView)) currentView = DEFAULT_LEADERBOARD_VIEW;
+  if (!isValidMetric(currentMetric)) currentMetric = DEFAULT_LEADERBOARD_METRIC;
+  currentView = sanitizeViewForMetric(currentView, currentMetric);
 
   cleanupLeaderboardParams();
 
   if (saveLastEnabled) {
     saveSource(currentSource);
     saveView(currentView);
+    saveMetric(currentMetric);
   }
 
-  function refresh(nextSource, nextView) {
+  const requestFavoritesRender = (source, metric) => {
+    if (metric !== "favorites") return;
+    const src = normalizeSourceKey(source);
+    if (!isValidSource(src)) return;
+    if (favoriteLeaderboardsBySource[src]) {
+      renderLeaderboard(
+        out,
+        boardDataBySource,
+        entriesBySource,
+        currentSource,
+        currentView,
+        currentMetric,
+        debugMode,
+      );
+      return;
+    }
+    ensureFavoriteCountsForSource(src)
+      .then((map) => {
+        favoriteLeaderboardsBySource[src] = buildFavoriteLeaderboards(
+          entriesBySource[src],
+          src,
+          debugMode,
+          map,
+        );
+      })
+      .finally(() => {
+        if (currentMetric !== "favorites") return;
+        renderLeaderboard(
+          out,
+          boardDataBySource,
+          entriesBySource,
+          currentSource,
+          currentView,
+          currentMetric,
+          debugMode,
+        );
+      });
+  };
+
+  function refresh(nextSource, nextView, nextMetric) {
     const source = isValidSource(normalizeSourceKey(nextSource))
       ? normalizeSourceKey(nextSource)
       : currentSource;
     const view = isValidView(normalizeViewKey(nextView))
       ? normalizeViewKey(nextView)
       : currentView;
+    const metric = isValidMetric(normalizeMetricKey(nextMetric))
+      ? normalizeMetricKey(nextMetric)
+      : currentMetric;
 
     currentSource = source;
-    currentView = view;
+    currentMetric = metric;
+    currentView = sanitizeViewForMetric(view, currentMetric);
 
     if (getSaveLastLeaderboardSetting()) {
       saveSource(currentSource);
       saveView(currentView);
+      saveMetric(currentMetric);
     }
 
-    renderLeaderboard(out, boardDataBySource, currentSource, currentView, debugMode);
-
-    const sourceSelect = document.getElementById("leaderboardSourceSelect");
-    const viewSelect = document.getElementById("leaderboardViewSelect");
-
-    if (sourceSelect) {
-      sourceSelect.addEventListener("change", function () {
-        refresh(sourceSelect.value, currentView);
-      });
-    }
-
-    if (viewSelect) {
-      viewSelect.addEventListener("change", function () {
-        refresh(currentSource, viewSelect.value);
-      });
-    }
+    renderLeaderboard(
+      out,
+      boardDataBySource,
+      entriesBySource,
+      currentSource,
+      currentView,
+      currentMetric,
+      debugMode,
+    );
+    requestFavoritesRender(currentSource, currentMetric);
   }
 
-  refresh(currentSource, currentView);
+  refresh(currentSource, currentView, currentMetric);
+
+  out.addEventListener("change", function (event) {
+    const target = event && event.target;
+    if (!target || !target.id) return;
+    if (
+      target.id !== "leaderboardSourceSelect" &&
+      target.id !== "leaderboardViewSelect" &&
+      target.id !== "leaderboardMetricSelect"
+    ) {
+      return;
+    }
+    const sourceSelect = document.getElementById("leaderboardSourceSelect");
+    const viewSelect = document.getElementById("leaderboardViewSelect");
+    const metricSelect = document.getElementById("leaderboardMetricSelect");
+    const desiredMetric = normalizeMetricKey(
+      metricSelect ? metricSelect.value : currentMetric,
+    );
+    const nextMetric = isValidMetric(desiredMetric)
+      ? desiredMetric
+      : DEFAULT_LEADERBOARD_METRIC;
+    const desiredView = normalizeViewKey(
+      viewSelect ? viewSelect.value : currentView,
+    );
+    const nextView = sanitizeViewForMetric(desiredView, nextMetric);
+    if (viewSelect && viewSelect.value !== nextView) {
+      viewSelect.value = nextView;
+    }
+    const nextSource = sourceSelect ? sourceSelect.value : currentSource;
+    refresh(nextSource, nextView, nextMetric);
+  });
 });
+})();
