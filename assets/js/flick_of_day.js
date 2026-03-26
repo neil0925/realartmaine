@@ -569,7 +569,7 @@
         const iconImg = document.createElement("img");
         iconImg.className = "tagger-icon-img";
         iconImg.alt = iconKey;
-        iconImg.src = `/assets/GUI/icons/${encodeURIComponent(iconKey)}.png`;
+        iconImg.src = `/assets/GUI/Icons/${encodeURIComponent(iconKey)}.png`;
         iconImg.onerror = () => {
           if (iconWrap.parentNode) iconWrap.parentNode.removeChild(iconWrap);
         };

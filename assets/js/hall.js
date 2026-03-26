@@ -208,7 +208,7 @@
     } catch (e) {}
   }
 
-  window.addEventListener("unload", () => {
+  window.addEventListener("pagehide", () => {
     try {
       __createdGuiBlobUrls.forEach((u) => {
         try {

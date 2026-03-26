@@ -1230,7 +1230,7 @@ async function replaceGuiImagesFromCache() {
     }
   } catch (e) {}
 }
-window.addEventListener("unload", () => {
+window.addEventListener("pagehide", () => {
   try {
     __createdGuiBlobUrls.forEach((u) => {
       try {
@@ -1905,7 +1905,7 @@ function openModal(meta) {
       const img = document.createElement("img");
       img.className = "tagger-icon-img";
       img.alt = iconKey;
-      img.src = `/assets/GUI/icons/${encodeURIComponent(iconKey)}.png`;
+      img.src = `/assets/GUI/Icons/${encodeURIComponent(iconKey)}.png`;
       img.onerror = () => {
         if (iconWrap.parentNode) iconWrap.parentNode.removeChild(iconWrap);
       };
