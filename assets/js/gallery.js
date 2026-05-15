@@ -1098,12 +1098,109 @@ const freightOutStateWritersToggle = document.getElementById(
 const freightFilterMenu = document.getElementById("freightFilterMenu");
 const FREIGHT_FILTERS_KEY = "ram_freight_filters_v1";
 const SORT_KEY = "gallerySort";
+const VALID_SORTS = ["newest", "oldest", "favorites", "most_favorites"];
 let currentSort = "newest";
+let filterGalleryToken = 0;
 try {
   const saved =
     typeof localStorage !== "undefined" ? localStorage.getItem(SORT_KEY) : null;
-  if (saved === "newest" || saved === "oldest") currentSort = saved;
+  if (saved && VALID_SORTS.includes(saved)) currentSort = saved;
 } catch (e) {}
+
+function getGallerySourceKey() {
+  return IS_FREIGHTS_PAGE ? "freights" : "gallery";
+}
+
+const GALLERY_SOURCE_KEY = getGallerySourceKey();
+const itemIdBySrc = new Map();
+const indexBySrc = new Map();
+metaList.forEach((m) => {
+  const idx = m.index;
+  const itemId = window.RAMFavorites
+    ? window.RAMFavorites.getItemId(GALLERY_SOURCE_KEY, idx)
+    : `${GALLERY_SOURCE_KEY}:${idx}`;
+  const sources = Array.isArray(m.candidates)
+    ? m.candidates.slice()
+    : [m.numericSrc];
+  sources.forEach((src) => {
+    if (!src) return;
+    itemIdBySrc.set(src, itemId);
+    indexBySrc.set(src, idx);
+  });
+  if (m.numericSrc) {
+    itemIdBySrc.set(m.numericSrc, itemId);
+    indexBySrc.set(m.numericSrc, idx);
+  }
+  if (m.orig) {
+    itemIdBySrc.set(m.orig, itemId);
+    indexBySrc.set(m.orig, idx);
+  }
+});
+
+function getItemIdForSrc(src) {
+  if (itemIdBySrc.has(src)) return itemIdBySrc.get(src);
+  const idx = getNumericIndexFromSrc(src);
+  const fav = window.RAMFavorites;
+  if (!fav || !idx) return "";
+  return fav.getItemId(GALLERY_SOURCE_KEY, idx);
+}
+
+function getIndexForSrc(src) {
+  if (indexBySrc.has(src)) return indexBySrc.get(src);
+  return getNumericIndexFromSrc(src);
+}
+
+function sortByIndex(list, newestFirst) {
+  list.sort((a, b) => {
+    const ia = getIndexForSrc(a);
+    const ib = getIndexForSrc(b);
+    return newestFirst ? ib - ia : ia - ib;
+  });
+  return list;
+}
+
+function formatPhotographerForCaption(meta) {
+  if (!meta || !meta.photographer) return "";
+  return String(meta.photographer).split(/[\s,]+/).filter(Boolean)[0] || "";
+}
+
+function sortNeedsNetwork() {
+  return currentSort === "favorites" || currentSort === "most_favorites";
+}
+
+async function sortImageSrcList(list) {
+  const items = Array.isArray(list) ? list.slice() : [];
+  if (currentSort === "newest") return sortByIndex(items, true);
+  if (currentSort === "oldest") return sortByIndex(items, false);
+
+  const fav = window.RAMFavorites;
+  if (!fav) return sortByIndex(items, true);
+
+  const source = GALLERY_SOURCE_KEY;
+  if (currentSort === "favorites") {
+    const ids = await fav.ensureUserFavoriteIdsForSource(source);
+    const out = [];
+    for (let i = 0; i < items.length; i += 1) {
+      const src = items[i];
+      const id = itemIdBySrc.get(src) || getItemIdForSrc(src);
+      if (id && ids.has(id)) out.push(src);
+    }
+    return sortByIndex(out, true);
+  }
+  if (currentSort === "most_favorites") {
+    const counts = await fav.ensureCountsForSource(source);
+    items.sort((a, b) => {
+      const idA = itemIdBySrc.get(a) || getItemIdForSrc(a);
+      const idB = itemIdBySrc.get(b) || getItemIdForSrc(b);
+      const ca = (idA && counts.get(idA)) || 0;
+      const cb = (idB && counts.get(idB)) || 0;
+      if (cb !== ca) return cb - ca;
+      return getIndexForSrc(b) - getIndexForSrc(a);
+    });
+    return items;
+  }
+  return sortByIndex(items, true);
+}
 if (sortSelect) {
   try {
     sortSelect.value = currentSort;
@@ -1741,7 +1838,13 @@ function openModal(meta) {
     return -1;
   };
 
-  const setCaptionFromMeta = (targetMeta) => {
+  const modalUI = window.RAMGalleryModalUI;
+  const taggerPopupCtrl = modalUI
+    ? modalUI.createTaggerPopupController()
+    : null;
+  let captionCtrl = null;
+
+  const buildCaptionOptions = (targetMeta) => {
     if (isDebug) {
       const full =
         targetMeta && (targetMeta.label || targetMeta.rawBase)
@@ -1757,35 +1860,62 @@ function openModal(meta) {
           idx = null;
         }
       }
-      caption.textContent = full + (idx ? ` (${idx})` : "");
-      return;
+      return {
+        isDebug: true,
+        debugText: full + (idx ? ` (${idx})` : ""),
+      };
     }
 
-    let tagText = "";
-    let photographerText = "";
-
+    let tags = [];
     if (targetMeta && Array.isArray(targetMeta.tags) && targetMeta.tags.length) {
-      tagText = targetMeta.tags.filter(Boolean).join(", ");
+      tags = targetMeta.tags.filter(Boolean);
     } else if (targetMeta && targetMeta.label) {
       const dashParts = String(targetMeta.label).split("-");
-      if (dashParts.length > 0) tagText = dashParts[0].trim();
+      if (dashParts.length > 0) {
+        tags = dashParts[0]
+          .split(",")
+          .map((t) => t.trim())
+          .filter(Boolean);
+      }
     }
 
-    if (targetMeta && targetMeta.photographer) {
-      photographerText = String(targetMeta.photographer)
-        .split(/[\s,]+/)
-        .filter(Boolean)[0];
+    const photographer = formatPhotographerForCaption(targetMeta);
+    let fallbackText = "";
+    if (tags.length) fallbackText = tags.join(", ");
+    if (photographer) {
+      fallbackText +=
+        (fallbackText ? " " : "") + `flicked by ${photographer}`;
+    }
+    if (!fallbackText && targetMeta && targetMeta.rawBase) {
+      fallbackText = targetMeta.rawBase;
     }
 
-    let captionText = "";
-    if (tagText) captionText = tagText;
-    if (photographerText) {
-      captionText +=
-        (captionText ? " " : "") + `flicked by ${photographerText}`;
-    }
+    const srcForId =
+      (targetMeta && (targetMeta.numericSrc || targetMeta.src)) || "";
+    const itemId = getItemIdForSrc(srcForId);
 
-    caption.textContent =
-      captionText || (targetMeta && targetMeta.rawBase) || "";
+    return {
+      tags,
+      photographer,
+      itemId,
+      fallbackText,
+      taggerPopupCtrl,
+    };
+  };
+
+  const setCaptionFromMeta = (targetMeta) => {
+    if (!modalUI) {
+      const opts = buildCaptionOptions(targetMeta);
+      caption.textContent = opts.isDebug
+        ? opts.debugText
+        : opts.fallbackText || "";
+      return;
+    }
+    if (captionCtrl && captionCtrl.bumpToken) captionCtrl.bumpToken();
+    captionCtrl = modalUI.renderRichCaption(
+      caption,
+      buildCaptionOptions(targetMeta),
+    );
   };
 
   let activeList = resolveActiveList();
@@ -1908,6 +2038,12 @@ function openModal(meta) {
 
   const closeModal = () => {
     modalLoadToken++;
+    if (taggerPopupCtrl && taggerPopupCtrl.hideTaggerPopup) {
+      taggerPopupCtrl.hideTaggerPopup();
+    }
+    if (taggerPopupCtrl && taggerPopupCtrl.popup && taggerPopupCtrl.popup.parentNode) {
+      taggerPopupCtrl.popup.parentNode.removeChild(taggerPopupCtrl.popup);
+    }
     const cards = document.querySelectorAll(".card");
     cards.forEach((card) => card.classList.remove("highlighted"));
     if (backdrop.parentNode) {
@@ -1962,6 +2098,14 @@ function openModal(meta) {
   if (currentIndex < 0 && Array.isArray(activeList) && activeList.length > 0) {
     currentIndex = 0;
     meta = parseFilename(activeList[0]);
+  }
+
+  if (window.RAMTaggerIcons && window.RAMTaggerIcons.ensureLoaded) {
+    window.RAMTaggerIcons.ensureLoaded().then(() => {
+      if (backdrop.parentNode) setCaptionFromMeta(meta);
+    });
+  } else {
+    setCaptionFromMeta(meta);
   }
 
   loadModalMeta(meta, currentIndex).catch(() => {});
@@ -2460,23 +2604,37 @@ function matchesFreightFilters(meta, filters) {
   if (opts.outOfStateWriters && meta.hasNonMaineWriters !== true) return false;
   return true;
 }
+function filterGalleryList(list, token) {
+  if (!sortNeedsNetwork()) {
+    const sorted = sortByIndex(list.slice(), currentSort === "newest");
+    if (token === filterGalleryToken) loadImagesSequentially(sorted);
+    return;
+  }
+  sortImageSrcList(list)
+    .then((sorted) => {
+      if (token !== filterGalleryToken) return;
+      loadImagesSequentially(sorted);
+    })
+    .catch(() => {
+      if (token !== filterGalleryToken) return;
+      loadImagesSequentially(sortByIndex(list.slice(), true));
+    });
+}
+
 function filterGallery(q) {
   if (!gallery) return;
+  const token = ++filterGalleryToken;
   q = (q || "").trim().toLowerCase();
   if (sortSelect) currentSort = sortSelect.value || currentSort;
   const freightFilters = getActiveFreightFilters();
+
   if (!q) {
     const all = imagesList.filter((src) => {
       if (!IS_FREIGHTS_PAGE) return true;
       const meta = parseFilename(src);
       return matchesFreightFilters(meta, freightFilters);
     });
-    all.sort((a, b) => {
-      const ia = getNumericIndexFromSrc(a);
-      const ib = getNumericIndexFromSrc(b);
-      return currentSort === "newest" ? ib - ia : ia - ib;
-    });
-    loadImagesSequentially(all);
+    filterGalleryList(all, token);
     return;
   }
   const queryTokens = q
@@ -2503,15 +2661,21 @@ function filterGallery(q) {
     const metaTokens = buildMetaTokens(meta);
     return Array.from(expandedQueryTokens).some((qt) => metaTokens.has(qt));
   });
-  filtered.sort((a, b) => {
-    const ia = getNumericIndexFromSrc(a);
-    const ib = getNumericIndexFromSrc(b);
-    return currentSort === "newest" ? ib - ia : ia - ib;
-  });
-  loadImagesSequentially(filtered);
+  filterGalleryList(filtered, token);
 }
+
+let filterGalleryDebounceTimer = null;
+function scheduleFilterGallery(q) {
+  if (filterGalleryDebounceTimer) clearTimeout(filterGalleryDebounceTimer);
+  const delay = q && String(q).trim() ? 120 : 0;
+  filterGalleryDebounceTimer = setTimeout(() => {
+    filterGalleryDebounceTimer = null;
+    filterGallery(q);
+  }, delay);
+}
+
 if (searchInput) {
-  searchInput.addEventListener("input", (e) => filterGallery(e.target.value));
+  searchInput.addEventListener("input", (e) => scheduleFilterGallery(e.target.value));
 }
 if (IS_FREIGHTS_PAGE) {
   if (freightFilterMenu) {
@@ -2550,10 +2714,20 @@ if (sortSelect) {
     try {
       localStorage.setItem(SORT_KEY, currentSort);
     } catch (e) {}
+    const fav = window.RAMFavorites;
+    if (fav && fav.needsFavoriteData && fav.needsFavoriteData(currentSort)) {
+      fav.preloadForSource(GALLERY_SOURCE_KEY);
+    }
     const q = searchInput && searchInput.value ? searchInput.value : "";
     filterGallery(q);
   });
 }
+
+window.refreshGalleryIfFavoritesSort = function () {
+  if (currentSort !== "favorites") return;
+  const q = searchInput && searchInput.value ? searchInput.value : "";
+  filterGallery(q);
+};
 function resizeAllMasonryItems() {
   const grid = document.querySelector(".gallery");
   if (!grid) return;
@@ -2630,6 +2804,19 @@ document.addEventListener("DOMContentLoaded", () => {
   } catch (e) {}
   try {
     replaceGuiImagesFromCache().catch(() => {});
+  } catch (e) {}
+  try {
+    const fav = window.RAMFavorites;
+    if (fav && fav.preloadForSource) {
+      const preloadFavs = () => fav.preloadForSource(GALLERY_SOURCE_KEY);
+      if (fav.needsFavoriteData && fav.needsFavoriteData(currentSort)) {
+        preloadFavs();
+      } else if (typeof requestIdleCallback === "function") {
+        requestIdleCallback(preloadFavs, { timeout: 3000 });
+      } else {
+        setTimeout(preloadFavs, 1500);
+      }
+    }
   } catch (e) {}
   try {
     filterGallery(initialQuery);
