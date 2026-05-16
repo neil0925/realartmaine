@@ -551,14 +551,14 @@
       return ordered[dayNumber % ordered.length];
     }
 
-    const useGallery = dayNumber % 2 === 0;
-    const ordered = orderEntries(
-      useGallery ? galleryList : freightList,
-      useGallery ? "gallery" : "freights",
-    );
+    // When both gallery and freight entries exist, combine them and
+    // order deterministically by a combined seed so the pool behaves
+    // as if both pages were merged. Then pick by dayNumber modulus
+    // the combined length so every entry shares equal odds.
+    const combined = galleryList.concat(freightList);
+    const ordered = orderEntries(combined, "combined");
     if (!ordered.length) return null;
-    const index = Math.floor(dayNumber / 2) % ordered.length;
-    return ordered[index];
+    return ordered[dayNumber % ordered.length];
   }
 
   function pickEntryForToday(galleryEntries, freightEntries) {
@@ -1105,7 +1105,31 @@
     if (!card || !image || !caption || !loader) return;
     ensureTaggerListLoaded();
 
-    const renderFlick = function () {
+    function ensureGalleryLabelsLoaded() {
+      return new Promise((resolve) => {
+        try {
+          if (typeof IMAGE_LABELS !== "undefined") {
+            resolve(IMAGE_LABELS || []);
+            return;
+          }
+          const existing = document.querySelector('script[src$="/assets/js/gallery.js"]');
+          if (existing) {
+            existing.addEventListener("load", () => resolve(typeof IMAGE_LABELS !== "undefined" ? IMAGE_LABELS : []));
+            existing.addEventListener("error", () => resolve([]));
+            return;
+          }
+          const s = document.createElement("script");
+          s.src = "/assets/js/gallery.js";
+          s.onload = () => resolve(typeof IMAGE_LABELS !== "undefined" ? IMAGE_LABELS : []);
+          s.onerror = () => resolve([]);
+          (document.head || document.documentElement).appendChild(s);
+        } catch (e) {
+          resolve([]);
+        }
+      });
+    }
+
+    const renderFlick = async function () {
       const token = (renderToken += 1);
       card.classList.remove("loaded");
       caption.textContent = "";
@@ -1118,8 +1142,10 @@
       image.removeAttribute("src");
       image.alt = "Flick of the day";
 
+      await ensureGalleryLabelsLoaded();
+
       const galleryLabels =
-        typeof window.IMAGE_LABELS !== "undefined" ? window.IMAGE_LABELS : [];
+        typeof IMAGE_LABELS !== "undefined" ? IMAGE_LABELS : [];
       const freightLabels =
         typeof window.FREIGHT_LABELS !== "undefined"
           ? window.FREIGHT_LABELS
