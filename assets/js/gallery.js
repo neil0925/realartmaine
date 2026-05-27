@@ -927,6 +927,14 @@ IMAGE_LABELS[803] = "ED15-2K69-realartmaine-throwie, hollow, antistyle";
 IMAGE_LABELS[804] = "lever-NTC-realartmaine-tags";
 IMAGE_LABELS[805] = "mother, salud-PTG,OHK,RBH-realartmaine-tags, character, hollow";
 IMAGE_LABELS[806] = "port-IMS,OHK,SLT-realartmaine-piece, hollow";
+IMAGE_LABELS[807] = "sewer, kujoe, noclue-5G,UK,FK-tincan1-tags";
+IMAGE_LABELS[808] = "kujoe-5G,UK-tincan1-tags";
+IMAGE_LABELS[809] = "kujoe-5G,UK-tincan1-tags";
+IMAGE_LABELS[810] = "towel, sewer, merlin, horses-5G,FK,TNL,CTS,LTB-tincan1-tags";
+IMAGE_LABELS[811] = "bdub, ramen, solar, neptune, lause, 2unidentified-DNB,AX-tincan1-tags";
+IMAGE_LABELS[812] = "world8, kujoe-5G,UK-tincan1-tags";
+IMAGE_LABELS[813] = "kujoe-5G,UK-tincan1-tags";
+IMAGE_LABELS[814] = "world8, rune, qjoe-5G,UK,2K69,LTB-tincan1-throwie, hollow";
 /*tag-crew-flicker-style-Maine freight y/n-has Maine writers y/n-has out of state writers y/n */
 /*example1:FREIGHT_LABELS[1] ="27-2GF,TSZ-realartmaine-piece-y-y-n";*/
 /*example2:FREIGHT_LABELS[2] ="27,mayo-2GF,TSZ-realartmaine-piece,throw-n-y-y";*/
@@ -1359,12 +1367,15 @@ const TOY_BLACKLIST = [
   "ecko",
   "echo",
   "cemo",
-  "mohammed hoch",
-  "mohammedhoch",
+  "mohamed hoch",
+  "mohamedhoch",
   "calcium",
   "cal",
   "moyo",
   "wd40",
+  "rhine",
+  "maze",
+  "mazer",
 ].map((s) => s.toLowerCase());
 const SYNONYM_GROUPS = [
   [
