@@ -106,10 +106,12 @@
     const prefix = entry.source === "freights" ? "freights" : "gallery";
     const idx = entry.index;
     if (idx === undefined || idx === null || idx === "") return "";
+    if (window.RAMFavorites) return window.RAMFavorites.getItemId(prefix, idx);
     return `${prefix}:${idx}`;
   }
 
   function formatFavoriteCount(value) {
+    if (window.RAMFavorites) return window.RAMFavorites.formatFavoriteCount(value);
     const count = Number(value || 0);
     if (!Number.isFinite(count) || count <= 0) return "0";
     if (count < 1000) return String(count);
@@ -129,6 +131,7 @@
   }
 
   async function fetchFavoriteCount(itemId) {
+    if (window.RAMFavorites) return window.RAMFavorites.fetchFavoriteCount(itemId);
     if (!itemId) return null;
     const client = getSupabaseClient();
     if (!client) return null;
@@ -144,6 +147,7 @@
   }
 
   async function fetchUserFavoriteState(itemId) {
+    if (window.RAMFavorites) return window.RAMFavorites.fetchUserFavoriteState(itemId);
     if (!itemId) return null;
     const client = getSupabaseClient();
     const uid = getGalleryUIDSafe();
@@ -161,6 +165,7 @@
   }
 
   async function addFavorite(itemId) {
+    if (window.RAMFavorites) return window.RAMFavorites.addFavorite(itemId);
     if (!itemId) return false;
     const client = getSupabaseClient();
     const uid = getGalleryUIDSafe();
@@ -175,6 +180,7 @@
   }
 
   async function removeFavorite(itemId) {
+    if (window.RAMFavorites) return window.RAMFavorites.removeFavorite(itemId);
     if (!itemId) return false;
     const client = getSupabaseClient();
     const uid = getGalleryUIDSafe();
@@ -244,6 +250,7 @@
   }
 
   function normalizeTaggerName(value) {
+    if (window.RAMTaggerIcons) return window.RAMTaggerIcons.normalizeTaggerName(value);
     return String(value || "").trim().toLowerCase();
   }
 
@@ -295,11 +302,13 @@
   }
 
   function getIconLabel(iconKey) {
+    if (window.RAMTaggerIcons) return window.RAMTaggerIcons.getIconLabel(iconKey);
     if (!iconKey) return "";
     return ICON_LABEL_MAP.get(iconKey) || iconKey;
   }
 
   function getIconFileName(iconKey) {
+    if (window.RAMTaggerIcons) return window.RAMTaggerIcons.getIconFileName(iconKey);
     if (!iconKey) return "";
     return ICON_FILE_MAP.get(iconKey) || iconKey;
   }
@@ -321,6 +330,9 @@
   }
 
   function getDisplayIconsForTagger(taggerKey) {
+    if (window.RAMTaggerIcons) {
+      return window.RAMTaggerIcons.getDisplayIconsForTagger(taggerKey);
+    }
     const map =
       taggerIconMap ||
       (typeof window !== "undefined" && window.RAM_TAGGER_ICON_MAP instanceof Map
@@ -350,6 +362,7 @@
   }
 
   function ensureTaggerListLoaded() {
+    if (window.RAMTaggerIcons) return window.RAMTaggerIcons.ensureLoaded();
     if (taggerIconMap) return Promise.resolve(taggerIconMap);
     if (
       typeof window !== "undefined" &&
@@ -538,14 +551,14 @@
       return ordered[dayNumber % ordered.length];
     }
 
-    const useGallery = dayNumber % 2 === 0;
-    const ordered = orderEntries(
-      useGallery ? galleryList : freightList,
-      useGallery ? "gallery" : "freights",
-    );
+    // When both gallery and freight entries exist, combine them and
+    // order deterministically by a combined seed so the pool behaves
+    // as if both pages were merged. Then pick by dayNumber modulus
+    // the combined length so every entry shares equal odds.
+    const combined = galleryList.concat(freightList);
+    const ordered = orderEntries(combined, "combined");
     if (!ordered.length) return null;
-    const index = Math.floor(dayNumber / 2) % ordered.length;
-    return ordered[index];
+    return ordered[dayNumber % ordered.length];
   }
 
   function pickEntryForToday(galleryEntries, freightEntries) {
@@ -722,7 +735,9 @@
         iconImg.className = "tagger-icon-img";
         iconImg.alt = iconKey;
         const iconFile = getIconFileName(iconKey);
-        iconImg.src = `/assets/GUI/Icons/${encodeURIComponent(iconFile)}.png`;
+        iconImg.src = window.RAMTaggerIcons
+          ? window.RAMTaggerIcons.iconSrcForKey(iconKey)
+          : `/assets/GUI/Icons/${encodeURIComponent(iconFile)}.png`;
         iconImg.onerror = () => {
           if (iconWrap.parentNode) iconWrap.parentNode.removeChild(iconWrap);
         };
@@ -767,11 +782,21 @@
         state.button.disabled = false;
         state.button.setAttribute("aria-busy", "false");
       }
-      const isFav = userFavorites.has(state.itemId);
-      state.icon.src = isFav ? UNFAVORITE_ICON_SRC : FAVORITE_ICON_SRC;
+      const favApi = window.RAMFavorites;
+      const isFav = favApi
+        ? favApi.isFavorited(state.itemId)
+        : userFavorites.has(state.itemId);
+      state.icon.src = isFav
+        ? favApi
+          ? favApi.UNFAVORITE_ICON_SRC
+          : UNFAVORITE_ICON_SRC
+        : favApi
+          ? favApi.FAVORITE_ICON_SRC
+          : FAVORITE_ICON_SRC;
       state.icon.alt = isFav ? "Unfavorite" : "Favorite";
-      const countValue =
-        favoriteCounts.get(state.itemId) != null
+      const countValue = favApi
+        ? favApi.getCount(state.itemId)
+        : favoriteCounts.get(state.itemId) != null
           ? favoriteCounts.get(state.itemId)
           : 0;
       state.countEl.textContent = formatFavoriteCount(countValue);
@@ -792,7 +817,8 @@
     const toggleFavorite = async (state) => {
       if (!state || !state.itemId) return;
       const itemId = state.itemId;
-      const isFav = userFavorites.has(itemId);
+      const favApi = window.RAMFavorites;
+      const isFav = favApi ? favApi.isFavorited(itemId) : userFavorites.has(itemId);
       let ok = false;
       if (isFav) ok = await removeFavorite(itemId);
       else ok = await addFavorite(itemId);
@@ -854,8 +880,9 @@
       }
 
       const itemId = getItemIdFromEntry(favoriteEntry);
-      const clientReady = !!getSupabaseClient();
-      const uidReady = !!getGalleryUIDSafe();
+      const favApi = window.RAMFavorites;
+      const clientReady = favApi ? favApi.isReady() : !!getSupabaseClient();
+      const uidReady = favApi ? favApi.isReady() : !!getGalleryUIDSafe();
       if (itemId && clientReady && uidReady) {
         const token = favoriteRequestToken;
         const action = document.createElement("span");
@@ -870,7 +897,7 @@
         const spinner = document.createElement("span");
         spinner.className = "favorite-spinner";
         const icon = document.createElement("img");
-        icon.src = FAVORITE_ICON_SRC;
+        icon.src = favApi ? favApi.FAVORITE_ICON_SRC : FAVORITE_ICON_SRC;
         icon.alt = "Favorite";
         icon.style.width = "30px";
         icon.style.height = "30px";
@@ -1078,7 +1105,31 @@
     if (!card || !image || !caption || !loader) return;
     ensureTaggerListLoaded();
 
-    const renderFlick = function () {
+    function ensureGalleryLabelsLoaded() {
+      return new Promise((resolve) => {
+        try {
+          if (typeof IMAGE_LABELS !== "undefined") {
+            resolve(IMAGE_LABELS || []);
+            return;
+          }
+          const existing = document.querySelector('script[src$="/assets/js/gallery.js"]');
+          if (existing) {
+            existing.addEventListener("load", () => resolve(typeof IMAGE_LABELS !== "undefined" ? IMAGE_LABELS : []));
+            existing.addEventListener("error", () => resolve([]));
+            return;
+          }
+          const s = document.createElement("script");
+          s.src = "/assets/js/gallery.js";
+          s.onload = () => resolve(typeof IMAGE_LABELS !== "undefined" ? IMAGE_LABELS : []);
+          s.onerror = () => resolve([]);
+          (document.head || document.documentElement).appendChild(s);
+        } catch (e) {
+          resolve([]);
+        }
+      });
+    }
+
+    const renderFlick = async function () {
       const token = (renderToken += 1);
       card.classList.remove("loaded");
       caption.textContent = "";
@@ -1091,8 +1142,10 @@
       image.removeAttribute("src");
       image.alt = "Flick of the day";
 
+      await ensureGalleryLabelsLoaded();
+
       const galleryLabels =
-        typeof window.IMAGE_LABELS !== "undefined" ? window.IMAGE_LABELS : [];
+        typeof IMAGE_LABELS !== "undefined" ? IMAGE_LABELS : [];
       const freightLabels =
         typeof window.FREIGHT_LABELS !== "undefined"
           ? window.FREIGHT_LABELS

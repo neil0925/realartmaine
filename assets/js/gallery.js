@@ -722,7 +722,6 @@ IMAGE_LABELS[602] = "necro, solar-DNB,NTC-realartmaine-tags";
 IMAGE_LABELS[603] = "sete-NTC-realartmaine-tags, character";
 IMAGE_LABELS[604] = "solar-DNB-realartmaine-tags";
 IMAGE_LABELS[605] = "necro, LTB-NTC-realartmaine-tags";
-IMAGE_LABELS[606] = "about-5G-realartmaine-tags, frieghts";
 IMAGE_LABELS[607] = "mobi-TSZ-realartmaine-tags";
 IMAGE_LABELS[608] = "updog-PTG-realartmaine-tags, antistyle";
 IMAGE_LABELS[609] = "loupe-DWT,AMC-realartmaine-tags, moniker";
@@ -1106,12 +1105,109 @@ const freightOutStateWritersToggle = document.getElementById(
 const freightFilterMenu = document.getElementById("freightFilterMenu");
 const FREIGHT_FILTERS_KEY = "ram_freight_filters_v1";
 const SORT_KEY = "gallerySort";
+const VALID_SORTS = ["newest", "oldest", "favorites", "most_favorites"];
 let currentSort = "newest";
+let filterGalleryToken = 0;
 try {
   const saved =
     typeof localStorage !== "undefined" ? localStorage.getItem(SORT_KEY) : null;
-  if (saved === "newest" || saved === "oldest") currentSort = saved;
+  if (saved && VALID_SORTS.includes(saved)) currentSort = saved;
 } catch (e) {}
+
+function getGallerySourceKey() {
+  return IS_FREIGHTS_PAGE ? "freights" : "gallery";
+}
+
+const GALLERY_SOURCE_KEY = getGallerySourceKey();
+const itemIdBySrc = new Map();
+const indexBySrc = new Map();
+metaList.forEach((m) => {
+  const idx = m.index;
+  const itemId = window.RAMFavorites
+    ? window.RAMFavorites.getItemId(GALLERY_SOURCE_KEY, idx)
+    : `${GALLERY_SOURCE_KEY}:${idx}`;
+  const sources = Array.isArray(m.candidates)
+    ? m.candidates.slice()
+    : [m.numericSrc];
+  sources.forEach((src) => {
+    if (!src) return;
+    itemIdBySrc.set(src, itemId);
+    indexBySrc.set(src, idx);
+  });
+  if (m.numericSrc) {
+    itemIdBySrc.set(m.numericSrc, itemId);
+    indexBySrc.set(m.numericSrc, idx);
+  }
+  if (m.orig) {
+    itemIdBySrc.set(m.orig, itemId);
+    indexBySrc.set(m.orig, idx);
+  }
+});
+
+function getItemIdForSrc(src) {
+  if (itemIdBySrc.has(src)) return itemIdBySrc.get(src);
+  const idx = getNumericIndexFromSrc(src);
+  const fav = window.RAMFavorites;
+  if (!fav || !idx) return "";
+  return fav.getItemId(GALLERY_SOURCE_KEY, idx);
+}
+
+function getIndexForSrc(src) {
+  if (indexBySrc.has(src)) return indexBySrc.get(src);
+  return getNumericIndexFromSrc(src);
+}
+
+function sortByIndex(list, newestFirst) {
+  list.sort((a, b) => {
+    const ia = getIndexForSrc(a);
+    const ib = getIndexForSrc(b);
+    return newestFirst ? ib - ia : ia - ib;
+  });
+  return list;
+}
+
+function formatPhotographerForCaption(meta) {
+  if (!meta || !meta.photographer) return "";
+  return String(meta.photographer).split(/[\s,]+/).filter(Boolean)[0] || "";
+}
+
+function sortNeedsNetwork() {
+  return currentSort === "favorites" || currentSort === "most_favorites";
+}
+
+async function sortImageSrcList(list) {
+  const items = Array.isArray(list) ? list.slice() : [];
+  if (currentSort === "newest") return sortByIndex(items, true);
+  if (currentSort === "oldest") return sortByIndex(items, false);
+
+  const fav = window.RAMFavorites;
+  if (!fav) return sortByIndex(items, true);
+
+  const source = GALLERY_SOURCE_KEY;
+  if (currentSort === "favorites") {
+    const ids = await fav.ensureUserFavoriteIdsForSource(source);
+    const out = [];
+    for (let i = 0; i < items.length; i += 1) {
+      const src = items[i];
+      const id = itemIdBySrc.get(src) || getItemIdForSrc(src);
+      if (id && ids.has(id)) out.push(src);
+    }
+    return sortByIndex(out, true);
+  }
+  if (currentSort === "most_favorites") {
+    const counts = await fav.ensureCountsForSource(source);
+    items.sort((a, b) => {
+      const idA = itemIdBySrc.get(a) || getItemIdForSrc(a);
+      const idB = itemIdBySrc.get(b) || getItemIdForSrc(b);
+      const ca = (idA && counts.get(idA)) || 0;
+      const cb = (idB && counts.get(idB)) || 0;
+      if (cb !== ca) return cb - ca;
+      return getIndexForSrc(b) - getIndexForSrc(a);
+    });
+    return items;
+  }
+  return sortByIndex(items, true);
+}
 if (sortSelect) {
   try {
     sortSelect.value = currentSort;
@@ -1446,10 +1542,265 @@ function getRenderedImageHeight(img, availableWidth) {
   if (img.naturalWidth && img.naturalHeight && cw > 0) {
     return (cw * img.naturalHeight) / img.naturalWidth;
   }
-  const rect = img.getBoundingClientRect
-    ? img.getBoundingClientRect()
-    : { height: 0 };
-  return rect.height || 0;
+  return 0;
+}
+
+/* Gallery memory tuning: native lazy imgs, DOM trim when far offscreen, visible-only resize */
+const GALLERY_LOAD_IO_MARGIN = "600px 0px";
+// NOTE: Removing/adding grid items above the viewport can trigger Firefox scroll-anchoring
+// heuristics and make the scroll position feel like it's "looping". Keep a higher DOM cap
+// and rely on lazy image loading instead of aggressive card recycling.
+const GALLERY_MAX_MOUNTED_CARDS = 2000;
+const GALLERY_RESIZE_DEBOUNCE_MS = 180;
+
+function getGridMetrics(grid) {
+  const el = grid || document.querySelector(".gallery");
+  if (!el) {
+    return { rowHeight: 10, rowGap: 10 };
+  }
+  const style = window.getComputedStyle(el);
+  return {
+    rowHeight: parseInt(style.getPropertyValue("grid-auto-rows") || "10", 10) || 10,
+    rowGap: parseInt(style.getPropertyValue("gap") || "10", 10) || 10,
+  };
+}
+
+function computeRowSpanForHeight(heightPx, gridMetrics) {
+  const h = Math.max(1, Number(heightPx) || 1);
+  const rowHeight = gridMetrics.rowHeight || 10;
+  const rowGap = gridMetrics.rowGap || 10;
+  return Math.max(1, Math.ceil((h + rowGap) / (rowHeight + rowGap)));
+}
+
+function applyItemLayout(item, finalH, gridMetrics) {
+  if (!item || !item.wrap || !item.card) return;
+  const height = Math.max(80, Math.round(finalH));
+  const rowSpan = computeRowSpanForHeight(height, gridMetrics);
+  item.wrap.style.height = `${height}px`;
+  item.card.style.gridRowEnd = `span ${rowSpan}`;
+  item.displayHeight = height;
+  item.rowSpan = rowSpan;
+}
+
+function syncGalleryCardLoadedState(item) {
+  if (!item || !item.wrap) return false;
+  const img = item.wrap.querySelector(".gallery-image");
+  if (!img || !img.complete || img.naturalWidth <= 0 || img.classList.contains("hidden")) {
+    return false;
+  }
+  item.loaded = true;
+  item.wrap.classList.add("loaded");
+  img.style.opacity = "1";
+  return true;
+}
+
+function markGalleryCardLoadFailed(item, placeholder) {
+  if (!item) return;
+  item.loadFailed = true;
+  item.loading = false;
+  item.queued = false;
+  item.cancelImageLoad = null;
+  const wrap = item.wrap;
+  if (wrap) {
+    const img = wrap.querySelector(".gallery-image");
+    if (img) {
+      img.onload = null;
+      img.onerror = null;
+      img.removeAttribute("src");
+      try {
+        img.remove();
+      } catch (e) {}
+    }
+    wrap.classList.remove("loaded");
+  }
+  if (placeholder && placeholder.parentNode) {
+    placeholder.textContent = "Unavailable";
+  }
+}
+
+function galleryCardNeedsImageLoad(item) {
+  if (!item || !item.wrap || item.loading || item.loadFailed) return false;
+  if (syncGalleryCardLoadedState(item)) return false;
+  const img = item.wrap.querySelector(".gallery-image");
+  if (!img) {
+    if (item.loaded) item.loaded = false;
+    return true;
+  }
+  if (img.classList.contains("hidden")) {
+    if (item.loaded) item.loaded = false;
+    return true;
+  }
+  if (img.complete && img.naturalWidth > 0) {
+    if (!item.loaded) item.loaded = true;
+    if (!item.wrap.classList.contains("loaded")) item.wrap.classList.add("loaded");
+    img.classList.remove("hidden");
+    img.style.opacity = "1";
+    return false;
+  }
+  return !item.loaded;
+}
+
+function unloadCardImage(item) {
+  if (!item || !item.wrap) return;
+  if (item.unloadTimer) {
+    clearTimeout(item.unloadTimer);
+    item.unloadTimer = null;
+  }
+  if (item.loading && typeof item.cancelImageLoad === "function") {
+    try {
+      item.cancelImageLoad();
+    } catch (e) {}
+  }
+  item.cancelImageLoad = null;
+  const img = item.wrap.querySelector(".gallery-image");
+  if (img) {
+    img.onload = null;
+    img.onerror = null;
+    img.removeAttribute("src");
+    img.classList.remove("fade-in");
+    img.style.opacity = "";
+    try {
+      img.remove();
+    } catch (e) {}
+  }
+  item.loaded = false;
+  item.loading = false;
+  item.queued = false;
+  if (item.displayHeight) {
+    item.wrap.style.height = `${item.displayHeight}px`;
+  }
+  if (item.rowSpan) {
+    item.card.style.gridRowEnd = `span ${item.rowSpan}`;
+  }
+  item.wrap.classList.remove("loaded");
+}
+
+function countMountedGalleryCards(grid) {
+  if (!grid) return 0;
+  return grid.querySelectorAll(".card").length;
+}
+
+function insertCardInDomOrder(grid, item) {
+  if (!item || !item.card || item.card.parentNode === grid) return;
+  const idx = item.index;
+  const domCards = grid.querySelectorAll(".card");
+  for (let i = 0; i < domCards.length; i++) {
+    const other = Number(domCards[i].dataset.listIndex);
+    if (Number.isFinite(other) && other > idx) {
+      grid.insertBefore(item.card, domCards[i]);
+      return;
+    }
+  }
+  grid.appendChild(item.card);
+}
+
+function freeFarAboveViewportSlots(grid, cardToItem, needed) {
+  if (!grid || needed <= 0) return true;
+  const vh = window.innerHeight || 800;
+  const cutoff = -vh * 3;
+  const domCards = Array.from(grid.querySelectorAll(".card"));
+  const farAbove = domCards
+    .map((card) => ({
+      card,
+      item: cardToItem.get(card),
+      bottom: card.getBoundingClientRect().bottom,
+    }))
+    .filter((row) => row.item && row.bottom < cutoff)
+    .sort((a, b) => a.bottom - b.bottom);
+
+  let freed = 0;
+  for (let i = 0; i < farAbove.length; i++) {
+    if (countMountedGalleryCards(grid) + needed <= GALLERY_MAX_MOUNTED_CARDS) {
+      return true;
+    }
+    const { card } = farAbove[i];
+    try {
+      card.remove();
+    } catch (e) {}
+    freed++;
+  }
+  return countMountedGalleryCards(grid) + needed <= GALLERY_MAX_MOUNTED_CARDS;
+}
+
+function freeFarBelowViewportSlots(grid, cardToItem, needed) {
+  if (!grid || needed <= 0) return true;
+  const vh = window.innerHeight || 800;
+  const cutoff = vh * 3;
+  const domCards = Array.from(grid.querySelectorAll(".card"));
+  const farBelow = domCards
+    .map((card) => ({
+      card,
+      item: cardToItem.get(card),
+      top: card.getBoundingClientRect().top,
+    }))
+    .filter((row) => row.item && row.top > cutoff)
+    .sort((a, b) => b.top - a.top);
+
+  for (let i = 0; i < farBelow.length; i++) {
+    if (countMountedGalleryCards(grid) + needed <= GALLERY_MAX_MOUNTED_CARDS) {
+      return true;
+    }
+    const { card } = farBelow[i];
+    try {
+      card.remove();
+    } catch (e) {}
+  }
+  return countMountedGalleryCards(grid) + needed <= GALLERY_MAX_MOUNTED_CARDS;
+}
+
+function makeRoomForMountedGalleryCard(grid, cardToItem) {
+  if (countMountedGalleryCards(grid) < GALLERY_MAX_MOUNTED_CARDS) return true;
+  if (freeFarAboveViewportSlots(grid, cardToItem, 1)) return true;
+  return freeFarBelowViewportSlots(grid, cardToItem, 1);
+}
+
+function resizeVisibleMasonryItems(grid, gridMetrics) {
+  const targetGrid = grid || document.querySelector(".gallery");
+  if (!targetGrid) return;
+  const metrics = gridMetrics || getGridMetrics(targetGrid);
+  const margin = 400;
+  const vh = window.innerHeight || 800;
+  const cards = targetGrid.querySelectorAll(".card");
+  cards.forEach((card) => {
+    const rect = card.getBoundingClientRect();
+    if (rect.bottom < -margin || rect.top > vh + margin) return;
+    const wrap = card.querySelector(".image-wrap");
+    const img = wrap && wrap.querySelector(".gallery-image");
+    if (!wrap) return;
+    let height = 0;
+    if (img && img.naturalWidth) {
+      const availW = wrap.clientWidth || card.clientWidth || 0;
+      height =
+        getRenderedImageHeight(img, availW) ||
+        parseInt(wrap.style.height, 10) ||
+        availW * DEFAULT_ASPECT;
+    } else {
+      height =
+        parseInt(wrap.style.height, 10) ||
+        wrap.clientWidth * DEFAULT_ASPECT ||
+        metrics.rowHeight;
+    }
+    wrap.style.height = `${height}px`;
+    card.style.gridRowEnd = `span ${computeRowSpanForHeight(height, metrics)}`;
+  });
+}
+
+let __galleryResizeDebounceTimer = null;
+let __galleryResizeRaf = 0;
+function scheduleResizeVisibleMasonryItems() {
+  if (__galleryResizeDebounceTimer) clearTimeout(__galleryResizeDebounceTimer);
+  __galleryResizeDebounceTimer = setTimeout(() => {
+    __galleryResizeDebounceTimer = null;
+    if (__galleryResizeRaf) cancelAnimationFrame(__galleryResizeRaf);
+    __galleryResizeRaf = requestAnimationFrame(() => {
+      __galleryResizeRaf = 0;
+      resizeVisibleMasonryItems();
+    });
+  }, GALLERY_RESIZE_DEBOUNCE_MS);
+}
+
+function resizeAllMasonryItems() {
+  resizeVisibleMasonryItems();
 }
 function normToken(s) {
   return (s || "").toString().trim().toLowerCase();
@@ -1752,7 +2103,13 @@ function openModal(meta) {
     return -1;
   };
 
-  const setCaptionFromMeta = (targetMeta) => {
+  const modalUI = window.RAMGalleryModalUI;
+  const taggerPopupCtrl = modalUI
+    ? modalUI.createTaggerPopupController()
+    : null;
+  let captionCtrl = null;
+
+  const buildCaptionOptions = (targetMeta) => {
     if (isDebug) {
       const full =
         targetMeta && (targetMeta.label || targetMeta.rawBase)
@@ -1768,35 +2125,62 @@ function openModal(meta) {
           idx = null;
         }
       }
-      caption.textContent = full + (idx ? ` (${idx})` : "");
-      return;
+      return {
+        isDebug: true,
+        debugText: full + (idx ? ` (${idx})` : ""),
+      };
     }
 
-    let tagText = "";
-    let photographerText = "";
-
+    let tags = [];
     if (targetMeta && Array.isArray(targetMeta.tags) && targetMeta.tags.length) {
-      tagText = targetMeta.tags.filter(Boolean).join(", ");
+      tags = targetMeta.tags.filter(Boolean);
     } else if (targetMeta && targetMeta.label) {
       const dashParts = String(targetMeta.label).split("-");
-      if (dashParts.length > 0) tagText = dashParts[0].trim();
+      if (dashParts.length > 0) {
+        tags = dashParts[0]
+          .split(",")
+          .map((t) => t.trim())
+          .filter(Boolean);
+      }
     }
 
-    if (targetMeta && targetMeta.photographer) {
-      photographerText = String(targetMeta.photographer)
-        .split(/[\s,]+/)
-        .filter(Boolean)[0];
+    const photographer = formatPhotographerForCaption(targetMeta);
+    let fallbackText = "";
+    if (tags.length) fallbackText = tags.join(", ");
+    if (photographer) {
+      fallbackText +=
+        (fallbackText ? " " : "") + `flicked by ${photographer}`;
+    }
+    if (!fallbackText && targetMeta && targetMeta.rawBase) {
+      fallbackText = targetMeta.rawBase;
     }
 
-    let captionText = "";
-    if (tagText) captionText = tagText;
-    if (photographerText) {
-      captionText +=
-        (captionText ? " " : "") + `flicked by ${photographerText}`;
-    }
+    const srcForId =
+      (targetMeta && (targetMeta.numericSrc || targetMeta.src)) || "";
+    const itemId = getItemIdForSrc(srcForId);
 
-    caption.textContent =
-      captionText || (targetMeta && targetMeta.rawBase) || "";
+    return {
+      tags,
+      photographer,
+      itemId,
+      fallbackText,
+      taggerPopupCtrl,
+    };
+  };
+
+  const setCaptionFromMeta = (targetMeta) => {
+    if (!modalUI) {
+      const opts = buildCaptionOptions(targetMeta);
+      caption.textContent = opts.isDebug
+        ? opts.debugText
+        : opts.fallbackText || "";
+      return;
+    }
+    if (captionCtrl && captionCtrl.bumpToken) captionCtrl.bumpToken();
+    captionCtrl = modalUI.renderRichCaption(
+      caption,
+      buildCaptionOptions(targetMeta),
+    );
   };
 
   let activeList = resolveActiveList();
@@ -1919,6 +2303,12 @@ function openModal(meta) {
 
   const closeModal = () => {
     modalLoadToken++;
+    if (taggerPopupCtrl && taggerPopupCtrl.hideTaggerPopup) {
+      taggerPopupCtrl.hideTaggerPopup();
+    }
+    if (taggerPopupCtrl && taggerPopupCtrl.popup && taggerPopupCtrl.popup.parentNode) {
+      taggerPopupCtrl.popup.parentNode.removeChild(taggerPopupCtrl.popup);
+    }
     const cards = document.querySelectorAll(".card");
     cards.forEach((card) => card.classList.remove("highlighted"));
     if (backdrop.parentNode) {
@@ -1975,6 +2365,14 @@ function openModal(meta) {
     meta = parseFilename(activeList[0]);
   }
 
+  if (window.RAMTaggerIcons && window.RAMTaggerIcons.ensureLoaded) {
+    window.RAMTaggerIcons.ensureLoaded().then(() => {
+      if (backdrop.parentNode) setCaptionFromMeta(meta);
+    });
+  } else {
+    setCaptionFromMeta(meta);
+  }
+
   loadModalMeta(meta, currentIndex).catch(() => {});
 }
 let __teardownLazyGalleryLoader = null;
@@ -1995,17 +2393,21 @@ async function loadImagesSequentially(list) {
     return;
   }
   const grid = gallery;
+  const gridMetrics = getGridMetrics(grid);
   const cards = [];
   const cardToItem = new WeakMap();
   const loadQueue = [];
+  const priorityLoadQueue = [];
+  const heightLedger = new Map();
   let activeLoads = 0;
-  let createdCount = 0;
-  let observer = null;
+  let mountMin = 0;
+  let mountMax = 0;
+  let loadObserver = null;
+  let scrollRaf = 0;
   const INITIAL_CARD_BATCH = 48;
   const APPEND_BATCH_SIZE = 36;
   const APPEND_SCROLL_THRESHOLD_PX = 1400;
-  const IMAGE_LOAD_CONCURRENCY = 1;
-  const IMAGE_OBSERVER_ROOT_MARGIN = "900px 0px";
+  const IMAGE_LOAD_CONCURRENCY = 2;
   let activePlaceholder = null;
   const queueSpinner = document.createElement("div");
   queueSpinner.className = "spinner";
@@ -2048,25 +2450,61 @@ async function loadImagesSequentially(list) {
     );
     return Math.max(80, Math.round(columnWidth * DEFAULT_ASPECT));
   }
-  function enqueueItem(item) {
-    if (!item || item.loaded || item.loading || item.queued) return;
-    item.queued = true;
-    let inserted = false;
-    for (let i = 0; i < loadQueue.length; i++) {
-      if (loadQueue[i].index > item.index) {
-        loadQueue.splice(i, 0, item);
-        inserted = true;
-        break;
+  function queueIndexOf(queue, item) {
+    for (let i = 0; i < queue.length; i++) {
+      if (queue[i] === item) return i;
+    }
+    return -1;
+  }
+  function removeQueuedItem(item) {
+    if (!item) return false;
+    let removed = false;
+    let idx = queueIndexOf(priorityLoadQueue, item);
+    if (idx >= 0) {
+      priorityLoadQueue.splice(idx, 1);
+      removed = true;
+    }
+    idx = queueIndexOf(loadQueue, item);
+    if (idx >= 0) {
+      loadQueue.splice(idx, 1);
+      removed = true;
+    }
+    if (removed) item.queued = false;
+    return removed;
+  }
+  function enqueueItem(item, isPriority) {
+    if (!item || item.loading || item.loadFailed) return;
+    if (!galleryCardNeedsImageLoad(item)) return;
+    if (item.queued) {
+      if (isPriority) {
+        removeQueuedItem(item);
+      } else {
+        return;
       }
     }
-    if (!inserted) loadQueue.push(item);
+    if (
+      queueIndexOf(priorityLoadQueue, item) >= 0 ||
+      queueIndexOf(loadQueue, item) >= 0
+    )
+      return;
+    item.queued = true;
+    (isPriority ? priorityLoadQueue : loadQueue).push(item);
     pumpQueue();
   }
   function pumpQueue() {
     if (myLoadId !== currentLoadId) return;
-    while (activeLoads < IMAGE_LOAD_CONCURRENCY && loadQueue.length > 0) {
-      const item = loadQueue.shift();
-      if (!item || item.loaded || item.loading) continue;
+    while (
+      activeLoads < IMAGE_LOAD_CONCURRENCY &&
+      (priorityLoadQueue.length > 0 || loadQueue.length > 0)
+    ) {
+      const item =
+        priorityLoadQueue.length > 0
+          ? priorityLoadQueue.shift()
+          : loadQueue.shift();
+      if (!item) continue;
+      item.queued = false;
+      if (!galleryCardNeedsImageLoad(item)) continue;
+      if (item.loading) continue;
       item.loading = true;
       moveQueueSpinner(item.placeholder);
       activeLoads++;
@@ -2076,6 +2514,9 @@ async function loadImagesSequentially(list) {
         item.wrap,
         item.placeholder,
         myLoadId,
+        item,
+        gridMetrics,
+        heightLedger,
       )
         .then((ok) => {
           if (ok) item.loaded = true;
@@ -2084,12 +2525,13 @@ async function loadImagesSequentially(list) {
           activeLoads--;
           item.loading = false;
           item.queued = false;
-          try {
-            if (observer && item.card) observer.unobserve(item.card);
-          } catch (e) {}
           if (myLoadId === currentLoadId) {
             pumpQueue();
-            if (activeLoads === 0 && loadQueue.length === 0)
+            if (
+              activeLoads === 0 &&
+              loadQueue.length === 0 &&
+              priorityLoadQueue.length === 0
+            )
               clearQueueSpinner();
           } else {
             clearQueueSpinner();
@@ -2110,18 +2552,13 @@ async function loadImagesSequentially(list) {
     placeholder.className = "placeholder-box";
     wrap.appendChild(placeholder);
     card.appendChild(wrap);
-    gallery.appendChild(card);
-    const rowHeight = parseInt(
-      window.getComputedStyle(grid).getPropertyValue("grid-auto-rows") || "10",
-    );
-    const rowGap = parseInt(
-      window.getComputedStyle(grid).getPropertyValue("gap") || "10",
-    );
-    const initialRowSpan = Math.max(
-      1,
-      Math.ceil((defaultH + rowGap) / (rowHeight + rowGap)),
-    );
+    const initialRowSpan = computeRowSpanForHeight(defaultH, gridMetrics);
     card.style.gridRowEnd = `span ${initialRowSpan}`;
+    const ledger = heightLedger.get(index);
+    if (ledger && ledger.wrapHeight) {
+      wrap.style.height = `${ledger.wrapHeight}px`;
+      card.style.gridRowEnd = `span ${ledger.rowSpan || 1}`;
+    }
     const item = {
       index,
       meta,
@@ -2131,197 +2568,462 @@ async function loadImagesSequentially(list) {
       loaded: false,
       loading: false,
       queued: false,
+      loadFailed: false,
+      displayHeight: ledger ? ledger.wrapHeight : defaultH,
+      rowSpan: ledger ? ledger.rowSpan : initialRowSpan,
+      loadedSrc: "",
+      wrapClickBound: false,
+      unloadTimer: null,
+      cancelImageLoad: null,
     };
     cards[index] = item;
     cardToItem.set(card, item);
-    if (observer) observer.observe(card);
-    else enqueueItem(item);
+    insertCardInDomOrder(grid, item);
+    if (loadObserver) loadObserver.observe(card);
+    else enqueueItem(item, true);
   }
-  function appendCards(count) {
-    if (myLoadId !== currentLoadId) return;
-    const target = Math.min(list.length, createdCount + count);
-    for (let i = createdCount; i < target; i++) {
-      createCardAt(i);
+  function mountSingleCard(listIndex) {
+    if (myLoadId !== currentLoadId) return false;
+    if (listIndex < 0 || listIndex >= list.length) return false;
+    if (!cards[listIndex]) {
+      if (!makeRoomForMountedGalleryCard(grid, cardToItem)) return false;
+      createCardAt(listIndex);
+      return true;
     }
-    createdCount = target;
+    const item = cards[listIndex];
+    const wasDisconnected = item.card.parentNode !== grid;
+    if (wasDisconnected) {
+      if (!makeRoomForMountedGalleryCard(grid, cardToItem)) return false;
+      insertCardInDomOrder(grid, item);
+      if (loadObserver) loadObserver.observe(item.card);
+      syncGalleryCardLoadedState(item);
+    }
+    if (wasDisconnected && galleryCardNeedsImageLoad(item)) {
+      enqueueItem(item);
+    }
+    return true;
+  }
+  function recomputeMountBounds() {
+    let min = list.length;
+    let max = 0;
+    for (let i = 0; i < list.length; i++) {
+      const item = cards[i];
+      if (!item || !item.card.isConnected) continue;
+      min = Math.min(min, i);
+      max = Math.max(max, i + 1);
+    }
+    if (max === 0) {
+      mountMin = 0;
+      mountMax = 0;
+    } else {
+      mountMin = min;
+      mountMax = max;
+    }
+  }
+  function mountCardsRange(from, to) {
+    if (myLoadId !== currentLoadId) return false;
+    const start = Math.max(0, Math.floor(from));
+    const end = Math.min(list.length, Math.floor(to));
+    if (end <= start) return false;
+    let changed = false;
+    for (let i = start; i < end; i++) {
+      if (mountSingleCard(i)) changed = true;
+    }
+    if (changed) recomputeMountBounds();
+    return changed;
+  }
+  function extendMountTowardEnd(batch) {
+    if (myLoadId !== currentLoadId) return false;
+    let from = mountMax;
+    let remaining = batch;
+    let changed = false;
+    while (remaining > 0 && from < list.length) {
+      if (!mountSingleCard(from)) break;
+      from++;
+      remaining--;
+      changed = true;
+    }
+    if (changed) mountMax = from;
+    return changed;
+  }
+  function extendMountTowardStart(batch) {
+    if (myLoadId !== currentLoadId) return false;
+    let to = mountMin;
+    let remaining = batch;
+    let changed = false;
+    while (remaining > 0 && to > 0) {
+      to--;
+      if (!mountSingleCard(to)) break;
+      remaining--;
+      changed = true;
+    }
+    if (changed) mountMin = to;
+    return changed;
+  }
+  function getVisibleListIndexRange() {
+    let visMin = list.length;
+    let visMax = -1;
+    const domCards = grid.querySelectorAll(".card");
+    const vh = window.innerHeight || 800;
+    const margin = 120;
+    for (let i = 0; i < domCards.length; i++) {
+      const card = domCards[i];
+      const rect = card.getBoundingClientRect();
+      if (rect.bottom < -margin || rect.top > vh + margin) continue;
+      const li = Number(card.dataset.listIndex);
+      if (!Number.isFinite(li)) continue;
+      visMin = Math.min(visMin, li);
+      visMax = Math.max(visMax, li);
+    }
+    if (visMax < 0) {
+      const docHeight = Math.max(
+        document.documentElement.scrollHeight || 0,
+        document.body.scrollHeight || 0,
+        1,
+      );
+      const ratio = Math.min(1, Math.max(0, window.scrollY / docHeight));
+      const est = Math.floor(ratio * list.length);
+      visMin = Math.max(0, est - 24);
+      visMax = Math.min(list.length - 1, est + 24);
+    }
+    return { visMin, visMax };
+  }
+  function ensureViewportMountBuffer() {
+    const { visMin, visMax } = getVisibleListIndexRange();
+    const buffer = APPEND_BATCH_SIZE;
+    const wantFrom = Math.max(0, visMin - buffer);
+    const wantTo = Math.min(list.length, visMax + buffer + 1);
+    if (wantFrom < mountMin) extendMountTowardStart(mountMin - wantFrom);
+    if (wantTo > mountMax) extendMountTowardEnd(wantTo - mountMax);
+  }
+  function ensureListIndexMounted(listIndex) {
+    const idx = Math.floor(listIndex);
+    if (idx < 0 || idx >= list.length) return;
+    const buffer = 18;
+    mountCardsRange(
+      Math.max(0, idx - buffer),
+      Math.min(list.length, idx + buffer + 1),
+    );
+  }
+  function remountOrphanedCardsNearViewport() {
+    const margin = window.innerHeight * 1.2;
+    const vh = window.innerHeight || 800;
+    const scanFrom = Math.max(0, mountMin - APPEND_BATCH_SIZE);
+    const scanTo = Math.min(list.length, mountMax + APPEND_BATCH_SIZE);
+    const toInsert = [];
+    for (let i = scanFrom; i < scanTo; i++) {
+      const item = cards[i];
+      if (!item || item.card.parentNode === grid) continue;
+      if (!makeRoomForMountedGalleryCard(grid, cardToItem)) continue;
+      toInsert.push(item);
+    }
+    for (let j = 0; j < toInsert.length; j++) {
+      const item = toInsert[j];
+      insertCardInDomOrder(grid, item);
+      if (loadObserver) loadObserver.observe(item.card);
+      syncGalleryCardLoadedState(item);
+    }
+    for (let i = scanFrom; i < scanTo; i++) {
+      const item = cards[i];
+      if (!item || !item.card.isConnected) continue;
+      const rect = item.card.getBoundingClientRect();
+      if (rect.bottom < -margin || rect.top > vh + margin) continue;
+      syncGalleryCardLoadedState(item);
+      if (galleryCardNeedsImageLoad(item)) enqueueItem(item, true);
+    }
   }
   __ensureGalleryCardForIndex = (targetIndex) => {
     if (myLoadId !== currentLoadId) return;
     const idx = Number(targetIndex);
     if (!Number.isFinite(idx) || idx < 0) return;
-    if (idx < createdCount) return;
-    appendCards(idx - createdCount + 1);
-    requestAnimationFrame(resizeAllMasonryItems);
+    ensureListIndexMounted(idx);
+    const item = cards[idx];
+    if (item && item.card.parentNode !== grid) {
+      insertCardInDomOrder(grid, item);
+      if (loadObserver) loadObserver.observe(item.card);
+      syncGalleryCardLoadedState(item);
+      if (galleryCardNeedsImageLoad(item)) enqueueItem(item);
+    }
+    requestAnimationFrame(() => resizeVisibleMasonryItems(grid, gridMetrics));
   };
+  function appendNearTopBatches() {
+    if (myLoadId !== currentLoadId) return;
+    let extended = false;
+    while (mountMin > 0) {
+      if (window.scrollY > APPEND_SCROLL_THRESHOLD_PX) break;
+      const before = mountMin;
+      extendMountTowardStart(APPEND_BATCH_SIZE);
+      if (mountMin === before) break;
+      extended = true;
+    }
+    if (extended) {
+      enqueueCardsInViewport();
+      requestAnimationFrame(() => resizeVisibleMasonryItems(grid, gridMetrics));
+    }
+  }
   function appendNearBottomBatches() {
     if (myLoadId !== currentLoadId) return;
     let appended = false;
-    while (createdCount < list.length) {
+    while (mountMax < list.length) {
       const scrollBottom = window.scrollY + window.innerHeight;
       const docHeight = Math.max(
         document.documentElement.scrollHeight || 0,
         document.body.scrollHeight || 0,
       );
       if (docHeight - scrollBottom > APPEND_SCROLL_THRESHOLD_PX) break;
-      const before = createdCount;
-      appendCards(APPEND_BATCH_SIZE);
-      if (createdCount === before) break;
+      const before = mountMax;
+      extendMountTowardEnd(APPEND_BATCH_SIZE);
+      if (mountMax === before) break;
       appended = true;
     }
-    if (appended) requestAnimationFrame(resizeAllMasonryItems);
+    if (appended) {
+      enqueueCardsInViewport();
+      requestAnimationFrame(() => resizeVisibleMasonryItems(grid, gridMetrics));
+    }
   }
-  const onScroll = () => appendNearBottomBatches();
+  function onScrollWork() {
+    scrollRaf = 0;
+    if (myLoadId !== currentLoadId) return;
+    ensureViewportMountBuffer();
+    remountOrphanedCardsNearViewport();
+    appendNearTopBatches();
+    appendNearBottomBatches();
+    enqueueCardsInViewport();
+  }
+  const onScroll = () => {
+    if (scrollRaf) return;
+    scrollRaf = requestAnimationFrame(onScrollWork);
+  };
   if (typeof IntersectionObserver !== "undefined") {
-    observer = new IntersectionObserver(
+    loadObserver = new IntersectionObserver(
       (entries) => {
         if (myLoadId !== currentLoadId) return;
         entries.forEach((entry) => {
           if (!entry.isIntersecting) return;
           const item = cardToItem.get(entry.target);
-          if (item) enqueueItem(item);
+          if (item && galleryCardNeedsImageLoad(item)) enqueueItem(item, false);
         });
       },
-      { root: null, rootMargin: IMAGE_OBSERVER_ROOT_MARGIN, threshold: 0.01 },
+      { root: null, rootMargin: GALLERY_LOAD_IO_MARGIN, threshold: 0.01 },
     );
   }
-  appendCards(INITIAL_CARD_BATCH);
-  appendNearBottomBatches();
-  const eagerCount = Math.min(createdCount, 1);
-  for (let i = 0; i < eagerCount; i++) {
-    if (cards[i]) enqueueItem(cards[i]);
+  function enqueueCardsInViewport() {
+    const margin = 320;
+    const vh = window.innerHeight || 800;
+    const unloadMargin = Math.max(1600, vh * 5);
+    const domCards = grid.querySelectorAll(".card");
+    for (let i = 0; i < domCards.length; i++) {
+      const item = cardToItem.get(domCards[i]);
+      if (!item || !item.card.isConnected) continue;
+      const rect = item.card.getBoundingClientRect();
+      const isFarOffscreen =
+        rect.bottom < -unloadMargin || rect.top > vh + unloadMargin;
+      if (isFarOffscreen) {
+        if (item.unloadTimer) continue;
+        if (!item.loaded && !item.loading && !item.queued) continue;
+        item.unloadTimer = setTimeout(() => {
+          item.unloadTimer = null;
+          if (myLoadId !== currentLoadId) return;
+          if (!item.card || !item.card.isConnected) return;
+          const vhNow = window.innerHeight || 800;
+          const unloadMarginNow = Math.max(1600, vhNow * 5);
+          const r = item.card.getBoundingClientRect();
+          if (r.bottom < -unloadMarginNow || r.top > vhNow + unloadMarginNow) {
+            if (item.queued && !item.loading) {
+              removeQueuedItem(item);
+            }
+            if (!item.loaded && !item.loading) return;
+            unloadCardImage(item);
+          }
+        }, 650);
+        continue;
+      }
+      if (item.unloadTimer) {
+        clearTimeout(item.unloadTimer);
+        item.unloadTimer = null;
+      }
+      if (rect.bottom < -margin || rect.top > vh + margin) continue;
+      syncGalleryCardLoadedState(item);
+      if (galleryCardNeedsImageLoad(item)) enqueueItem(item, true);
+    }
   }
+  extendMountTowardEnd(INITIAL_CARD_BATCH);
+  appendNearBottomBatches();
+  appendNearTopBatches();
+  enqueueCardsInViewport();
+  requestAnimationFrame(() => {
+    if (myLoadId !== currentLoadId) return;
+    enqueueCardsInViewport();
+  });
   window.addEventListener("scroll", onScroll, { passive: true });
+  try {
+    window.RAMGalleryKick = () => {
+      if (myLoadId !== currentLoadId) return;
+      if (scrollRaf) {
+        cancelAnimationFrame(scrollRaf);
+        scrollRaf = 0;
+      }
+      onScrollWork();
+      pumpQueue();
+      requestAnimationFrame(() => resizeVisibleMasonryItems(grid, gridMetrics));
+    };
+  } catch (e) {}
   __teardownLazyGalleryLoader = () => {
+    if (scrollRaf) {
+      cancelAnimationFrame(scrollRaf);
+      scrollRaf = 0;
+    }
     try {
       window.removeEventListener("scroll", onScroll);
     } catch (e) {}
     try {
-      if (observer) observer.disconnect();
+      if (loadObserver) loadObserver.disconnect();
     } catch (e) {}
+    for (let i = 0; i < cards.length; i++) {
+      if (cards[i]) unloadCardImage(cards[i]);
+    }
     clearQueueSpinner();
     __ensureGalleryCardForIndex = null;
     loadQueue.length = 0;
+    priorityLoadQueue.length = 0;
+    heightLedger.clear();
+    try {
+      if (window.RAMGalleryKick) window.RAMGalleryKick = null;
+    } catch (e) {}
   };
-  if (myLoadId === currentLoadId) requestAnimationFrame(resizeAllMasonryItems);
+  if (myLoadId === currentLoadId) {
+    requestAnimationFrame(() => resizeVisibleMasonryItems(grid, gridMetrics));
+  }
 }
-function loadImageIntoCard(meta, card, wrap, placeholder, expectedLoadId) {
+
+function loadImageIntoCard(
+  meta,
+  card,
+  wrap,
+  placeholder,
+  expectedLoadId,
+  item,
+  gridMetrics,
+  heightLedger,
+) {
   return new Promise((resolve) => {
     if (expectedLoadId !== currentLoadId) {
       resolve(false);
       return;
     }
-    const img = new Image();
-    img.alt = meta.rawBase;
-    img.className = "gallery-image hidden";
-    img.draggable = false;
-    const grid = document.querySelector(".gallery");
-    const rowHeight = parseInt(
-      window.getComputedStyle(grid).getPropertyValue("grid-auto-rows") || "10",
-    );
-    const rowGap = parseInt(
-      window.getComputedStyle(grid).getPropertyValue("gap") || "10",
-    );
+    if (item.loadFailed) {
+      resolve(false);
+      return;
+    }
+    const gridEl = document.querySelector(".gallery");
+    const metrics = gridMetrics || getGridMetrics(gridEl);
     const candidates =
       meta && meta.candidates && meta.candidates.length
         ? meta.candidates.slice()
-        : [meta.src];
-    const onWrapClick = (e) => {
-      e.stopPropagation();
-      openModal(meta);
-    };
-    wrap.addEventListener("click", onWrapClick);
+        : [meta.src].filter(Boolean);
+
+    if (!item.wrapClickBound) {
+      item.wrapClickBound = true;
+      wrap.addEventListener("click", (e) => {
+        e.stopPropagation();
+        openModal(meta);
+      });
+    }
+
+    let img = wrap.querySelector(".gallery-image");
+    if (!img) {
+      img = document.createElement("img");
+      img.className = "gallery-image hidden";
+      img.decoding = "async";
+      img.draggable = false;
+      img.alt = meta.rawBase || "";
+      wrap.appendChild(img);
+    }
+    // Queue-driven loads must be in-document; lazy attr defers/off-DOM loads indefinitely.
+    img.loading = "eager";
+
+    let settled = false;
+    function cancelLoad() {
+      settle(false);
+    }
+    function settle(ok) {
+      if (settled) return;
+      settled = true;
+      img.onload = null;
+      img.onerror = null;
+      if (item && item.cancelImageLoad === cancelLoad) {
+        item.cancelImageLoad = null;
+      }
+      resolve(ok);
+    }
+    if (item) item.cancelImageLoad = cancelLoad;
+
     let attemptIndex = 0;
-    function tryNext() {
+
+    function finishSuccess(candidate) {
+      if (settled) return;
       if (expectedLoadId !== currentLoadId) {
-        if (card.parentNode === gallery) gallery.removeChild(card);
-        resolve(false);
+        settle(false);
+        return;
+      }
+      meta.src = candidate;
+      item.loadedSrc = candidate;
+      item.loadFailed = false;
+      const finalH =
+        getRenderedImageHeight(img, wrap.clientWidth) ||
+        parseInt(wrap.style.height, 10) ||
+        150;
+      // Avoid large offscreen relayouts (can cause scroll anchoring "feedback" in Firefox).
+      let applyLayoutNow = true;
+      try {
+        if (card && card.isConnected) {
+          const vh = window.innerHeight || 800;
+          const layoutMargin = Math.max(1200, vh * 2);
+          const r = card.getBoundingClientRect();
+          applyLayoutNow = !(r.bottom < -layoutMargin || r.top > vh + layoutMargin);
+        }
+      } catch (e) {}
+      if (applyLayoutNow) {
+        applyItemLayout(item, finalH, metrics);
+      } else {
+        const h = Math.max(80, Math.round(finalH));
+        item.displayHeight = h;
+        item.rowSpan = computeRowSpanForHeight(h, metrics);
+      }
+      if (heightLedger && typeof item.index === "number") {
+        heightLedger.set(item.index, {
+          wrapHeight: item.displayHeight,
+          rowSpan: item.rowSpan,
+        });
+      }
+      img.classList.remove("hidden");
+      img.style.opacity = "1";
+      img.classList.add("fade-in");
+      if (!wrap.contains(img)) wrap.appendChild(img);
+      wrap.classList.add("loaded");
+      settle(true);
+    }
+
+    function tryNext() {
+      if (settled) return;
+      if (expectedLoadId !== currentLoadId) {
+        if (card.parentNode === gridEl) gridEl.removeChild(card);
+        settle(false);
         return;
       }
       if (attemptIndex >= candidates.length) {
-        try {
-          if (card.parentNode === gallery) {
-            gallery.removeChild(card);
-            requestAnimationFrame(resizeAllMasonryItems);
-          } else if (placeholder && placeholder.parentNode === wrap) {
-            placeholder.innerHTML = "";
-          }
-        } catch (e) {}
-        resolve(true);
+        markGalleryCardLoadFailed(item, placeholder);
+        settle(false);
         return;
       }
       const candidate = candidates[attemptIndex++];
-      img.onload = () => {
-        if (expectedLoadId !== currentLoadId) {
-          if (card.parentNode === gallery) gallery.removeChild(card);
-          resolve(false);
-          return;
-        }
-        meta.src = candidate;
-        const finalH =
-          getRenderedImageHeight(img, wrap.clientWidth) ||
-          parseInt(wrap.style.height) ||
-          150;
-        wrap.style.height = `${finalH}px`;
-        img.classList.remove("hidden");
-        img.classList.add("fade-in");
-        wrap.appendChild(img);
-        requestAnimationFrame(() => {
-          const rowSpan = Math.max(
-            1,
-            Math.ceil((finalH + rowGap) / (rowHeight + rowGap)),
-          );
-          card.style.gridRowEnd = `span ${rowSpan}`;
-          wrap.classList.add("loaded");
-          resolve(true);
-        });
-      };
-      img.onerror = () => {
-        tryNext();
-      };
-      (async () => {
-        try {
-          if (expectedLoadId !== currentLoadId) return resolve(false);
-          const resolved = await getValidatedImageBlob(candidate);
-          if (!resolved || !resolved.blob) {
-            tryNext();
-            return;
-          }
-          const blob = resolved.blob;
-          if (expectedLoadId !== currentLoadId) return resolve(false);
-          const blobUrl = URL.createObjectURL(blob);
-          img.src = blobUrl;
-          img
-            .decode()
-            .then(() => {
-              meta.src = candidate;
-              const finalH =
-                getRenderedImageHeight(img, wrap.clientWidth) ||
-                parseInt(wrap.style.height) ||
-                150;
-              wrap.style.height = `${finalH}px`;
-              img.classList.remove("hidden");
-              img.classList.add("fade-in");
-              wrap.appendChild(img);
-              requestAnimationFrame(() => {
-                const rowSpan = Math.max(
-                  1,
-                  Math.ceil((finalH + rowGap) / (rowHeight + rowGap)),
-                );
-                card.style.gridRowEnd = `span ${rowSpan}`;
-                wrap.classList.add("loaded");
-                scheduleBlobUrlRevoke(blobUrl);
-                resolve(true);
-              });
-            })
-            .catch(() => {
-              scheduleBlobUrlRevoke(blobUrl);
-              tryNext();
-            });
-        } catch (e) {
-          tryNext();
-        }
-      })();
+      const onLoad = () => finishSuccess(candidate);
+      img.onload = onLoad;
+      img.onerror = () => tryNext();
+      img.src = candidate;
+      if (img.complete && img.naturalWidth > 0) onLoad();
     }
+
     tryNext();
   });
 }
@@ -2471,23 +3173,37 @@ function matchesFreightFilters(meta, filters) {
   if (opts.outOfStateWriters && meta.hasNonMaineWriters !== true) return false;
   return true;
 }
+function filterGalleryList(list, token) {
+  if (!sortNeedsNetwork()) {
+    const sorted = sortByIndex(list.slice(), currentSort === "newest");
+    if (token === filterGalleryToken) loadImagesSequentially(sorted);
+    return;
+  }
+  sortImageSrcList(list)
+    .then((sorted) => {
+      if (token !== filterGalleryToken) return;
+      loadImagesSequentially(sorted);
+    })
+    .catch(() => {
+      if (token !== filterGalleryToken) return;
+      loadImagesSequentially(sortByIndex(list.slice(), true));
+    });
+}
+
 function filterGallery(q) {
   if (!gallery) return;
+  const token = ++filterGalleryToken;
   q = (q || "").trim().toLowerCase();
   if (sortSelect) currentSort = sortSelect.value || currentSort;
   const freightFilters = getActiveFreightFilters();
+
   if (!q) {
     const all = imagesList.filter((src) => {
       if (!IS_FREIGHTS_PAGE) return true;
       const meta = parseFilename(src);
       return matchesFreightFilters(meta, freightFilters);
     });
-    all.sort((a, b) => {
-      const ia = getNumericIndexFromSrc(a);
-      const ib = getNumericIndexFromSrc(b);
-      return currentSort === "newest" ? ib - ia : ia - ib;
-    });
-    loadImagesSequentially(all);
+    filterGalleryList(all, token);
     return;
   }
   const queryTokens = q
@@ -2514,15 +3230,21 @@ function filterGallery(q) {
     const metaTokens = buildMetaTokens(meta);
     return Array.from(expandedQueryTokens).some((qt) => metaTokens.has(qt));
   });
-  filtered.sort((a, b) => {
-    const ia = getNumericIndexFromSrc(a);
-    const ib = getNumericIndexFromSrc(b);
-    return currentSort === "newest" ? ib - ia : ia - ib;
-  });
-  loadImagesSequentially(filtered);
+  filterGalleryList(filtered, token);
 }
+
+let filterGalleryDebounceTimer = null;
+function scheduleFilterGallery(q) {
+  if (filterGalleryDebounceTimer) clearTimeout(filterGalleryDebounceTimer);
+  const delay = q && String(q).trim() ? 120 : 0;
+  filterGalleryDebounceTimer = setTimeout(() => {
+    filterGalleryDebounceTimer = null;
+    filterGallery(q);
+  }, delay);
+}
+
 if (searchInput) {
-  searchInput.addEventListener("input", (e) => filterGallery(e.target.value));
+  searchInput.addEventListener("input", (e) => scheduleFilterGallery(e.target.value));
 }
 if (IS_FREIGHTS_PAGE) {
   if (freightFilterMenu) {
@@ -2561,51 +3283,29 @@ if (sortSelect) {
     try {
       localStorage.setItem(SORT_KEY, currentSort);
     } catch (e) {}
+    const fav = window.RAMFavorites;
+    if (fav && fav.needsFavoriteData && fav.needsFavoriteData(currentSort)) {
+      fav.preloadForSource(GALLERY_SOURCE_KEY);
+    }
     const q = searchInput && searchInput.value ? searchInput.value : "";
     filterGallery(q);
   });
 }
-function resizeAllMasonryItems() {
-  const grid = document.querySelector(".gallery");
-  if (!grid) return;
-  const rowHeight = parseInt(
-    window.getComputedStyle(grid).getPropertyValue("grid-auto-rows") || "10",
-  );
-  const rowGap = parseInt(
-    window.getComputedStyle(grid).getPropertyValue("gap") || "10",
-  );
-  const items = Array.from(document.querySelectorAll(".card"));
-  items.forEach((item) => {
-    const wrap = item.querySelector(".image-wrap");
-    const img = item.querySelector(".gallery-image");
-    const err = item.querySelector(".loading-error");
-    if (!wrap) {
-      item.style.gridRowEnd = null;
-      return;
-    }
-    let height = 0;
-    if (img) {
-      const availW = wrap.clientWidth || item.clientWidth || 0;
-      height =
-        getRenderedImageHeight(img, availW) ||
-        availW * DEFAULT_ASPECT ||
-        rowHeight;
-    } else if (err) {
-      height = wrap.getBoundingClientRect().height || rowHeight;
-    } else {
-      height =
-        wrap.getBoundingClientRect().height ||
-        wrap.clientWidth * DEFAULT_ASPECT ||
-        rowHeight;
-    }
-    wrap.style.height = `${height}px`;
-    const rowSpan = Math.max(
-      1,
-      Math.ceil((height + rowGap) / (rowHeight + rowGap)),
-    );
-    item.style.gridRowEnd = `span ${rowSpan}`;
-  });
-}
+
+window.refreshGalleryIfFavoritesSort = function () {
+  if (currentSort !== "favorites") return;
+  const q = searchInput && searchInput.value ? searchInput.value : "";
+  filterGallery(q);
+};
+
+/*
+ * MEMORY_OPTIMIZATION summary (largest wins first):
+ * 1. Grid tiles use native <img> + direct URLs (no Blob/decode per tile).
+ * 2. Debounced unload observer strips img bitmaps far offscreen; card shell height preserved.
+ * 3. MAX_MOUNTED frees only cards far above viewport so infinite scroll at bottom can continue.
+ * 4. resizeVisibleMasonryItems + debounced resize avoid full-grid layout reads.
+ * Remaining: full JPEG download size without autogenerated thumbs.
+ */
 document.addEventListener("DOMContentLoaded", () => {
   if (sortSelect) {
     try {
@@ -2643,12 +3343,23 @@ document.addEventListener("DOMContentLoaded", () => {
     replaceGuiImagesFromCache().catch(() => {});
   } catch (e) {}
   try {
+    const fav = window.RAMFavorites;
+    if (fav && fav.preloadForSource) {
+      const preloadFavs = () => fav.preloadForSource(GALLERY_SOURCE_KEY);
+      if (fav.needsFavoriteData && fav.needsFavoriteData(currentSort)) {
+        preloadFavs();
+      } else if (typeof requestIdleCallback === "function") {
+        requestIdleCallback(preloadFavs, { timeout: 3000 });
+      } else {
+        setTimeout(preloadFavs, 1500);
+      }
+    }
+  } catch (e) {}
+  try {
     filterGallery(initialQuery);
   } catch (e) {
     loadImagesSequentially(imagesList);
   }
 });
-window.addEventListener("resize", () =>
-  requestAnimationFrame(resizeAllMasonryItems),
-);
-window.addEventListener("load", resizeAllMasonryItems);
+window.addEventListener("resize", scheduleResizeVisibleMasonryItems);
+window.addEventListener("load", scheduleResizeVisibleMasonryItems);

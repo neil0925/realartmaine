@@ -1115,7 +1115,6 @@ footer hr {
     width 0.22s ease,
     height 0.22s ease,
     box-shadow 0.22s ease;
-  will-change: top, left, width, height;
   z-index: 1;
   backface-visibility: hidden;
 }
@@ -1126,9 +1125,11 @@ footer hr {
   height: calc(100% + 10px);
   z-index: 40;
   box-shadow: 0 22px 44px rgba(0, 0, 0, 0.52);
+  will-change: top, left, width, height;
 }
 .gallery-image.fade-in {
-  animation: fadeIn 0.45s ease forwards;
+  opacity: 1;
+  animation: fadeIn 0.45s ease;
 }
 .gallery-image.hidden {
   display: none;

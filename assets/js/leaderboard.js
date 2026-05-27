@@ -412,6 +412,7 @@ function buildLeaderboards(entries, debugMode) {
 
 function buildFavoriteLeaderboards(entries, source, debugMode, favoriteMap) {
   const flickers = new Map();
+  const crews = new Map();
   const tags = new Map();
   const sourceKey = normalizeSourceKey(source);
   const favorites = favoriteMap || new Map();
@@ -427,13 +428,16 @@ function buildFavoriteLeaderboards(entries, source, debugMode, favoriteMap) {
     const flicker = pickFlicker(parsed.flickerSegment, debugMode);
     if (flicker) incrementCounterBy(flickers, flicker, weight);
 
+    const crewValues = splitCommaValues(parsed.crewSegment);
+    if (crewValues.length) incrementUniquePerEntryBy(crews, crewValues, weight);
+
     const tagValues = splitCommaValues(parsed.tagNameSegment);
     if (tagValues.length) incrementUniquePerEntryBy(tags, tagValues, weight);
   });
 
   return {
     flickers: sortLeaderboard(flickers, 200),
-    crews: [],
+    crews: sortLeaderboard(crews, 200),
     tags: sortLeaderboard(tags, 200),
   };
 }
@@ -575,7 +579,6 @@ function getRowsForView(boardDataBySource, source, view) {
 }
 
 function sanitizeViewForMetric(view, metric) {
-  if (metric === "favorites" && view === "crews") return "tags";
   return view;
 }
 
@@ -620,7 +623,7 @@ function renderLeaderboard(
         )
       : getRowsForView(boardDataBySource, source, view);
   const isLoadingFavorites = metric === "favorites" && !favoriteBoards;
-  const showCrews = metric !== "favorites";
+  const showCrews = true;
   const viewOptions = [
     `<option value="flickers">${VIEW_DEFS.flickers.option}</option>`,
     showCrews ? `<option value="crews">${VIEW_DEFS.crews.option}</option>` : "",

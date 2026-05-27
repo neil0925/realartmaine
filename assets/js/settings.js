@@ -344,6 +344,23 @@
     });
     btn.addEventListener("click", function () {
       window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
+      // Some browsers can skip lazy-load callbacks during fast scroll jumps.
+      // Give the gallery loader a couple chances to enqueue the visible tiles.
+      try {
+        const kick = () => {
+          try {
+            if (typeof window.RAMGalleryKick === "function") window.RAMGalleryKick();
+          } catch (e) {}
+        };
+        const startedAt = Date.now();
+        const kickUntilTopSettles = () => {
+          kick();
+          if (Date.now() - startedAt < 2200 && Math.abs(window.scrollY) > 2) {
+            setTimeout(kickUntilTopSettles, 140);
+          }
+        };
+        kickUntilTopSettles();
+      } catch (e) {}
     });
     document.body.appendChild(btn);
     return btn;
