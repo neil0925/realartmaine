@@ -934,6 +934,15 @@ IMAGE_LABELS[811] = "bdub, ramen, solar, neptune, lause, 2unidentified-DNB,AX-ti
 IMAGE_LABELS[812] = "world8, kujoe-5G,UK-tincan1-tags";
 IMAGE_LABELS[813] = "kujoe-5G,UK-tincan1-tags";
 IMAGE_LABELS[814] = "world8, rune, qjoe-5G,UK,2K69,LTB-tincan1-throwie, hollow";
+IMAGE_LABELS[815] = "petco-5G,ICBM-Bruhmomentokay-tags, slaps";
+IMAGE_LABELS[816] = "cats, garst, pigeon, habits, cels-5G,2GF-Bruhmomentokay-tags, slaps";
+IMAGE_LABELS[817] = "aura, neone-OHK-Bruhmomentokay-tags";
+IMAGE_LABELS[818] = "learn, garst, unidentified-YME,SFL,NBS-Bruhmomentokay-slaps";
+IMAGE_LABELS[819] = "karen, halt, gas-PTG,5G,CRAFT-Bruhmomentokay-tags";
+IMAGE_LABELS[820] = "neone, RX-Bruhmomentokay-tags";
+IMAGE_LABELS[821] = "naste, lerk, unidentified-SFL,TMS-piece";
+IMAGE_LABELS[822] = "pyle-BNE,PTG,OHK-Bruhmomentokay-tags";
+IMAGE_LABELS[823] = "plank, dollhouse, 27, reo, spif, ergus, paeday-CTS,TNL,TSZ-Bruhmomentokay-tags";
 /*tag-crew-flicker-style-Maine freight y/n-has Maine writers y/n-has out of state writers y/n */
 /*example1:FREIGHT_LABELS[1] ="27-2GF,TSZ-realartmaine-piece-y-y-n";*/
 /*example2:FREIGHT_LABELS[2] ="27,mayo-2GF,TSZ-realartmaine-piece,throw-n-y-y";*/
@@ -1465,10 +1474,6 @@ const TOY_BLACKLIST = [
   "cemo",
   "mohamed hoch",
   "mohamedhoch",
-  "calcium",
-  "cal",
-  "moyo",
-  "wd40",
   "rhine",
   "maze",
   "mazer",
